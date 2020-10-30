@@ -37,7 +37,8 @@ class CreditorsAPIAdapter(HTTPAdapter):
             with cls.__access_token_lock:
                 access_token = cls.__access_token
                 if access_token is None:
-                    access_token = cls.__access_token = cls.__obtain_new_access_token()
+                    token_info = cls.__obtain_new_access_token()
+                    access_token = cls.__access_token = token_info['access_token']
                     is_new_access_token = True
 
         return access_token, is_new_access_token
@@ -51,7 +52,7 @@ class CreditorsAPIAdapter(HTTPAdapter):
         auth = HTTPBasicAuth(client_id, client_secret)
         client = BackendApplicationClient(client_id=client_id)
         oauth = OAuth2Session(client=client)
-        token = oauth.fetch_token(token_url=token_url, auth=auth)
+        token = oauth.fetch_token(token_url=token_url, auth=auth, scope=['activate'])
 
         return token
 
@@ -66,6 +67,7 @@ class CreditorsAPIAdapter(HTTPAdapter):
 def create_requests_session():
     creditors_resource_server = current_app.config['API_RESOURCE_SERVER']
     session = requests.Session()
+    session.timeout = float(current_app.config['API_TIMEOUT_SECONDS'])
     session.mount(creditors_resource_server, CreditorsAPIAdapter())
 
     return session
