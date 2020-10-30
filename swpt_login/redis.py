@@ -16,10 +16,7 @@ def _reserve_user_id():
     api_resource_server = current_app.config['API_RESOURCE_SERVER']
     api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
     api_user_id_field_name = current_app.config['API_USER_ID_FIELD_NAME']
-    response = requests_session.post(
-        url=f'{api_resource_server}{api_reserve_user_id_path}',
-        json={'type': 'CreditorReservationRequest'},
-    )
+    response = requests_session.post(f'{api_resource_server}{api_reserve_user_id_path}', json={})
     response.raise_for_status()
     response_json = response.json()
     user_id = u64_to_i64(int(response_json[api_user_id_field_name]))
@@ -167,6 +164,7 @@ class SignUpRequest(RedisSecretHashRecord):
 
     def accept(self, password):
         self.delete()
+
         if self.recover:
             recovery_code = None
             user = User.query.filter_by(email=self.email).one()
@@ -176,6 +174,7 @@ class SignUpRequest(RedisSecretHashRecord):
             # verification failures, thus guaranteeing that the user
             # will be able to log in immediately.
             _clear_user_verification_code_failures(user.user_id)
+
         else:
             salt = utils.generate_password_salt(current_app.config['PASSWORD_HASHING_METHOD'])
             if current_app.config['USE_RECOVERY_CODE']:
@@ -184,25 +183,34 @@ class SignUpRequest(RedisSecretHashRecord):
             else:
                 recovery_code = None
                 recovery_code_hash = None
+
             user_id, reservation_id = _reserve_user_id()
-            # TODO: Handle the possibility that the User with this
-            #       user_id already exists.
-            db.session.add(User(
-                user_id=user_id,
-                email=self.email,
-                salt=salt,
-                password_hash=utils.calc_crypt_hash(salt, password),
-                recovery_code_hash=recovery_code_hash,
-                two_factor_login=True,
-            ))
+            existing_user = User.query.filter_by(user_id=user_id).one_or_none()
+            if existing_user is None:
+                db.session.add(User(
+                    user_id=user_id,
+                    email=self.email,
+                    salt=salt,
+                    password_hash=utils.calc_crypt_hash(salt, password),
+                    recovery_code_hash=recovery_code_hash,
+                    two_factor_login=True,
+                ))
             db.session.add(RegisteredUserSignal(
                 user_id=user_id,
                 reservation_id=reservation_id,
             ))
             if current_app.config['SEND_USER_UPDATE_SIGNAL']:
-                db.session.add(UserUpdateSignal(user_id=user_id, email=self.email))
+                email = existing_user.email if existing_user else self.email
+                db.session.add(UserUpdateSignal(user_id=user_id, email=email))
+
         db.session.commit()
         self.user_id = user_id
+        if existing_user:
+            raise RuntimeError(
+                'An attempt has been made to register a new user, '
+                'but another user with the same ID already exists.'
+            )
+
         return recovery_code
 
 

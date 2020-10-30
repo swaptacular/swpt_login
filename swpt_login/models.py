@@ -1,4 +1,6 @@
-from .extensions import db
+from flask import current_app
+from swpt_lib.utils import i64_to_u64
+from .extensions import db, requests_session
 
 
 class User(db.Model):
@@ -29,4 +31,13 @@ class RegisteredUserSignal(db.Model):
     reservation_id = db.Column(db.BigInteger, nullable=False)
 
     def send_signalbus_message(self):
-        pass
+        api_resource_server = current_app.config['API_RESOURCE_SERVER']
+        api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
+        api_base_path = api_reserve_user_id_path.split('.')[0]
+        response = requests_session.post(
+            url=f'{api_resource_server}{api_base_path}{i64_to_u64(self.user_id)}/activate',
+            json={'reservationId': self.reservation_id},
+        )
+        status_code = response.status_code
+        if status_code not in [200, 409, 422]:
+            raise RuntimeError(f'Unexpected status code ({status_code}) while trying to activate a user.')
