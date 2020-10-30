@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6ba55a1c87a101c6a4ffff6e6a6bbbf86cc23a851bf504c8e607089f23fe909f"
+            "sha256": "3f704545a3b603a3eb78537784714cde490a60341ae11db6459b6492b0194b08"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -364,6 +364,10 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "version": "==1.3.20"
+        },
+        "swpt-lib": {
+            "git": "https://github.com/epandurski/swpt_lib.git",
+            "ref": "5382564622bf4c558ac1bbb0821fdde2157b3286"
         },
         "ua-parser": {
             "hashes": [

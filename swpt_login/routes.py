@@ -195,7 +195,7 @@ def choose_password(secret):
         else:
             new_recovery_code = signup_request.accept(password)
             if is_password_recovery:
-                hydra.invalidate_credentials(signup_request.user_id)
+                hydra.invalidate_credentials(int(signup_request.user_id))
                 UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
                 emails.send_change_password_success_email(
                     signup_request.email,

@@ -1,11 +1,12 @@
 from urllib.parse import urljoin, quote_plus
 import requests
 from flask import current_app
+from swpt_lib.utils import i64_to_u64
 from .redis import increment_key_with_limit, UserLoginsHistory, ExceededValueLimitError
 
 
 def get_subject(user_id):
-    return current_app.config['SUBJECT_PREFIX'] + str(user_id)
+    return current_app.config['SUBJECT_PREFIX'] + str(i64_to_u64(user_id))
 
 
 def invalidate_credentials(user_id):

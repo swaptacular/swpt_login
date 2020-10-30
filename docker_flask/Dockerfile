@@ -3,11 +3,15 @@ WORKDIR /usr/src/app
 ARG FLASK_APP=swpt_login
 
 RUN apk add --no-cache \
+    file \
+    make \
+    curl \
     gcc \
+    git \
     musl-dev \
+    libffi-dev \
     python3-dev \
     postgresql-dev \
-    git \
     supervisor \
   && pip install --upgrade pip \
   && pip install pipenv gunicorn json-logging-py pudb

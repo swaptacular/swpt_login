@@ -10,7 +10,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 _local = Local()
 
 
-class CreditorsAPIAdapter(HTTPAdapter):
+class APIAdapter(HTTPAdapter):
     __access_token = None
     __access_token_lock = threading.Lock()
 
@@ -65,10 +65,10 @@ class CreditorsAPIAdapter(HTTPAdapter):
 
 
 def create_requests_session():
-    creditors_resource_server = current_app.config['API_RESOURCE_SERVER']
+    api_resource_server = current_app.config['API_RESOURCE_SERVER']
     session = requests.Session()
     session.timeout = float(current_app.config['API_TIMEOUT_SECONDS'])
-    session.mount(creditors_resource_server, CreditorsAPIAdapter())
+    session.mount(api_resource_server, APIAdapter())
 
     return session
 

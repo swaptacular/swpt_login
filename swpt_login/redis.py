@@ -2,13 +2,30 @@ import time
 import hashlib
 from sqlalchemy.exc import IntegrityError
 from flask import current_app
+from swpt_lib.utils import u64_to_i64
 from . import utils
-from .models import User, UserUpdateSignal
-from .extensions import db, redis_store
+from .models import User, UserUpdateSignal, RegisteredUserSignal
+from .extensions import db, redis_store, requests_session
 
 
 def _get_user_verification_code_failures_redis_key(user_id):
     return 'vcfails:' + str(user_id)
+
+
+def _reserve_user_id():
+    api_resource_server = current_app.config['API_RESOURCE_SERVER']
+    api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
+    api_user_id_field_name = current_app.config['API_USER_ID_FIELD_NAME']
+    response = requests_session.post(
+        url=f'{api_resource_server}{api_reserve_user_id_path}',
+        json={'type': 'CreditorReservationRequest'},
+    )
+    response.raise_for_status()
+    response_json = response.json()
+    user_id = u64_to_i64(int(response_json[api_user_id_field_name]))
+    reservation_id = int(response_json['reservationId'])
+
+    return user_id, reservation_id
 
 
 def _register_user_verification_code_failure(user_id):
@@ -167,18 +184,25 @@ class SignUpRequest(RedisSecretHashRecord):
             else:
                 recovery_code = None
                 recovery_code_hash = None
-            user = User(
+            user_id, reservation_id = _reserve_user_id()
+            # TODO: Handle the possibility that the User with this
+            #       user_id already exists.
+            db.session.add(User(
+                user_id=user_id,
                 email=self.email,
                 salt=salt,
                 password_hash=utils.calc_crypt_hash(salt, password),
                 recovery_code_hash=recovery_code_hash,
                 two_factor_login=True,
-            )
-            db.session.add(user)
+            ))
+            db.session.add(RegisteredUserSignal(
+                user_id=user_id,
+                reservation_id=reservation_id,
+            ))
             if current_app.config['SEND_USER_UPDATE_SIGNAL']:
-                db.session.add(UserUpdateSignal(user=user, email=user.email))
+                db.session.add(UserUpdateSignal(user_id=user_id, email=self.email))
         db.session.commit()
-        self.user_id = user.user_id
+        self.user_id = user_id
         return recovery_code
 
 
@@ -196,7 +220,7 @@ class ChangeEmailRequest(RedisSecretHashRecord):
         user = User.query.filter_by(user_id=user_id, email=self.old_email).one()
         user.email = self.email
         if current_app.config['SEND_USER_UPDATE_SIGNAL']:
-            db.session.add(UserUpdateSignal(user=user, email=self.email))
+            db.session.add(UserUpdateSignal(user_id=user_id, email=self.email))
         try:
             db.session.commit()
         except IntegrityError:

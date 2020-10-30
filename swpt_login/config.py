@@ -79,4 +79,6 @@ class Configuration(metaclass=MetaFlaskEnv):
     SUPERVISOR_CLIENT_SECRET = 'creditors-supervisor'
     API_AUTH2_TOKEN_URL = 'https://hydra/oauth2/token'
     API_RESOURCE_SERVER = 'https://resource-server'
+    API_RESERVE_USER_ID_PATH = '/users/.user-reserve'
+    API_USER_ID_FIELD_NAME = 'userId'
     API_TIMEOUT_SECONDS = 5
