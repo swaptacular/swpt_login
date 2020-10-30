@@ -19,6 +19,7 @@ user-agents = "*"
 flask-redis = "*"
 flask-signalbus = "*"
 mysql-connector = "*"
+requests-oauthlib = "*"
 
 [requires]
-python_version = "3.5"
+python_version = "3.7"

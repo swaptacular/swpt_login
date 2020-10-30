@@ -108,5 +108,5 @@ TAGS
 .projectile
 .dir-locals.el
 
-# hydra_login2f specifics
+# swpt_login specifics
 !example/.env

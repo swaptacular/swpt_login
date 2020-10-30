@@ -23,7 +23,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     LANGUAGES = 'en'  # separated by a comma, for example 'en,bg'
     USE_RECOVERY_CODE = True
     SUBJECT_PREFIX = ''
-    ABOUT_URL = 'https://github.com/epandurski/hydra_login2f'
+    ABOUT_URL = 'https://github.com/epandurski/swpt_login'
     STYLE_URL = ''
     LOGIN_PATH = '/login'
     CONSENT_PATH = '/consent'
@@ -74,3 +74,8 @@ class Configuration(metaclass=MetaFlaskEnv):
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_DEFAULT_TIMEZONE = 'UTC'
     LANGUAGE_CHOICES = _get_language_choices(LANGUAGES)
+
+    SUPERVISOR_CLIENT_ID = 'creditors-supervisor'
+    SUPERVISOR_CLIENT_SECRET = 'creditors-supervisor'
+    API_AUTH2_TOKEN_URL = 'http://hydra:4444/oauth2/token'
+    API_RESOURCE_SERVER = 'http://resource-server:8080'

@@ -1,21 +1,13 @@
-# hydra_login2f
+swpt_login
+==========
 
-*hydra_login2f* is a secure login provider for [ORY Hydra OAuth2
-Server](https://github.com/ory/hydra). *hydra_login2f* implements
-two-factor authentication via email.
-
-
-## Installation
-
-*hydra_login2f* can be deployed directly from a docker image. You can
-find a working example in the `example/` directory.
+Swaptacular micro-service responsible for user's sign up an login
 
 
 ## Configuration
 
-*hydra_login2f*'s behavior can be tuned with environment
-variables. Here are the most important settings with their default
-values:
+*swpt_login*'s behavior can be tuned with environment variables. Here
+are the most important settings with their default values:
 
 ``` shell
 # The port on which `hydra_login2f` will run.

@@ -1,8 +1,8 @@
 # How to localize
 
-*hydra_login2f* uses [babel](http://babel.pocoo.org/en/latest/) for
+*swpt_login* uses [babel](http://babel.pocoo.org/en/latest/) for
 localization. Here are the most basic commands that you will probably
-want to use (they all should be executed from the `hydra_login2f/`
+want to use (they all should be executed from the `swpt_login/`
 directory):
 
 ## Extract all messages to `messages.pot`:

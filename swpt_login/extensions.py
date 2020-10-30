@@ -1,9 +1,11 @@
+from werkzeug.local import LocalProxy
 from flask_sqlalchemy import SQLAlchemy
 from flask_signalbus import SignalBusMixin
 from flask_mail import Mail
 from flask_redis import FlaskRedis
 from flask_babel import Babel
 from flask_migrate import Migrate
+from .api_requests_session import get_requests_session
 
 
 class CustomAlchemy(SignalBusMixin, SQLAlchemy):
@@ -18,6 +20,7 @@ migrate = Migrate()
 mail = Mail()
 redis_store = FlaskRedis(socket_timeout=5, charset="utf-8", decode_responses=True)
 babel = Babel()
+requests_session = LocalProxy(get_requests_session)
 
 
 def init_app(app):
