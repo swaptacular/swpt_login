@@ -48,12 +48,17 @@ class APIAdapter(HTTPAdapter):
         client_id = current_app.config['SUPERVISOR_CLIENT_ID']
         client_secret = current_app.config['SUPERVISOR_CLIENT_SECRET']
         token_url = current_app.config['API_AUTH2_TOKEN_URL']
+        timeout_seconds = float(current_app.config['API_TIMEOUT_SECONDS'])
 
         auth = HTTPBasicAuth(client_id, client_secret)
         client = BackendApplicationClient(client_id=client_id)
         oauth = OAuth2Session(client=client)
-        token = oauth.fetch_token(token_url=token_url, auth=auth, scope=['activate'])
-
+        token = oauth.fetch_token(
+            token_url=token_url,
+            auth=auth,
+            scope=['activate'],
+            timeout=timeout_seconds,
+        )
         return token
 
     @classmethod
