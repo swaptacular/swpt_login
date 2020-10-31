@@ -1,11 +1,13 @@
+import re
 import time
 import hashlib
 from sqlalchemy.exc import IntegrityError
 from flask import current_app
-from swpt_lib.utils import u64_to_i64
 from . import utils
-from .models import User, UserUpdateSignal, RegisteredUserSignal
+from .models import UserRegistration, UserUpdateSignal, RegisteredUserSignal
 from .extensions import db, redis_store, requests_session
+
+USER_ID_REGEX_PATTERN = re.compile(r'^[0-9A-Za-z_=-]{1,64}$')
 
 
 def _get_user_verification_code_failures_redis_key(user_id):
@@ -16,10 +18,13 @@ def _reserve_user_id():
     api_resource_server = current_app.config['API_RESOURCE_SERVER']
     api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
     api_user_id_field_name = current_app.config['API_USER_ID_FIELD_NAME']
+
     response = requests_session.post(f'{api_resource_server}{api_reserve_user_id_path}', json={})
     response.raise_for_status()
     response_json = response.json()
-    user_id = u64_to_i64(int(response_json[api_user_id_field_name]))
+    user_id = response_json[api_user_id_field_name]
+    if not USER_ID_REGEX_PATTERN.match(user_id):
+        raise RuntimeError('Unvalid user ID.')
     reservation_id = int(response_json['reservationId'])
 
     return user_id, reservation_id
@@ -130,7 +135,7 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         return instance
 
     def is_correct_recovery_code(self, recovery_code):
-        user = User.query.filter_by(user_id=int(self.user_id)).one()
+        user = UserRegistration.query.filter_by(user_id=self.user_id).one()
         normalized_recovery_code = utils.normalize_recovery_code(recovery_code)
         return user.recovery_code_hash == utils.calc_crypt_hash(user.salt, normalized_recovery_code)
 
@@ -152,7 +157,7 @@ class SignUpRequest(RedisSecretHashRecord):
     ENTRIES = ['email', 'cc', 'recover', 'has_rc']
 
     def is_correct_recovery_code(self, recovery_code):
-        user = User.query.filter_by(email=self.email).one()
+        user = UserRegistration.query.filter_by(email=self.email).one()
         normalized_recovery_code = utils.normalize_recovery_code(recovery_code)
         return user.recovery_code_hash == utils.calc_crypt_hash(user.salt, normalized_recovery_code)
 
@@ -164,11 +169,13 @@ class SignUpRequest(RedisSecretHashRecord):
 
     def accept(self, password):
         self.delete()
+        conflicting_user = None
 
         if self.recover:
             recovery_code = None
-            user = User.query.filter_by(email=self.email).one()
+            user = UserRegistration.query.filter_by(email=self.email).one()
             user.password_hash = utils.calc_crypt_hash(user.salt, password)
+            user_id = user.user_id
 
             # After changing the password, we "forget" past login
             # verification failures, thus guaranteeing that the user
@@ -185,9 +192,9 @@ class SignUpRequest(RedisSecretHashRecord):
                 recovery_code_hash = None
 
             user_id, reservation_id = _reserve_user_id()
-            existing_user = User.query.filter_by(user_id=user_id).one_or_none()
-            if existing_user is None:
-                db.session.add(User(
+            conflicting_user = UserRegistration.query.filter_by(user_id=user_id).one_or_none()
+            if conflicting_user is None:
+                db.session.add(UserRegistration(
                     user_id=user_id,
                     email=self.email,
                     salt=salt,
@@ -200,16 +207,16 @@ class SignUpRequest(RedisSecretHashRecord):
                 reservation_id=reservation_id,
             ))
             if current_app.config['SEND_USER_UPDATE_SIGNAL']:
-                email = existing_user.email if existing_user else self.email
+                email = conflicting_user.email if conflicting_user else self.email
                 db.session.add(UserUpdateSignal(user_id=user_id, email=email))
 
         db.session.commit()
-        self.user_id = user_id
-        if existing_user:
+        if conflicting_user:
             raise RuntimeError(
                 'An attempt has been made to register a new user, '
                 'but another user with the same ID already exists.'
             )
+        self.user_id = user_id
 
         return recovery_code
 
@@ -224,8 +231,8 @@ class ChangeEmailRequest(RedisSecretHashRecord):
 
     def accept(self):
         self.delete()
-        user_id = int(self.user_id)
-        user = User.query.filter_by(user_id=user_id, email=self.old_email).one()
+        user_id = self.user_id
+        user = UserRegistration.query.filter_by(user_id=user_id, email=self.old_email).one()
         user.email = self.email
         if current_app.config['SEND_USER_UPDATE_SIGNAL']:
             db.session.add(UserUpdateSignal(user_id=user_id, email=self.email))
@@ -244,7 +251,7 @@ class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
     def accept(self):
         self.delete()
         recovery_code = utils.generate_recovery_code()
-        user = User.query.filter_by(email=self.email).one()
+        user = UserRegistration.query.filter_by(email=self.email).one()
         user.recovery_code_hash = utils.calc_crypt_hash(user.salt, recovery_code)
         db.session.commit()
         return recovery_code

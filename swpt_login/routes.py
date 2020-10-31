@@ -6,7 +6,7 @@ import user_agents
 from . import utils, captcha, emails, hydra
 from .redis import SignUpRequest, LoginVerificationRequest, ChangeEmailRequest,\
     ChangeRecoveryCodeRequest, UserLoginsHistory
-from .models import User
+from .models import UserRegistration
 from .extensions import babel
 
 login = Blueprint('login', __name__, template_folder='templates', static_folder='static')
@@ -121,7 +121,7 @@ def signup():
         else:
             computer_code = get_computer_code()
             computer_code_hash = utils.calc_sha256(computer_code)
-            user = User.query.filter_by(email=email).one_or_none()
+            user = UserRegistration.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
                     emails.send_duplicate_registration_email(email)
@@ -195,7 +195,7 @@ def choose_password(secret):
         else:
             new_recovery_code = signup_request.accept(password)
             if is_password_recovery:
-                hydra.invalidate_credentials(int(signup_request.user_id))
+                hydra.invalidate_credentials(signup_request.user_id)
                 UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
                 emails.send_change_password_success_email(
                     signup_request.email,
@@ -223,7 +223,7 @@ def change_email_login():
     if request.method == 'POST':
         email = request.form['email'].strip()
         password = request.form['password']
-        user = User.query.filter_by(email=email).one_or_none()
+        user = UserRegistration.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             try:
                 # We create a new login verification request without a
@@ -251,7 +251,7 @@ def choose_new_email(secret):
     verification_request = LoginVerificationRequest.from_secret(secret)
     if not verification_request:
         return render_template('report_expired_link.html')
-    user = User.query.filter_by(user_id=int(verification_request.user_id)).one()
+    user = UserRegistration.query.filter_by(user_id=verification_request.user_id).one()
     require_recovery_code = user.recovery_code_hash and current_app.config['USE_RECOVERY_CODE']
     if not require_recovery_code:
         # Allowing the user to change her account email address
@@ -306,13 +306,13 @@ def change_email_address(secret):
     if request.method == 'POST':
         email = change_email_request.old_email
         password = request.form['password']
-        user = User.query.filter_by(email=email).one_or_none()
+        user = UserRegistration.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             try:
                 change_email_request.accept()
             except change_email_request.EmailAlredyRegistered:
                 return redirect(url_for('.report_email_change_failure', new_email=change_email_request.email))
-            hydra.invalidate_credentials(int(change_email_request.user_id))
+            hydra.invalidate_credentials(change_email_request.user_id)
             return redirect(url_for(
                 '.report_email_change_success',
                 new_email=change_email_request.email,
@@ -375,7 +375,7 @@ def generate_recovery_code(secret):
     if request.method == 'POST':
         email = change_recovery_code_request.email
         password = request.form['password']
-        user = User.query.filter_by(email=email).one_or_none()
+        user = UserRegistration.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             new_recovery_code = change_recovery_code_request.accept()
             response = make_response(render_template(
@@ -401,7 +401,7 @@ def login_form():
         email = request.form['email'].strip()
         password = request.form['password']
         remember_me = 'remember_me' in request.form
-        user = User.query.filter_by(email=email).one_or_none()
+        user = UserRegistration.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             user_id = user.user_id
             subject = hydra.get_subject(user_id)
@@ -465,7 +465,7 @@ def enter_verification_code():
     if request.method == 'POST':
         if request.form['verification_code'].strip() == verification_request.code:
             login_request = hydra.LoginRequest(verification_request.challenge_id)
-            user_id = int(verification_request.user_id)
+            user_id = verification_request.user_id
             subject = hydra.get_subject(user_id)
             remember_me = verification_request.remember_me == 'yes'
             verification_request.accept(clear_failures=True)
