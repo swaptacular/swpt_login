@@ -71,9 +71,12 @@ class APIAdapter(HTTPAdapter):
 
 def create_requests_session():
     api_resource_server = current_app.config['API_RESOURCE_SERVER']
+    hydra_admin_url = current_app.config['HYDRA_ADMIN_URL']
+
     session = requests.Session()
     session.timeout = float(current_app.config['API_TIMEOUT_SECONDS'])
     session.mount(api_resource_server, APIAdapter())
+    session.mount(hydra_admin_url, HTTPAdapter())
 
     return session
 
