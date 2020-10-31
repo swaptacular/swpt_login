@@ -1,5 +1,4 @@
 from flask import current_app
-from swpt_lib.utils import i64_to_u64
 from .extensions import db, requests_session
 
 
