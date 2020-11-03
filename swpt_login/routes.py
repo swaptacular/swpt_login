@@ -482,9 +482,20 @@ def enter_verification_code():
 
 
 @consent.route('/', methods=['GET', 'POST'])
-def dummy_consent():
-    """Always grant consent."""
-
+def grant_consent():
     consent_request = hydra.ConsentRequest(request.args['consent_challenge'])
-    requested_scope = consent_request.fetch()
-    return redirect(consent_request.accept(requested_scope))
+
+    if request.method == 'POST':
+        granted_scopes = request.form.getlist('granted_scope')
+        return redirect(consent_request.accept(granted_scopes))
+
+    consent_request_info = consent_request.fetch()
+    requested_scopes = consent_request_info['requested_scope'] if consent_request_info else []
+    if len(requested_scopes) == 0:
+        return redirect(consent_request.accept([]))
+
+    return render_template(
+        'grant_scopes.html',
+        requested_scopes=requested_scopes,
+        client=consent_request_info['client'],
+    )

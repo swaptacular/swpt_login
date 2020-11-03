@@ -1,0 +1,53 @@
+{% extends "form.html" %}
+
+{% block form_header %}
+  {% trans %}Grant Permissions{% endtrans %}
+{% endblock form_header %}
+
+{% block form_body %}
+  <form action="" method="POST" id="grant-scopes-form">
+
+    {% if 'access.readonly' in requested_scopes %}
+      {% set scope_name %}{% trans %}Read-only access{% endtrans %}{% endset %}
+      {% set scope_description %}
+        {% trans %}
+          Can view the log, transfers, and accounts. 
+        {% endtrans %}
+      {% endset %}
+      {% with scope='access.readonly' %}{% include '_grant_scope_checkbox.html' %}{% endwith %}
+    {% endif %}
+
+    {% if 'access' in requested_scopes %}
+      {% set scope_name %}{% trans %}Read-write access{% endtrans %}{% endset %}
+      {% set scope_description %}
+        {% trans %}
+          Can make transfers; create, reconfigure, and delete
+          accounts; view the log, transfers, and accounts.
+        {% endtrans %}
+      {% endset %}
+      {% with scope='access' %}{% include '_grant_scope_checkbox.html' %}{% endwith %}
+    {% endif %}
+
+    {% if 'disable_pin' in requested_scopes %}
+      {% set scope_name %}{% trans %}Disable the PIN{% endtrans %}{% endset %}
+      {% set scope_description %}
+        {% trans %}
+          Can perform potentially dangerous operations without asking
+          for the Personal Identification Number.
+        {% endtrans %}
+      {% endset %}
+      {% with scope='disable_pin' %}{% include '_grant_scope_checkbox.html' %}{% endwith %}
+    {% endif %}
+
+    <p class="form-comment">
+      {% trans client_name=client.client_name %}
+        <strong>{{ client_name }}</strong> requires your permission to
+        do the things listed above. Before granting these permissions,
+        make sure that you understand the consequences.
+      {% endtrans %}
+    </p>
+    <p>
+      <input type="submit" value="{% trans %}Grant the selected permisions{% endtrans %}">
+    </p>
+  </form>
+{% endblock form_body %}

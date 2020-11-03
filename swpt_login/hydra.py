@@ -96,7 +96,7 @@ class ConsentRequest:
         self.accept_url = urljoin(base_url, 'consent/accept')
 
     def fetch(self):
-        """Return the list of requested scopes, or an empty list if no consent is required."""
+        """Return the consentRequest dict, or `None` if no consent is required."""
 
         r = requests_session.get(
             url=f'{self.fetch_url}?consent_challenge={self.challenge_id}',
@@ -104,7 +104,7 @@ class ConsentRequest:
         )
         r.raise_for_status()
         fetched_data = r.json()
-        return [] if fetched_data['skip'] else fetched_data['requested_scope']
+        return None if fetched_data['skip'] else fetched_data
 
     def accept(self, grant_scope, remember=False, remember_for=0):
         """Approve the request, return an URL to redirect to."""
