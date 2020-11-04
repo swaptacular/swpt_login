@@ -58,9 +58,9 @@ COPY docker/entrypoint.sh \
 COPY migrations/ migrations/
 COPY $FLASK_APP/ $FLASK_APP/
 RUN python -m compileall -x '^\./(migrations|tests)/' . \
+    && ! which pybabel || pybabel compile -d $FLASK_APP/translations \
     && rm -f .env \
-    && chown -R "$FLASK_APP:$FLASK_APP" . \
-    && ! which pybabel || pybabel compile -d $FLASK_APP/translations
+    && chown -R "$FLASK_APP:$FLASK_APP" .
 
 USER $FLASK_APP
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
