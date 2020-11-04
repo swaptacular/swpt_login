@@ -1,13 +1,24 @@
+import os
+import os.path
 import logging
+import logging.config
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-from flask import Flask  # noqa: E402
-from . import extensions  # noqa: E402
+# Configure app logging. If the value of "$APP_LOGGING_CONFIG_FILE" is
+# a relative path, the directory of this (__init__.py) file will be
+# used as a current directory.
+config_filename = os.environ.get('APP_LOGGING_CONFIG_FILE')
+if config_filename:  # pragma: no cover
+    if not os.path.isabs(config_filename):
+        current_dir = os.path.dirname(__file__)
+        config_filename = os.path.join(current_dir, config_filename)
+    logging.config.fileConfig(config_filename, disable_existing_loggers=False)
+else:
+    logging.basicConfig(level=logging.WARNING)
 
 
 def create_app(config_object=None):
+    from flask import Flask
+    from . import extensions
     from .config import Configuration
     from .routes import login, consent
 

@@ -39,5 +39,10 @@ if __name__ == '__main__':
     if len(args) == 2:
         trigger(args[0], int(args[1]))
     else:
-        print('Usage: trigger_supervisor_process.py PROCESS_NAME INTERVAL_SECONDS')
+        print(
+            'This program is intended to be used as supervisord event listener. It triggers\n'
+            'a process at regular intervals.\n'
+            '\n'
+            'Usage: trigger_supervisor_process.py PROCESS_NAME INTERVAL_SECONDS\n'
+        )
         sys.exit(1)

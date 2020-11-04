@@ -101,6 +101,28 @@ MAIL_DEFAULT_SENDER=None
 RECAPTCHA_PUBLIC_KEY='6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37'
 RECAPTCHA_PIVATE_KEY='6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q'
 
+# The OAuth2 token endpoint, the client ID, and the client secret used to
+# perform the "Client Credentials OAuth2 flow, so as to obtain the permissions
+# to create new users. During testing, it might be necessary to set
+# `OAUTHLIB_INSECURE_TRANSPORT=1` as well.
+API_AUTH2_TOKEN_URL='http://hydra:4444/oauth2/token'
+SUPERVISOR_CLIENT_ID='creditors-supervisor'
+SUPERVISOR_CLIENT_SECRET='creditors-supervisor'
+
+# Parameters that determine how a new user ID can be obtained from the
+# resource server.
+API_RESOURCE_SERVER='http://resource-server:8080'
+API_RESERVE_USER_ID_PATH='/creditors/.creditor-reserve'
+API_USER_ID_FIELD_NAME='creditorId'
+API_TIMEOUT_SECONDS=5
+
+# This sets the desired granularity of log outputs. Valid level names
+# are: debug, info, warning, error, critical.
+GUNICORN_LOGLEVEL='warning'
+
+# This sets the type of workers to use with gunicorn.
+GUNICORN_WORKER_CLASS='sync'
+
 # Set this to the number of worker processes for handling requests -- a
 # positive integer generally in the 2-4 * $NUM_CORES range.
 GUNICORN_WORKERS=2
