@@ -75,8 +75,8 @@ class Configuration(metaclass=MetaFlaskEnv):
     BABEL_DEFAULT_TIMEZONE = 'UTC'
     LANGUAGE_CHOICES = _get_language_choices(LANGUAGES)
 
-    SUPERVISOR_CLIENT_ID = 'creditors-supervisor'
-    SUPERVISOR_CLIENT_SECRET = 'creditors-supervisor'
+    SUPERVISOR_CLIENT_ID = 'users-supervisor'
+    SUPERVISOR_CLIENT_SECRET = 'users-supervisor'
     API_AUTH2_TOKEN_URL = 'https://hydra/oauth2/token'
     API_RESOURCE_SERVER = 'https://resource-server'
     API_RESERVE_USER_ID_PATH = '/users/.user-reserve'

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "swpt_login"
 version = "0.1.0"
-description = "Swaptacular micro-service responsible for user's sign up an login"
+description = "Swaptacular micro-service responsible for user's sign up and login"
 authors = ["Evgeni Pandurski <epandurski@gmail.com>"]
 license = "MIT"
 

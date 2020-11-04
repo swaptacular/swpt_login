@@ -1,7 +1,7 @@
 swpt_login
 ==========
 
-Swaptacular micro-service responsible for user's sign up an login
+Swaptacular micro-service responsible for user's sign up and login
 
 
 ## Configuration
@@ -101,19 +101,20 @@ MAIL_DEFAULT_SENDER=None
 RECAPTCHA_PUBLIC_KEY='6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37'
 RECAPTCHA_PIVATE_KEY='6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q'
 
-# The OAuth2 token endpoint, the client ID, and the client secret used to
+# The client ID, the client secret, and the OAuth2 token endpoint, used to
 # perform the "Client Credentials OAuth2 flow, so as to obtain the permissions
 # to create new users. During testing, it might be necessary to set
 # `OAUTHLIB_INSECURE_TRANSPORT=1` as well.
-API_AUTH2_TOKEN_URL='http://hydra:4444/oauth2/token'
-SUPERVISOR_CLIENT_ID='creditors-supervisor'
-SUPERVISOR_CLIENT_SECRET='creditors-supervisor'
+SUPERVISOR_CLIENT_ID='users-supervisor'
+SUPERVISOR_CLIENT_SECRET='users-supervisor'
+API_AUTH2_TOKEN_URL='https://hydra/oauth2/token'
 
 # Parameters that determine how a new user ID can be obtained from the
-# resource server.
-API_RESOURCE_SERVER='http://resource-server:8080'
-API_RESERVE_USER_ID_PATH='/creditors/.creditor-reserve'
-API_USER_ID_FIELD_NAME='creditorId'
+# resource server. Note that the `API_RESOURCE_SERVER` value may include a
+# port, but *must not* include a path or a trailing slash.
+API_RESOURCE_SERVER='http://resource-server'
+API_RESERVE_USER_ID_PATH='/users/.user-reserve'
+API_USER_ID_FIELD_NAME='userId'
 API_TIMEOUT_SECONDS=5
 
 # This sets the desired granularity of log outputs. Valid level names
