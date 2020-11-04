@@ -16,10 +16,7 @@ PORT=8000
 # The path to the login page (ORY Hydra's `OAUTH2_LOGIN_URL`):
 LOGIN_PATH='/login'
 
-# The path to the dummy consent page (ORY Hydra's `OAUTH2_CONSENT_URL`).
-# `hydra_login2f` implements a dummy consent page, which accepts all
-# consent requests unconditionally, without showing any UI to the user.
-# This is sometimes useful, especially during testing.
+# The path to the consent page (ORY Hydra's `OAUTH2_CONSENT_URL`).
 CONSENT_PATH='/consent'
 
 # The prefix added the user ID to form the Oauth2 subject field. For
@@ -36,16 +33,10 @@ SECRET_KEY='dummy-secret'
 SITE_TITLE='My site name'
 
 # Set this to an URL that tells more about your site.
-ABOUT_URL='https://github.com/epandurski/hydra_login2f'
+ABOUT_URL='https://github.com/epandurski/swpt_login'
 
 # Optional URL for a custom CSS style-sheet:
 STYLE_URL=''
-
-# Whether to issue recovery codes to your users for additional security
-# ('True' or 'False'). It is probably a good idea to use recovery codes
-# if the account to your service might be more important to your users
-# than their email account.
-USE_RECOVERY_CODE=True
 
 # Set this to the URL for ORY Hydra's admin API.
 HYDRA_ADMIN_URL='http://hydra:4445'
@@ -106,7 +97,7 @@ API_AUTH2_TOKEN_URL='https://hydra/oauth2/token'
 
 # Parameters that determine how a new user ID can be obtained from the
 # resource server. Note that the `API_RESOURCE_SERVER` value may include a
-# port, but *must not* include a path or a trailing slash.
+# port, but MUST NOT include a path or a trailing slash.
 API_RESOURCE_SERVER='http://resource-server'
 API_RESERVE_USER_ID_PATH='/users/.user-reserve'
 API_USER_ID_FIELD_NAME='userId'
