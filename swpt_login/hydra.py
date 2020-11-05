@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import urljoin, quote_plus
 from flask import current_app
 from .redis import increment_key_with_limit, UserLoginsHistory, ExceededValueLimitError
@@ -69,6 +70,8 @@ class LoginRequest:
             },
         )
         r.raise_for_status()
+        logger = logging.getLogger(__name__)
+        logger.info('Successful login', extra={'subject': subject})
         return r.json()['redirect_to']
 
     def reject(self):
