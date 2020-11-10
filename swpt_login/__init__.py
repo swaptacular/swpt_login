@@ -17,12 +17,14 @@ else:
 
 
 def create_app(config_object=None):
+    from werkzeug.middleware.proxy_fix import ProxyFix
     from flask import Flask
     from . import extensions
     from .config import Configuration
     from .routes import login, consent
 
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app)
     app.config.from_object(config_object or Configuration)
     extensions.init_app(app)
     app.register_blueprint(login, url_prefix=app.config['LOGIN_PATH'])
