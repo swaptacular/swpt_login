@@ -22,7 +22,7 @@ def _reserve_user_id():
     response = requests_session.post(f'{api_resource_server}{api_reserve_user_id_path}', json={})
     response.raise_for_status()
     response_json = response.json()
-    user_id = response_json[api_user_id_field_name]
+    user_id = str(response_json[api_user_id_field_name])
     if not USER_ID_REGEX_PATTERN.match(user_id):
         raise RuntimeError('Unvalid user ID.')
     reservation_id = int(response_json['reservationId'])
