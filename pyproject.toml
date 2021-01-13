@@ -7,8 +7,6 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pudb = "*"
-web-pdb = "*"
 gunicorn = "*"
 python-json-logger = "^0.1.11"
 redis = "^3.5"
@@ -24,6 +22,8 @@ flask-env = "^2.0"
 flask_signalbus = "^0.5.4"
 
 [tool.poetry.dev-dependencies]
+pudb = "*"
+web-pdb = "*"
 python-dotenv = ">=0.10.1"
 flake8 = "^3.7"
 pytest-pudb = "^0.7.0"
