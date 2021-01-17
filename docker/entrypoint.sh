@@ -10,10 +10,13 @@ case $1 in
     configure)
         exec flask db upgrade
         ;;
-    serve)
+    webserver)
+        export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
+        export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
+        export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$PORT wsgi:app
         ;;
-    supervisord)
+    all)
         exec supervisord -c "$APP_ROOT_DIR/supervisord.conf"
         ;;
     *)
