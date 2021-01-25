@@ -10,9 +10,19 @@
     {% if 'access.readonly' in requested_scopes %}
       {% set scope_name %}{% trans %}Read-only access{% endtrans %}{% endset %}
       {% set scope_description %}
-        {% trans %}
-          Can view the log, transfers, and accounts. 
-        {% endtrans %}
+        {% if user_id_field_name == 'creditorId' %}
+          {% trans %}
+            Can view the log, transfers, and accounts.
+          {% endtrans %}
+        {% elif user_id_field_name == 'debtorId' %}
+          {% trans %}
+            Can view configuration and transfers.
+          {% endtrans %}
+        {% else %}
+          {% trans %}
+            Can view objects.
+          {% endtrans %}
+        {% endif %}
       {% endset %}
       {% with scope='access.readonly' %}{% include '_grant_scope_checkbox.html' %}{% endwith %}
     {% endif %}
@@ -20,10 +30,20 @@
     {% if 'access' in requested_scopes %}
       {% set scope_name %}{% trans %}Read-write access{% endtrans %}{% endset %}
       {% set scope_description %}
-        {% trans %}
-          Can make transfers; create, reconfigure, and delete
-          accounts; view the log, transfers, and accounts.
-        {% endtrans %}
+        {% if user_id_field_name == 'creditorId' %}
+          {% trans %}
+            Can make transfers; create, reconfigure, and delete
+            accounts; view the log, transfers, and accounts.
+          {% endtrans %}
+        {% elif user_id_field_name == 'debtorId' %}
+          {% trans %}
+            Can update configuration and make transfers.
+          {% endtrans %}
+        {% else %}
+          {% trans %}
+            Can change objects.
+          {% endtrans %}
+        {% endif %}
       {% endset %}
       {% with scope='access' %}{% include '_grant_scope_checkbox.html' %}{% endwith %}
     {% endif %}

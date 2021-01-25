@@ -497,5 +497,6 @@ def grant_consent():
     return render_template(
         'grant_scopes.html',
         requested_scopes=requested_scopes,
+        user_id_field_name=current_app.config['API_USER_ID_FIELD_NAME'],
         client=consent_request_info['client'],
     )
