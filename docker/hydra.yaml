@@ -14,4 +14,4 @@ serve:
 
 log:
   format: json
-  level: warn
+  level: error
