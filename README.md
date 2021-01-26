@@ -11,7 +11,7 @@ are the most important settings with their default values:
 
 ``` shell
 # The port on which `hydra_login2f` will run.
-PORT=8000
+WEBSERVER_PORT=8000
 
 # The path to the login page (ORY Hydra's `OAUTH2_LOGIN_URL`):
 LOGIN_PATH='/login'

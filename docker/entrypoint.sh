@@ -41,13 +41,13 @@ fi
 case $1 in
     develop-run-flask)
         shift;
-        exec flask run --host=0.0.0.0 --port $PORT --without-threads "$@"
+        exec flask run --host=0.0.0.0 --port $WEBSERVER_PORT --without-threads "$@"
         ;;
     configure)
         perform_db_upgrade
         ;;
     webserver)
-        exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$PORT wsgi:app
+        exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
         ;;
     all)
         exec supervisord -c "$APP_ROOT_DIR/supervisord.conf"
