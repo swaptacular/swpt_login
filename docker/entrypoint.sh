@@ -30,13 +30,24 @@ perform_db_initialization() {
     return 0
 }
 
-export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
-export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
-export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
-
+# HYDRA_DSN is preferred over DSN, because it is less ambiguous.
 if [[ -n "$HYDRA_DSN" ]]; then
     export DSN="$HYDRA_DSN"
 fi
+
+# If URLS_LOGIN is empty, try to guess its value.
+if [[ -z "$URLS_LOGIN" && -n "$URLS_SELF_ISSUER" && -n "LOGIN_PATH" ]]; then
+    export URLS_LOGIN="$URLS_SELF_ISSUER$LOGIN_PATH"
+fi
+
+# If URLS_CONSENT is empty, try to guess its value.
+if [[ -z "$URLS_CONSENT" && -n "$URLS_SELF_ISSUER" && -n "CONSENT_PATH" ]]; then
+    export URLS_CONSENT="$URLS_SELF_ISSUER$CONSENT_PATH"
+fi
+
+export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
+export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
+export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
 
 case $1 in
     develop-run-flask)
