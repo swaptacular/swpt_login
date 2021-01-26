@@ -1,3 +1,5 @@
+FROM oryd/hydra:v1.9.0-alpine as hydra-image
+
 FROM python:3.7.9-alpine3.12 AS venv-image
 WORKDIR /usr/src/app
 
@@ -44,11 +46,14 @@ RUN apk add --no-cache \
     gettext \
     && addgroup -S "$FLASK_APP" \
     && adduser -S -D -h "$APP_ROOT_DIR" "$FLASK_APP" "$FLASK_APP"
+RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
+COPY --from=oathkeeper-image /usr/bin/hydra /usr/bin/hydra
 COPY --from=venv-image /opt/venv /opt/venv
 
 WORKDIR /usr/src/app
 
+COPY docker/hydra.yaml .hydra.yaml
 COPY docker/entrypoint.sh \
      docker/gunicorn.conf.py \
      docker/supervisord.conf \
