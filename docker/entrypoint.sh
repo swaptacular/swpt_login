@@ -30,11 +30,13 @@ perform_db_initialization() {
     return 0
 }
 
-configure_web_server() {
-    export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
-    export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
-    export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
-}
+export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
+export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
+export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
+
+if [[ -n "$HYDRA_DSN" ]]; then
+    export DSN="$HYDRA_DSN"
+fi
 
 case $1 in
     develop-run-flask)
@@ -45,11 +47,9 @@ case $1 in
         perform_db_upgrade
         ;;
     webserver)
-        configure_web_server
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$PORT wsgi:app
         ;;
     all)
-        configure_web_server
         exec supervisord -c "$APP_ROOT_DIR/supervisord.conf"
         ;;
     *)
