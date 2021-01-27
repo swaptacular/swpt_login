@@ -58,6 +58,7 @@ class APIAdapter(HTTPAdapter):
             auth=auth,
             scope=['activate'],
             timeout=timeout_seconds,
+            verify=False,
         )
         return token
 
