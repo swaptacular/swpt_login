@@ -1,14 +1,14 @@
 #!/bin/sh
 set -e
 
-# This function tries to upgrade webserver's database schema with
+# This function tries to upgrade the login database schema with
 # exponential backoff. This is necessary during development, because
 # the database might not be running yet when this script executes.
 perform_db_upgrade() {
     local retry_after=1
     local time_limit=$(($retry_after << 5))
     local error_file="$APP_ROOT_DIR/flask-db-upgrade.error"
-    echo -n 'Running database schema upgrade ...'
+    echo -n 'Running login database schema upgrade ...'
     while [[ $retry_after -lt $time_limit ]]; do
         if flask db upgrade 2>$error_file; then
             perform_db_initialization
