@@ -69,6 +69,12 @@ class APIAdapter(HTTPAdapter):
                     cls.__access_token = None
 
 
+class HydraAdminAdapter(HTTPAdapter):
+    def send(self, request, *args, **kw):
+        request.headers['X-Forwarded-Proto'] = 'https'
+        return super().send(request, *args, **kw)
+
+
 def create_requests_session():
     api_resource_server = current_app.config['API_RESOURCE_SERVER']
     hydra_admin_url = current_app.config['HYDRA_ADMIN_URL']
@@ -76,7 +82,7 @@ def create_requests_session():
     session = requests.Session()
     session.timeout = float(current_app.config['API_TIMEOUT_SECONDS'])
     session.mount(api_resource_server, APIAdapter())
-    session.mount(hydra_admin_url, HTTPAdapter())
+    session.mount(hydra_admin_url, HydraAdminAdapter())
 
     return session
 
