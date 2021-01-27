@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
-# This function tries to upgrade the database schema with exponential
-# backoff. This is necessary during development, because the database
-# might not be running yet when this script executes.
+# This function tries to upgrade webserver's database schema with
+# exponential backoff. This is necessary during development, because
+# the database might not be running yet when this script executes.
 perform_db_upgrade() {
     local retry_after=1
     local time_limit=$(($retry_after << 5))
@@ -28,6 +28,27 @@ perform_db_upgrade() {
 # (https://en.wikipedia.org/wiki/Idempotence)
 perform_db_initialization() {
     return 0
+}
+
+# This function tries to preform hydra's database migrations with
+# exponential backoff. This is necessary during development, because
+# the database might not be running yet when this script executes.
+perform_hydra_migrations() {
+    local retry_after=1
+    local time_limit=$(($retry_after << 5))
+    local error_file="$APP_ROOT_DIR/hydra-db-migration.error"
+    echo -n 'Running hydra schema migrations ...'
+    while [[ $retry_after -lt $time_limit ]]; do
+        if hydra migrate sql "$DSN" --yes 2>$error_file; then
+            echo ' done.'
+            return 0
+        fi
+        sleep $retry_after
+        retry_after=$((2 * retry_after))
+    done
+    echo
+    cat "$error_file"
+    return 1
 }
 
 # HYDRA_DSN is preferred over DSN, because it is less ambiguous.
@@ -56,6 +77,7 @@ case $1 in
         ;;
     configure)
         perform_db_upgrade
+        perform_hydra_migrations
         ;;
     webserver)
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
