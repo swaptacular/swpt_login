@@ -82,6 +82,9 @@ case $1 in
     webserver)
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
         ;;
+    hydraserver)
+        exec hydra serve all
+        ;;
     all)
         exec supervisord -c "$APP_ROOT_DIR/supervisord.conf"
         ;;
