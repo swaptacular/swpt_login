@@ -1,4 +1,3 @@
-from flask_env import MetaFlaskEnv
 from os import environ
 
 SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
@@ -14,7 +13,36 @@ def _get_default_password_min_length(fallback):
     return 12 if environ.get('USE_RECOVERY_CODE', str(bool(fallback))).lower() == 'true' else 6
 
 
-class Configuration(metaclass=MetaFlaskEnv):
+class MetaEnvReader(type):
+    def __init__(cls, name, bases, dct):
+        """MetaEnvReader class initializer.
+
+        This function will get called when a new class which utilizes
+        this metaclass is defined, as opposed to when an instance is
+        initialized. This function overrides the default configuration
+        from environment variables.
+
+        """
+
+        super().__init__(name, bases, dct)
+        NoneType = type(None)
+        annotations = dct.get('__annotations__', {})
+        falsy_values = {'false', 'off', 'no', ''}
+        for key, value in environ.items():
+            if hasattr(cls, key):
+                target_type = annotations.get(key) or type(getattr(cls, key))
+                if target_type is NoneType:  # pragma: no cover
+                    target_type = str
+
+                if target_type is bool:
+                    value = value.lower() not in falsy_values
+                else:
+                    value = target_type(value)
+
+                setattr(cls, key, value)
+
+
+class Configuration(metaclass=MetaEnvReader):
     VERSION = '0.9.5'
 
     SECRET_KEY = 'dummy-secret'
@@ -29,18 +57,18 @@ class Configuration(metaclass=MetaFlaskEnv):
     HYDRA_ADMIN_URL = 'http://hydra:4445'
     REDIS_URL = 'redis://localhost:6379/0'
     SQLALCHEMY_DATABASE_URI = ''
-    SQLALCHEMY_POOL_SIZE = None
-    SQLALCHEMY_POOL_TIMEOUT = None
-    SQLALCHEMY_POOL_RECYCLE = None
-    SQLALCHEMY_MAX_OVERFLOW = None
+    SQLALCHEMY_POOL_SIZE: int = None
+    SQLALCHEMY_POOL_TIMEOUT: int = None
+    SQLALCHEMY_POOL_RECYCLE: int = None
+    SQLALCHEMY_MAX_OVERFLOW: int = None
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 25
     MAIL_USE_TLS = False
     MAIL_USE_SSL = False
-    MAIL_USERNAME = None
-    MAIL_PASSWORD = None
-    MAIL_DEFAULT_SENDER = None
-    MAIL_MAX_EMAILS = None
+    MAIL_USERNAME: str = None
+    MAIL_PASSWORD: str = None
+    MAIL_DEFAULT_SENDER: str = None
+    MAIL_MAX_EMAILS: int = None
     MAIL_ASCII_ATTACHMENTS = False
     RECAPTCHA_PUBLIC_KEY = '6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37'
     RECAPTCHA_PIVATE_KEY = '6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q'

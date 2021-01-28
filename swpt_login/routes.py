@@ -400,7 +400,7 @@ def login_form():
     if request.method == 'POST':
         email = request.form['email'].strip()
         password = request.form['password']
-        remember_me = 'remember_me' in request.form
+        remember_me = not current_app.config['HIDE_REMEMBER_ME_CHECKBOX'] and 'remember_me' in request.form
         user = UserRegistration.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             user_id = user.user_id
