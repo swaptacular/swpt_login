@@ -1,6 +1,44 @@
 #!/bin/sh
 set -e
 
+# The WEBSERVER_* variables should be used instead of the GUNICORN_*
+# variables, because we do not want to tie the public interface to the
+# "gunicorn" server, which we may, or may not use in the future.
+export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
+export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
+export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
+
+# The HYDRA_DSN variable should be used instead of the DSN variable,
+# because it's name is less ambiguous.
+if [[ -n "$HYDRA_DSN" ]]; then
+    export DSN="$HYDRA_DSN"
+fi
+
+# When SUBJECT_PREFIX is set to one of the two standard values (which
+# almost certainly will be case), even if API_RESERVE_USER_ID_PATH
+# and/or API_USER_ID_FIELD_NAME variables are not set, we can guess
+# their values with certainty.
+case "$SUBJECT_PREFIX" in
+    debtors:)
+        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/debtors/.debtor-reserve}
+        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-debtorId}
+        ;;
+    creditors:)
+        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/creditors/.creditor-reserve}
+        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-creditorId}
+        ;;
+esac
+
+# If URLS_LOGIN is empty, try to guess its value.
+if [[ -z "$URLS_LOGIN" && -n "$URLS_SELF_ISSUER" && -n "LOGIN_PATH" ]]; then
+    export URLS_LOGIN="$URLS_SELF_ISSUER$LOGIN_PATH"
+fi
+
+# If URLS_CONSENT is empty, try to guess its value.
+if [[ -z "$URLS_CONSENT" && -n "$URLS_SELF_ISSUER" && -n "CONSENT_PATH" ]]; then
+    export URLS_CONSENT="$URLS_SELF_ISSUER$CONSENT_PATH"
+fi
+
 # This function tries to upgrade the login database schema with
 # exponential backoff. This is necessary during development, because
 # the database might not be running yet when this script executes.
@@ -50,40 +88,6 @@ perform_hydra_migrations() {
     cat "$error_file"
     return 1
 }
-
-# HYDRA_DSN is preferred over DSN, because it is less ambiguous.
-if [[ -n "$HYDRA_DSN" ]]; then
-    export DSN="$HYDRA_DSN"
-fi
-
-# If URLS_LOGIN is empty, try to guess its value.
-if [[ -z "$URLS_LOGIN" && -n "$URLS_SELF_ISSUER" && -n "LOGIN_PATH" ]]; then
-    export URLS_LOGIN="$URLS_SELF_ISSUER$LOGIN_PATH"
-fi
-
-# If URLS_CONSENT is empty, try to guess its value.
-if [[ -z "$URLS_CONSENT" && -n "$URLS_SELF_ISSUER" && -n "CONSENT_PATH" ]]; then
-    export URLS_CONSENT="$URLS_SELF_ISSUER$CONSENT_PATH"
-fi
-
-# When SUBJECT_PREFIX is set to one of the two standard values (which
-# is the most probable case), even if API_RESERVE_USER_ID_PATH and/or
-# API_USER_ID_FIELD_NAME are not set, we can reasonably well guess
-# their values.
-case "$SUBJECT_PREFIX" in
-    debtors:)
-        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/debtors/.debtor-reserve}
-        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-debtorId}
-        ;;
-    creditors:)
-        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/creditors/.creditor-reserve}
-        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-creditorId}
-        ;;
-esac
-
-export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
-export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
-export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
 
 case $1 in
     develop-run-flask)
