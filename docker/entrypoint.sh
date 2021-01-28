@@ -66,6 +66,21 @@ if [[ -z "$URLS_CONSENT" && -n "$URLS_SELF_ISSUER" && -n "CONSENT_PATH" ]]; then
     export URLS_CONSENT="$URLS_SELF_ISSUER$CONSENT_PATH"
 fi
 
+# When SUBJECT_PREFIX is set to one of the two standard values (which
+# is the most probable case), even if API_RESERVE_USER_ID_PATH and/or
+# API_USER_ID_FIELD_NAME are not set, we can reasonably well guess
+# their values.
+case "$SUBJECT_PREFIX" in
+    debtors:)
+        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/debtors/.debtor-reserve}
+        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-debtorId}
+        ;;
+    creditors:)
+        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/creditors/.creditor-reserve}
+        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-creditorId}
+        ;;
+esac
+
 export GUNICORN_LOGLEVEL=${WEBSERVER_LOGLEVEL:-warning}
 export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
 export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
