@@ -6,12 +6,14 @@
     {% trans %}
       All permissions granted to connected devices will be revoked
       soon. In order to obtain permissions again, all devices will
-      need to re-authenticate.
+      need to be re-authorized.
     {% endtrans %}
   </p>
   {% with consent_challenge=request.args.consent_challenge %}
     <p>
-      <a class="login-link" href="{{url_for('.grant_consent', consent_challenge=consent_challenge)|safe}}">{% trans %}Grant permissions{% endtrans %}</a>
+      <a class="login-link" href="{{url_for('.grant_consent', consent_challenge=consent_challenge)|safe}}">
+        {% trans %}Go to the authorization page{% endtrans %}
+      </a>
     </p>
   {% endwith %}
 {% endblock message %}
