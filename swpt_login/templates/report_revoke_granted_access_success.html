@@ -8,4 +8,9 @@
       to gain access again, all devices will need to re-authenticate.
     {% endtrans %}
   </p>
+  {% with consent_challenge=request.args.consent_challenge %}
+    <p>
+      <a class="login-link" href="{{url_for('.grant_consent', consent_challenge=consent_challenge)|safe}}">{% trans %}Grant permissions{% endtrans %}</a>
+    </p>
+  {% endwith %}
 {% endblock message %}
