@@ -77,7 +77,7 @@
   {% with consent_challenge=request.args.consent_challenge %}
     {% autoescape false %}
       <ul class="login-footer-links">
-        <li><a href="{{url_for('.revoke_granted_access', consent_challenge=consent_challenge)}}">{% trans %}Want to revoke granted access?{% endtrans %}</a></li>
+        <li><a href="{{url_for('.revoke_granted_access', consent_challenge=consent_challenge)}}">{% trans %}Want to revoke granted permissions?{% endtrans %}</a></li>
       </ul>
     {% endautoescape %}
   {% endwith %}

@@ -4,8 +4,9 @@
   <p class="success-message-icon"></p>
   <p>
     {% trans %}
-      Access to all connected devices will be revoked soon. In order
-      to gain access again, all devices will need to re-authenticate.
+      All permissions granted to connected devices will be revoked
+      soon. In order to obtain permissions again, all devices will
+      need to re-authenticate.
     {% endtrans %}
   </p>
   {% with consent_challenge=request.args.consent_challenge %}

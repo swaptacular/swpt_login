@@ -1,20 +1,20 @@
 {% extends "form.html" %}
 
 {% block form_header %}
-  {% trans %}Revoke Granted Access{% endtrans %}
+  {% trans %}Revoke Granted Permissions{% endtrans %}
 {% endblock form_header %}
 
 {% block form_body %}
   <form action="" method="POST" id="revoke-granted-access-form">
     <p class="form-comment">
       {% trans %}
-        <strong>Warning:</strong> Access to all connected devices will
-        be revoked. In order to gain access again, all devices will
-        need to re-authenticate.
+        <strong>Warning:</strong> All permissions granted to connected
+        devices will be revoked. In order to obtain permissions again,
+        all devices will need to re-authenticate.
       {% endtrans %}
     </p>
     <p>
-      <input type="submit" value="{% trans %}Revoke granted access{% endtrans %}">
+      <input type="submit" value="{% trans %}Revoke granted permissions{% endtrans %}">
     </p>
   </form>
 {% endblock form_body %}
