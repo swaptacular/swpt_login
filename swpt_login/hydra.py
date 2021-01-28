@@ -12,11 +12,20 @@ def get_subject(user_id):
 def invalidate_credentials(user_id):
     UserLoginsHistory(user_id).clear()
     subject = quote_plus(get_subject(user_id))
+    revoke_consent_sessions(subject)
+    invalidate_login_sessions(subject)
+
+
+def revoke_consent_sessions(subject):
     timeout = float(current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS'])
     hydra_consents_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/consent')
-    hydra_logins_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/login')
+    requests_session.delete(f'{hydra_consents_base_url}?subject={subject}&all=true', timeout=timeout)
+    pass
 
-    requests_session.delete(f'{hydra_consents_base_url}?subject={subject}', timeout=timeout)
+
+def invalidate_login_sessions(subject):
+    timeout = float(current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS'])
+    hydra_logins_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/login')
     requests_session.delete(f'{hydra_logins_base_url}?subject={subject}', timeout=timeout)
 
 

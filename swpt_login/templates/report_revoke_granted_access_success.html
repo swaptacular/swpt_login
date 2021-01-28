@@ -1,0 +1,11 @@
+{% extends "message.html" %}
+
+{% block message %}
+  <p class="success-message-icon"></p>
+  <p>
+    {% trans %}
+      Access to all connected devices has been revoked. In order to
+      gain access again, all devices will need to re-authenticate.
+    {% endtrans %}
+  </p>
+{% endblock message %}

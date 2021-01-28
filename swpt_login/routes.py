@@ -500,3 +500,16 @@ def grant_consent():
         user_id_field_name=current_app.config['API_USER_ID_FIELD_NAME'],
         client=consent_request_info['client'],
     )
+
+
+@consent.route('/revoke-access', methods=['GET', 'POST'])
+def revoke_granted_access():
+    if request.method == 'POST':
+        consent_request = hydra.ConsentRequest(request.args['consent_challenge'])
+        consent_data = consent_request.fetch()
+        if consent_data:
+            hydra.revoke_consent_sessions(consent_data['subject'])
+
+        return render_template('report_revoke_granted_access_success.html')
+
+    return render_template('revoke_granted_access.html')
