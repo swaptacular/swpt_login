@@ -117,4 +117,9 @@ GUNICORN_WORKERS=2
 # Set this to the number of worker threads for handling requests. (Runs
 # each worker with the specified number of threads.)
 GUNICORN_THREADS=1
+
+# Parameters that determine the logging configuration.
+APP_LOG_LEVEL=warning
+APP_LOG_FORMAT=text
+APP_ASSOCIATED_LOGGERS=flask_signalbus.signalbus_cli sqlalchemy
 ```
