@@ -7,8 +7,24 @@ set -e
 export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
 export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
 
-# The HYDRA_DSN variable should be used instead of the DSN variable,
-# because it's name is less ambiguous.
+# HYDRA_LOG_LEVEL, HYDRA_LOG_FORMAT, HYDRA_DSN variables should be
+# used instead of LOG_LEVEL, LOG_FORMAT, and DSN variables, because
+# those names are less ambiguous. Also, for consistency we would like
+# to allow the "warning" and "critical" log level names.
+case "$HYDRA_LOG_LEVEL" in
+    warning)
+        export LOG_LEVEL=warn
+        ;;
+    critical)
+        export LOG_LEVEL=fatal
+        ;;
+    ?*)
+        export LOG_LEVEL="$HYDRA_LOG_LEVEL"
+        ;;
+esac
+if [[ -n "$HYDRA_LOG_FORMAT" ]]; then
+    export LOG_FORMAT="$HYDRA_LOG_FORMAT"
+fi
 if [[ -n "$HYDRA_DSN" ]]; then
     export DSN="$HYDRA_DSN"
 fi
