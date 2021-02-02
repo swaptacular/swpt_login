@@ -44,16 +44,6 @@ case "$SUBJECT_PREFIX" in
         ;;
 esac
 
-# If URLS_LOGIN is empty, try to guess its value.
-if [[ -z "$URLS_LOGIN" && -n "$URLS_SELF_ISSUER" && -n "LOGIN_PATH" ]]; then
-    export URLS_LOGIN="$URLS_SELF_ISSUER$LOGIN_PATH"
-fi
-
-# If URLS_CONSENT is empty, try to guess its value.
-if [[ -z "$URLS_CONSENT" && -n "$URLS_SELF_ISSUER" && -n "CONSENT_PATH" ]]; then
-    export URLS_CONSENT="$URLS_SELF_ISSUER$CONSENT_PATH"
-fi
-
 # This function tries to upgrade the login database schema with
 # exponential backoff. This is necessary during development, because
 # the database might not be running yet when this script executes.
