@@ -9,8 +9,8 @@ export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
 
 # HYDRA_LOG_LEVEL, HYDRA_LOG_FORMAT, HYDRA_DSN variables should be
 # used instead of LOG_LEVEL, LOG_FORMAT, and DSN variables, because
-# those names are less ambiguous. Also, for consistency we would like
-# to allow the "warning" and "critical" log level names.
+# those names are less ambiguous. Also, for consistency we want to
+# allow the "warning" and "critical" log level names.
 case "$HYDRA_LOG_LEVEL" in
     warning)
         export LOG_LEVEL=warn
@@ -43,6 +43,15 @@ case "$SUBJECT_PREFIX" in
         export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-creditorId}
         ;;
 esac
+
+# If not set, the values of LOGIN_PATH and CONSENT_PATH variables can
+# be guessed from the values of URLS_LOGIN and URLS_CONSENT.
+if [[ -z "$LOGIN_PATH" ]]; then
+    export LOGIN_PATH=$(echo "$URLS_LOGIN" | sed -E "s/^.*(\/[^\/]+)\/?$/\1/")
+fi
+if [[ -z "$CONSENT_PATH" ]]; then
+    export CONSENT_PATH=$(echo "$URLS_CONSENT" | sed -E "s/^.*(\/[^\/]+)\/?$/\1/")
+fi
 
 # This function tries to upgrade the login database schema with
 # exponential backoff. This is necessary during development, because
