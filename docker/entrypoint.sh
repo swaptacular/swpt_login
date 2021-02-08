@@ -62,7 +62,7 @@ perform_db_upgrade() {
     local error_file="$APP_ROOT_DIR/flask-db-upgrade.error"
     echo -n 'Running login database schema upgrade ...'
     while [[ $retry_after -lt $time_limit ]]; do
-        if flask db upgrade 2>$error_file; then
+        if flask db upgrade &>$error_file; then
             perform_db_initialization
             echo ' done.'
             return 0
@@ -91,7 +91,7 @@ perform_hydra_migrations() {
     local error_file="$APP_ROOT_DIR/hydra-db-migration.error"
     echo -n 'Running hydra schema migrations ...'
     while [[ $retry_after -lt $time_limit ]]; do
-        if hydra migrate sql "$DSN" --yes 2>$error_file; then
+        if hydra migrate sql "$DSN" --yes &>$error_file; then
             echo ' done.'
             return 0
         fi
