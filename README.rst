@@ -20,10 +20,13 @@ can be spawned from the generated image, see the `entrypoint`_. This
 Configuration
 -------------
 
-*swpt_login*'s behavior can be tuned with environment variables. Here
-are the most important settings with their default values:
+The behavior of the service can be tuned with environment
+variables. Here are the most important settings with example values:
 
 .. code-block:: shell
+
+  # The URL for the PostgreSQL database that ORY Hydra should use.
+  HYDRA_DSN=postgres://hydra_debtors:hydra_debtors@pg/hydra
 
   # Hydra configuration settings. See ORY Hydra's configuration docs.
   SERVE_PUBLIC_PORT=4444
@@ -37,17 +40,27 @@ are the most important settings with their default values:
   URLS_CONSENT=https://example.com/debtors-consent/
   URLS_ERROR=https://example.com/auth-error
 
-  # Set this the URL for your PostgreSQL database server instance.
-  HYDRA_DSN=postgres://hydra_debtors:hydra_debtors@pg/${POSTGRES_DB}
-
-  # Set this to the URL for ORY Hydra's admin API.
-  HYDRA_ADMIN_URL=http://hydra:4445
+  # Parameters that determine the logging configuration for ORY Hydra.
+  HYDRA_LOG_LEVEL=warning
+  HYDRA_LOG_FORMAT=json
 
   # The port on which the login and consent web-apps will run. The number
   # of worker processes and threads.
   WEBSERVER_PORT=8000
   WEBSERVER_WORKERS=1
   WEBSERVER_THREADS=3
+
+  # The URL for the PostgreSQL database that the login and consent apps should use.
+  SQLALCHEMY_DATABASE_URI=postgresql://user:pass@servername/login
+
+  # Set this to the URL for the Redis server instance that the login and
+  # consent apps should use. It is highly recommended that your Redis instance
+  # is backed by disk storage. If not so, your users might be inconvenienced
+  # when your Redis instace is restarted.
+  REDIS_URL=redis://localhost:6379/0
+
+  # Set this to the URL for ORY Hydra's admin API.
+  HYDRA_ADMIN_URL=http://hydra:4445
 
   # The prefix added the user ID to form the Oauth2 subject field. Should be
   # either "creditors:" or "debtors:". For example, if SUBJECT_PREFIX=creditors:,
@@ -62,14 +75,6 @@ are the most important settings with their default values:
 
   # Optional URL for a custom CSS style-sheet:
   STYLE_URL=
-
-  # Set this to the URL for your Redis server instance. It is highly
-  # recommended that your Redis instance is backed by disk storage. If not so,
-  # your users might be inconvenienced when your Redis instace is restarted.
-  REDIS_URL=redis://localhost:6379/0
-
-  # Set this to the URL for your PostgreSQL database server instance.
-  SQLALCHEMY_DATABASE_URI=postgresql://user:pass@servername/dbname
 
   # SMTP server connection parameters. You should set `MAIL_DEFAULT_SENDER`
   # to the email address from which you send your outgoing emails to users,
@@ -98,8 +103,7 @@ are the most important settings with their default values:
   API_RESOURCE_SERVER='http://resource-server'
   API_TIMEOUT_SECONDS=5
 
-  # Parameters that determine the logging configuration.
-  HYDRA_LOG_LEVEL=warning
-  HYDRA_LOG_FORMAT=json
+  # Parameters that determine the logging configuration for the login and
+  # consent web apps.
   APP_LOG_LEVEL=warning
   APP_LOG_FORMAT=text
