@@ -119,6 +119,7 @@ case $1 in
         exec hydra serve all
         ;;
     all)
+        # Spawns all the necessary processes in one container.
         exec supervisord -c "$APP_ROOT_DIR/supervisord.conf"
         ;;
     *)
