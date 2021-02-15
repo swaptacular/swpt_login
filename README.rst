@@ -50,6 +50,14 @@ variables. Here are the most important settings with example values:
   WEBSERVER_WORKERS=1
   WEBSERVER_THREADS=3
 
+  # Optional path (only the path) to the login page. If not set, the value of
+  # the URLS_LOGIN variable will be used to guess the login path.
+  LOGIN_PATH=
+
+  # Optional path (only the path) to the consetn page. If not set, the value of
+  # the URLS_CONSENT variable will be used to guess the consent path.
+  CONSENT_PATH=
+
   # The URL for the PostgreSQL database that the login and consent apps should use.
   SQLALCHEMY_DATABASE_URI=postgresql://user:pass@servername/login
 
