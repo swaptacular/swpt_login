@@ -1,13 +1,11 @@
-swpt_login
-==========
-
 Swaptacular service that manages OAuth2 login and consent
+=========================================================
 
 This service uses `ORY Hydra`_ to implement the OAuth2 login and
 consent. The ultimate deliverable is a docker image, which is
 generated from the project's `Dockerfile`_. To find out what processes
 can be spawned from the generated image, see the `entrypoint`_. This
-`example`_ shows how to use generated image.
+`example`_ shows how to use the generated image.
 
 
 .. _`ORY Hydra`: https://www.ory.sh/hydra/docs/
