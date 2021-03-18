@@ -58,7 +58,7 @@ msgstr "Имейл адреса е невалиден."
 
 #: routes.py:160
 #, python-format
-msgid "The password should have least %(num)s characters."
+msgid "The password should have at least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
 #: routes.py:162

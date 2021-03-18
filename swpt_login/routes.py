@@ -181,7 +181,7 @@ def choose_password(secret):
         min_length = current_app.config['PASSWORD_MIN_LENGTH']
         max_length = current_app.config['PASSWORD_MAX_LENGTH']
         if len(password) < min_length:
-            flash(gettext('The password should have least %(num)s characters.', num=min_length))
+            flash(gettext('The password should have at least %(num)s characters.', num=min_length))
         elif len(password) > max_length:
             flash(gettext('The password should have at most %(num)s characters.', num=max_length))
         elif password != request.form['confirm']:
