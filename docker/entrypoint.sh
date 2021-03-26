@@ -116,7 +116,7 @@ case $1 in
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
         ;;
     hydraserver)
-        exec hydra serve all
+        exec hydra serve all --config "${APP_ROOT_DIR}/.hydra.yaml"
         ;;
     all)
         # Spawns all the necessary processes in one container.
