@@ -4,10 +4,18 @@ serve:
       enabled: true
       allowed_origins:
         - '*'
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
       allowed_headers:
         - Authorization
         - Content-Type
         - X-Requested-With
+      exposed_headers:
+        - Content-Type
       max_age: 86400
   cookies:
     same_site_legacy_workaround: true
