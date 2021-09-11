@@ -76,6 +76,7 @@ class Configuration(metaclass=MetaEnvReader):
 
     RECAPTCHA_CHALLENGE_URL = 'https://www.google.com/recaptcha/api.js'
     RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
+    APP_SIGNUP_REDIRECT_URL = ''
     HYDRA_REQUEST_TIMEOUT_SECONDS = 5
     SEND_USER_UPDATE_SIGNAL = False
     SHOW_CAPTCHA_ON_SIGNUP = True

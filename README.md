@@ -76,6 +76,9 @@ SITE_TITLE=My site name
 # Set this to an URL that tells more about your site.
 ABOUT_URL=https://github.com/epandurski/swpt_login
 
+# Optional URL to go after a successful sign-up:
+APP_SIGNUP_REDIRECT_URL=
+
 # Optional URL for a custom CSS style-sheet:
 STYLE_URL=
 
