@@ -17,7 +17,7 @@
   {% endif %}
   <p>
     {% if config.APP_SIGNUP_REDIRECT_URL %}
-      <a href="{{config.APP_SIGNUP_REDIRECT_URL|safe}}">{% trans %}Now you can log in.{% endtrans %}</a>
+      <a class="login-link" href="{{config.APP_SIGNUP_REDIRECT_URL|safe}}">{% trans %}Now you can log in{% endtrans %}</a>
     {% else %}
       {% trans %}Now you can log in.{% endtrans %}
     {% endif %}
