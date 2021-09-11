@@ -10,15 +10,16 @@
     {% endtrans %}
     {% if recovery_code %}
       {% trans %}Your account recovery code is:{% endtrans %}
-    {% else %}
-      {% if config.APP_SIGNUP_REDIRECT_URL %}
-        <a href="{{config.APP_SIGNUP_REDIRECT_URL|safe}}">{% trans %}Now you can log in.{% endtrans %}</a>
-      {% else %}
-        {% trans %}Now you can log in.{% endtrans %}
-      {% endif %}
     {% endif %}
   </p>
   {% if recovery_code %}
     {% include '_recovery_code.html' %}
   {% endif %}
+  <p>
+    {% if config.APP_SIGNUP_REDIRECT_URL %}
+      <a href="{{config.APP_SIGNUP_REDIRECT_URL|safe}}">{% trans %}Now you can log in.{% endtrans %}</a>
+    {% else %}
+      {% trans %}Now you can log in.{% endtrans %}
+    {% endif %}
+  </p>
 {% endblock message %}
