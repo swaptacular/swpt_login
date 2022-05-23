@@ -17,7 +17,7 @@
         {% with locale_code = get_locale()|string, language_choices=config['LANGUAGE_CHOICES'] %}
           <nav>
             <ul class="languages">
-              <li><a href="{{config.ABOUT_URL}}">{% trans %}About{% endtrans %}</a></li>
+              <li><a href="{{config.ABOUT_URL}}">{{config.SITE_TITLE}}</a></li>
               {% for code, language in language_choices %}
                 {% if code != locale_code %}
                   <li><a href="{{url_for('.set_language', lang=code, to=request.url)}}">{{language}}</a></li>
