@@ -3,6 +3,7 @@ import sys
 import os
 import os.path
 from typing import List
+from flask import render_template
 
 
 def _excepthook(exc_type, exc_value, traceback):  # pragma: nocover
@@ -36,6 +37,10 @@ def _configure_root_logger(format: str) -> logging.Logger:
     _add_console_hander(root_logger, format)
 
     return root_logger
+
+
+def _server_error(error=None):
+    return render_template('500.html')
 
 
 def configure_logging(level: str, format: str, associated_loggers: List[str]) -> None:
@@ -81,6 +86,7 @@ def create_app(config_object=None):
     extensions.init_app(app)
     app.register_blueprint(login, url_prefix=app.config['LOGIN_PATH'])
     app.register_blueprint(consent, url_prefix=app.config['CONSENT_PATH'])
+    app.register_error_handler(500, _server_error)
     return app
 
 

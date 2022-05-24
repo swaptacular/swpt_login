@@ -1,0 +1,10 @@
+{% extends "message.html" %}
+
+{% block message %}
+  <p class="failure-message-icon"></p>
+  <p>
+    {% trans %}
+      An error has occurred during this operation.
+    {% endtrans %}
+  </p>
+{% endblock message %}
