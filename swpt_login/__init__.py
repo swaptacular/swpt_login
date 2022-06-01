@@ -87,6 +87,7 @@ def create_app(config_object=None):
     app.register_blueprint(login, url_prefix=app.config['LOGIN_PATH'])
     app.register_blueprint(consent, url_prefix=app.config['CONSENT_PATH'])
     app.register_error_handler(500, _server_error)
+    app.register_error_handler(403, _server_error)
     return app
 
 
