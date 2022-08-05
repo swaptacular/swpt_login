@@ -204,18 +204,6 @@ dev = ["coverage", "pytest", "pytest-mock", "pre-commit"]
 tests = ["coverage", "pytest", "pytest-mock"]
 
 [[package]]
-name = "flask-signalbus"
-version = "0.5.7"
-description = "A Flask-SQLAlchemy extension for atomically sending messages (signals) over a message bus"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-Flask-SQLAlchemy = ">=1.0"
-marshmallow-sqlalchemy = ">=0.22.0"
-
-[[package]]
 name = "flask-sqlalchemy"
 version = "2.4.4"
 description = "Adds SQLAlchemy support to your Flask application."
@@ -333,24 +321,6 @@ lint = ["mypy (==0.790)", "flake8 (==3.8.4)", "flake8-bugbear (==20.11.1)", "pre
 tests = ["pytest", "pytz", "simplejson"]
 
 [[package]]
-name = "marshmallow-sqlalchemy"
-version = "0.24.1"
-description = "SQLAlchemy integration with the marshmallow (de)serialization library"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-marshmallow = ">=3.0.0"
-SQLAlchemy = ">=1.2.0"
-
-[package.extras]
-dev = ["pytest", "pytest-lazy-fixture", "flake8 (==3.8.4)", "flake8-bugbear (==20.1.4)", "pre-commit (>=2.0,<3.0)", "tox"]
-docs = ["sphinx (==3.3.1)", "alabaster (==0.7.12)", "sphinx-issues (==1.2.0)"]
-lint = ["flake8 (==3.8.4)", "flake8-bugbear (==20.1.4)", "pre-commit (>=2.0,<3.0)"]
-tests = ["pytest", "pytest-lazy-fixture"]
-
-[[package]]
 name = "mccabe"
 version = "0.6.1"
 description = "McCabe checker, plugin for flake8"
@@ -405,6 +375,19 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
 pyparsing = ">=2.0.2"
+
+[[package]]
+name = "pika"
+version = "1.3.0"
+description = "Pika Python AMQP Client Library"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+gevent = ["gevent"]
+tornado = ["tornado"]
+twisted = ["twisted"]
 
 [[package]]
 name = "pluggy"
@@ -561,11 +544,11 @@ python-versions = "*"
 
 [[package]]
 name = "python-json-logger"
-version = "0.1.11"
+version = "2.0.4"
 description = "A python library adding a json log formatter"
 category = "main"
 optional = false
-python-versions = ">=2.7"
+python-versions = ">=3.5"
 
 [[package]]
 name = "pytz"
@@ -646,6 +629,26 @@ postgresql_pg8000 = ["pg8000"]
 postgresql_psycopg2binary = ["psycopg2-binary"]
 postgresql_psycopg2cffi = ["psycopg2cffi"]
 pymysql = ["pymysql"]
+
+[[package]]
+name = "Swpt-Pythonlib"
+version = "0.8.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "*"
+develop = false
+
+[package.dependencies]
+Flask-SQLAlchemy = ">=2.4"
+marshmallow = ">=3.10,<4.0"
+pika = ">=1.3,<2.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/swaptacular/swpt_pythonlib.git"
+reference = "v0.8.0"
+resolved_reference = "804e19806259726d066c8ce0d09d0064b02163ee"
 
 [[package]]
 name = "toml"
@@ -750,7 +753,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "12d093cb99a29509bb6e125ca684e063b9bf71f14e478d6e69766e4ba97f2a24"
+content-hash = "e29ef6f5b1646c5861f787cd9874be84aa34c2197940940ffdf89bec45a5796d"
 
 [metadata.files]
 alembic = [
@@ -822,9 +825,6 @@ flask-migrate = [
 flask-redis = [
     {file = "flask-redis-0.4.0.tar.gz", hash = "sha256:e1fccc11e7ea35c2a4d68c0b9aa58226a098e45e834d615c7b6c4928b01ddd6c"},
     {file = "flask_redis-0.4.0-py2.py3-none-any.whl", hash = "sha256:8d79eef4eb1217095edab603acc52f935b983ae4b7655ee7c82c0dfd87315d17"},
-]
-flask-signalbus = [
-    {file = "Flask-SignalBus-0.5.7.tar.gz", hash = "sha256:9b13506faa73a958d798c179f4be96a040f4e5bfddc44e7ade5d858d512bf2c3"},
 ]
 flask-sqlalchemy = [
     {file = "Flask-SQLAlchemy-2.4.4.tar.gz", hash = "sha256:bfc7150eaf809b1c283879302f04c42791136060c6eeb12c0c6674fb1291fae5"},
@@ -916,10 +916,6 @@ marshmallow = [
     {file = "marshmallow-3.10.0-py2.py3-none-any.whl", hash = "sha256:eca81d53aa4aafbc0e20566973d0d2e50ce8bf0ee15165bb799bec0df1e50177"},
     {file = "marshmallow-3.10.0.tar.gz", hash = "sha256:4ab2fdb7f36eb61c3665da67a7ce281c8900db08d72ba6bf0e695828253581f7"},
 ]
-marshmallow-sqlalchemy = [
-    {file = "marshmallow-sqlalchemy-0.24.1.tar.gz", hash = "sha256:d051cf013c075c43e1ee5c4b01f8fab6dd6b140dab6825be45875f674a0d289c"},
-    {file = "marshmallow_sqlalchemy-0.24.1-py2.py3-none-any.whl", hash = "sha256:93f47b880ac7070f7b34c8ac0a71eeec3f8582a22e5c0330c1c436e3f5f99a37"},
-]
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
@@ -949,6 +945,7 @@ packaging = [
     {file = "packaging-20.9-py2.py3-none-any.whl", hash = "sha256:67714da7f7bc052e064859c05c595155bd1ee9f69f76557e21f051443c20947a"},
     {file = "packaging-20.9.tar.gz", hash = "sha256:5b327ac1320dc863dca72f4514ecc086f31186744b84a230374cc1fd776feae5"},
 ]
+pika = []
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
@@ -1040,9 +1037,7 @@ python-editor = [
     {file = "python_editor-1.0.4-py3-none-any.whl", hash = "sha256:1bf6e860a8ad52a14c3ee1252d5dc25b2030618ed80c022598f00176adc8367d"},
     {file = "python_editor-1.0.4-py3.5.egg", hash = "sha256:c3da2053dbab6b29c94e43c486ff67206eafbe7eb52dbec7390b5e2fb05aac77"},
 ]
-python-json-logger = [
-    {file = "python-json-logger-0.1.11.tar.gz", hash = "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"},
-]
+python-json-logger = []
 pytz = [
     {file = "pytz-2020.5-py2.py3-none-any.whl", hash = "sha256:16962c5fb8db4a8f63a26646d8886e9d769b6c511543557bc84e9569fb9a9cb4"},
     {file = "pytz-2020.5.tar.gz", hash = "sha256:180befebb1927b16f6b57101720075a984c019ac16b1b7575673bea42c6c3da5"},
@@ -1104,6 +1099,7 @@ sqlalchemy = [
     {file = "SQLAlchemy-1.3.22-cp39-cp39-win_amd64.whl", hash = "sha256:04f995fcbf54e46cddeb4f75ce9dfc17075d6ae04ac23b2bacb44b3bc6f6bf11"},
     {file = "SQLAlchemy-1.3.22.tar.gz", hash = "sha256:758fc8c4d6c0336e617f9f6919f9daea3ab6bb9b07005eda9a1a682e24a6cacc"},
 ]
+Swpt-Pythonlib = []
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},

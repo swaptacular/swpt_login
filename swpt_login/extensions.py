@@ -1,6 +1,6 @@
 from werkzeug.local import LocalProxy
 from flask_sqlalchemy import SQLAlchemy
-from flask_signalbus import SignalBusMixin
+from swpt_pythonlib.flask_signalbus import SignalBusMixin
 from flask_mail import Mail
 from flask_redis import FlaskRedis
 from flask_babel import Babel
