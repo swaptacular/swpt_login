@@ -25,7 +25,7 @@ class UserUpdateSignal(db.Model):
 class RegisteredUserSignal(db.Model):
     user_id = db.Column(db.String(64), primary_key=True)
     registered_user_signal_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    reservation_id = db.Column(db.BigInteger, nullable=False)
+    reservation_id = db.Column(db.String(255), nullable=False)
 
     def send_signalbus_message(self):
         api_resource_server = current_app.config['API_RESOURCE_SERVER']
