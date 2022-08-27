@@ -3,13 +3,12 @@ Swaptacular service that manages OAuth2 login and consent
 
 This service uses [ORY Hydra](https://www.ory.sh/hydra/docs/) to
 implement the OAuth2 login and consent for
-[Swaptacular](https://github.com/epandurski/swaptacular). The ultimate
+[Swaptacular](https://swaptacular.github.io/overview). The ultimate
 deliverable is a docker image, which is generated from the project's
-[Dockerfile](https://github.com/epandurski/swpt_login/blob/master/Dockerfile). To
-find out what processes can be spawned from the generated image, see
-the
-[entrypoint](https://github.com/epandurski/swpt_login/blob/master/docker/entrypoint.sh). This
-[example](https://github.com/epandurski/swpt_debtors/blob/master/docker-compose-all.yml)
+[Dockerfile](../master/Dockerfile). To find out what processes can be
+spawned from the generated image, see the
+[entrypoint](../master/docker/entrypoint.sh). This
+[example](https://github.com/swaptacular/swpt_debtors/blob/master/docker-compose-all.yml)
 shows how to use the generated image.
 
 
@@ -74,7 +73,7 @@ SUBJECT_PREFIX=debtors:
 SITE_TITLE=My site name
 
 # Set this to an URL that tells more about your site.
-ABOUT_URL=https://github.com/epandurski/swpt_login
+ABOUT_URL=https://swaptacular.github.io/overview
 
 # Optional URL to go after a successful sign-up:
 APP_SIGNUP_REDIRECT_URL=
