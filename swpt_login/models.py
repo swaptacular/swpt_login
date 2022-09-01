@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 from flask import current_app
 from .extensions import db, requests_session
 
@@ -28,11 +29,11 @@ class RegisteredUserSignal(db.Model):
     reservation_id = db.Column(db.String(255), nullable=False)
 
     def send_signalbus_message(self):
-        api_resource_server = current_app.config['API_RESOURCE_SERVER']
+        api_resource_server_base_url = current_app.config['API_RESOURCE_SERVER_BASE_URL']
         api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
         api_base_path = api_reserve_user_id_path.split('.')[0]
         response = requests_session.post(
-            url=f'{api_resource_server}{api_base_path}{self.user_id}/activate',
+            url=urljoin(api_resource_server_base_url, f'.{api_base_path}{self.user_id}/activate'),
             json={'reservationId': self.reservation_id},
         )
         status_code = response.status_code

@@ -1,6 +1,11 @@
 Swaptacular service that manages OAuth2 login and consent
 =========================================================
 
+**IMPORTANT NOTE: The implementation of this service is
+provisional. Organizations running Swaptacular debtors and creditors
+agents are encouraged to use their own implementations, which take
+into account their concrete security and user management policies.**
+
 This service uses [ORY Hydra](https://www.ory.sh/hydra/docs/) to
 implement the OAuth2 login and consent for
 [Swaptacular](https://swaptacular.github.io/overview). The ultimate
@@ -15,8 +20,9 @@ shows how to use the generated image.
 Configuration
 -------------
 
-The behavior of the service can be tuned with environment variables.
-Here are the most important settings with example values:
+The behavior of the running container can be tuned with environment
+variables. Here are the most important settings with some random
+example values:
 
 ```shell
 # The URL for the PostgreSQL database that ORY Hydra should use.
@@ -38,10 +44,10 @@ URLS_ERROR=https://example.com/auth-error
 HYDRA_LOG_LEVEL=warning
 HYDRA_LOG_FORMAT=json
 
-# The port on which the login and consent web-apps will run. The number
-# of worker processes and threads.
+# The port on which the login and consent web-apps will run, also the
+# number of worker processes, and running threads in each process.
 WEBSERVER_PORT=8000
-WEBSERVER_WORKERS=1
+WEBSERVER_PROCESSES=1
 WEBSERVER_THREADS=3
 
 # Optional path (only the path) to the login page. If not set, the value of
@@ -59,7 +65,7 @@ SQLALCHEMY_DATABASE_URI=postgresql://user:pass@servername/login
 # consent apps should use. It is highly recommended that your Redis instance
 # is backed by disk storage. If not so, your users might be inconvenienced
 # when your Redis instace is restarted.
-REDIS_URL=redis://localhost:6379/0
+REDIS_URL=redis://redis:6379/0
 
 # Set this to the URL for ORY Hydra's admin API.
 HYDRA_ADMIN_URL=http://hydra:4445
@@ -70,10 +76,10 @@ HYDRA_ADMIN_URL=http://hydra:4445
 SUBJECT_PREFIX=debtors:
 
 # Set this to the name of your site, as it is known to your users.
-SITE_TITLE=My site name
+SITE_TITLE=Demo Debtors Agent
 
 # Set this to an URL that tells more about your site.
-ABOUT_URL=https://swaptacular.github.io/overview
+ABOUT_URL=https://example.com/about
 
 # Optional URL to go after a successful sign-up:
 APP_SIGNUP_REDIRECT_URL=
@@ -81,16 +87,18 @@ APP_SIGNUP_REDIRECT_URL=
 # Optional URL for a custom CSS style-sheet:
 STYLE_URL=
 
-# SMTP server connection parameters. You should set `MAIL_DEFAULT_SENDER`
-# to the email address from which you send your outgoing emails to users,
-# "My Site Name <no-reply@my-site.com>" for example.
-MAIL_SERVER=localhost
+# SMTP server connection parameters. You should set
+# `MAIL_DEFAULT_SENDER` to the email address from which you send your
+# outgoing emails to users, "My Site Name <no-reply@my-site.com>" for
+# example. Do not set `MAIL_USERNAME` and `MAIL_PASSWORD` if the SMPT
+# server does not require username and password.
+MAIL_SERVER=mail
 MAIL_PORT=25
 MAIL_USE_TLS=False
 MAIL_USE_SSL=False
-MAIL_USERNAME=None
-MAIL_PASSWORD=None
-MAIL_DEFAULT_SENDER=None
+MAIL_USERNAME=smtp_user
+MAIL_PASSWORD=smpt_password
+MAIL_DEFAULT_SENDER=Demo Debtors Agent <no-reply@example.com>
 
 # Parameters for Google reCAPTCHA 2. You should obtain your own public/private
 # key pair from www.google.com/recaptcha, and put it here.
@@ -98,14 +106,14 @@ RECAPTCHA_PUBLIC_KEY=6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37
 RECAPTCHA_PIVATE_KEY=6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q
 
 # Parameters that determine how to obtain an user ID from the resource
-# server. Note that the `API_RESOURCE_SERVER` value may include a port, but
-# MUST NOT include a path or a trailing slash. The client ID, and the client
-# secret are used to perform the "Client Credentials" OAuth2 flow against the
-# OAuth2 token endpoint, so as to get the permissions to create new users.
+# server. The client ID, and the client secret are used to perform the
+# "Client Credentials" OAuth2 flow against the OAuth2 token endpoint,
+# so as to get the permissions to create new users. New users will be
+# created by sending requests relative to `API_RESOURCE_SERVER_BASE_URL`.
 SUPERVISOR_CLIENT_ID=users-supervisor
 SUPERVISOR_CLIENT_SECRET=users-supervisor
-API_AUTH2_TOKEN_URL=https://hydra/oauth2/token
-API_RESOURCE_SERVER='http://resource-server'
+API_AUTH2_TOKEN_URL=https://nginx-proxy/debtors-hydra/oauth2/token
+API_RESOURCE_SERVER_BASE_URL=https://nginx-proxy/
 API_TIMEOUT_SECONDS=5
 
 # Parameters that determine the logging configuration for the login and

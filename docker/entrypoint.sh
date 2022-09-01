@@ -4,7 +4,7 @@ set -e
 # The WEBSERVER_* variables should be used instead of the GUNICORN_*
 # variables, because we do not want to tie the public interface to the
 # "gunicorn" server, which we may, or may not use in the future.
-export GUNICORN_WORKERS=${WEBSERVER_WORKERS:-1}
+export GUNICORN_WORKERS=${WEBSERVER_PROCESSES:-1}
 export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
 
 # HYDRA_LOG_LEVEL, HYDRA_LOG_FORMAT, HYDRA_DSN variables should be

@@ -1,6 +1,7 @@
 import re
 import time
 import hashlib
+from urllib.parse import urljoin
 from sqlalchemy.exc import IntegrityError
 from flask import current_app
 from . import utils
@@ -15,11 +16,14 @@ def _get_user_verification_code_failures_redis_key(user_id):
 
 
 def _reserve_user_id():
-    api_resource_server = current_app.config['API_RESOURCE_SERVER']
+    api_resource_server_base_url = current_app.config['API_RESOURCE_SERVER_BASE_URL']
     api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
     api_user_id_field_name = current_app.config['API_USER_ID_FIELD_NAME']
 
-    response = requests_session.post(f'{api_resource_server}{api_reserve_user_id_path}', json={})
+    response = requests_session.post(
+        url=urljoin(api_resource_server_base_url, f'.{api_reserve_user_id_path}'),
+        json={},
+    )
     response.raise_for_status()
     response_json = response.json()
     user_id = str(response_json[api_user_id_field_name])
