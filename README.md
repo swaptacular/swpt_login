@@ -137,7 +137,7 @@ reverse-proxy and the RabbitMQ broker temporarily route the same
 creditor ID to different database servers, this would not result in a
 disaster. Both [Debtors Agent] and [Creditors Agent] reference
 implementations, as an extension to the [Swaptacular Messaging
-Protocol], support `ActivateDebtor` and `ActivateCreditor` messages
+Protocol], support `ActivateDebtor` and `ActivateCreditor` message
 types respectively. The user registration logic should be re-written
 to send these messages to activate users, instead of making HTTP POST
 requests.
