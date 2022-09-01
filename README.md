@@ -6,10 +6,10 @@ provisional. Organizations running Swaptacular debtors and creditors
 agents are encouraged to use their own implementations, which take
 into account their concrete security and user management policies.**
 
-This service uses [ORY Hydra](https://www.ory.sh/hydra/docs/) to
-implement the OAuth2 login and consent for
-[Swaptacular](https://swaptacular.github.io/overview). The ultimate
-deliverable is a docker image, which is generated from the project's
+This service provides user registration, login, and authorization
+consent for [Swaptacular]. Internally, it uses the [ORY Hydra] OAuth
+2.0 authorization server. The ultimate deliverable is a docker image,
+which is generated from the project's
 [Dockerfile](../master/Dockerfile). To find out what processes can be
 spawned from the generated image, see the
 [entrypoint](../master/docker/entrypoint.sh). This
@@ -121,3 +121,8 @@ API_TIMEOUT_SECONDS=5
 APP_LOG_LEVEL=warning
 APP_LOG_FORMAT=text
 ```
+
+
+
+[Swaptacular]: https://swaptacular.github.io/overview
+[ORY Hydra]: https://www.ory.sh/hydra/docs/
