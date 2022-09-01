@@ -23,6 +23,7 @@ def _reserve_user_id():
     response = requests_session.post(
         url=urljoin(api_resource_server_base_url, f'.{api_reserve_user_id_path}'),
         json={},
+        verify=False,
     )
     response.raise_for_status()
     response_json = response.json()

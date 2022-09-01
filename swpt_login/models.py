@@ -35,6 +35,7 @@ class RegisteredUserSignal(db.Model):
         response = requests_session.post(
             url=urljoin(api_resource_server_base_url, f'.{api_base_path}{self.user_id}/activate'),
             json={'reservationId': self.reservation_id},
+            verify=False,
         )
         status_code = response.status_code
         if status_code not in [200, 409, 422]:
