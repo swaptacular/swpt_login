@@ -16,12 +16,12 @@ def _get_user_verification_code_failures_redis_key(user_id):
 
 
 def _reserve_user_id():
-    api_resource_server_base_url = current_app.config['API_RESOURCE_SERVER_BASE_URL']
+    api_resource_server_base_url = current_app.config['API_RESOURCE_SERVER']
     api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
     api_user_id_field_name = current_app.config['API_USER_ID_FIELD_NAME']
 
     response = requests_session.post(
-        url=urljoin(api_resource_server_base_url, f'.{api_reserve_user_id_path}'),
+        url=urljoin(api_resource_server_base_url, f'{api_reserve_user_id_path}'),
         json={},
         verify=False,
     )

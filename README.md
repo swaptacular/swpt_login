@@ -109,11 +109,11 @@ RECAPTCHA_PIVATE_KEY=6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q
 # server. The client ID, and the client secret are used to perform the
 # "Client Credentials" OAuth2 flow against the OAuth2 token endpoint,
 # so as to get the permissions to create new users. New users will be
-# created by sending requests relative to `API_RESOURCE_SERVER_BASE_URL`.
+# created by sending requests to `API_RESOURCE_SERVER`.
 SUPERVISOR_CLIENT_ID=users-supervisor
 SUPERVISOR_CLIENT_SECRET=users-supervisor
 API_AUTH2_TOKEN_URL=https://nginx-proxy/debtors-hydra/oauth2/token
-API_RESOURCE_SERVER_BASE_URL=https://nginx-proxy/
+API_RESOURCE_SERVER=https://nginx-proxy
 API_TIMEOUT_SECONDS=5
 
 # Parameters that determine the logging configuration for the login and

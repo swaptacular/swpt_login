@@ -78,7 +78,7 @@ class HydraAdminAdapter(HTTPAdapter):
 
 
 def create_requests_session():
-    api_base_url = urlparse(current_app.config['API_RESOURCE_SERVER_BASE_URL'])
+    api_base_url = urlparse(current_app.config['API_RESOURCE_SERVER'])
     api_resource_server = f'{api_base_url.scheme}://{api_base_url.netloc}'
     hydra_admin_url = current_app.config['HYDRA_ADMIN_URL']
 
