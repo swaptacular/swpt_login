@@ -44,6 +44,14 @@ URLS_ERROR=https://example.com/auth-error
 HYDRA_LOG_LEVEL=warning
 HYDRA_LOG_FORMAT=json
 
+# Set this to the URL for ORY Hydra's admin API.
+HYDRA_ADMIN_URL=http://hydra:4445
+
+# The prefix added the user ID to form the Oauth2 subject field. Should be
+# either "creditors:" or "debtors:". For example, if SUBJECT_PREFIX=creditors:,
+# the OAuth2 subject for the user with ID=1234 would be "creditors:1234".
+SUBJECT_PREFIX=debtors:
+
 # The port on which the login and consent web-apps will run, also the
 # number of worker processes, and running threads in each process.
 WEBSERVER_PORT=8000
@@ -66,14 +74,6 @@ SQLALCHEMY_DATABASE_URI=postgresql://user:pass@servername/login
 # is backed by disk storage. If not so, your users might be inconvenienced
 # when your Redis instace is restarted.
 REDIS_URL=redis://redis:6379/0
-
-# Set this to the URL for ORY Hydra's admin API.
-HYDRA_ADMIN_URL=http://hydra:4445
-
-# The prefix added the user ID to form the Oauth2 subject field. Should be
-# either "creditors:" or "debtors:". For example, if SUBJECT_PREFIX=creditors:,
-# the OAuth2 subject for the user with ID=1234 would be "creditors:1234".
-SUBJECT_PREFIX=debtors:
 
 # Set this to the name of your site, as it is known to your users.
 SITE_TITLE=Demo Debtors Agent
