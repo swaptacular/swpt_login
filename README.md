@@ -122,7 +122,11 @@ APP_LOG_LEVEL=warning
 APP_LOG_FORMAT=text
 ```
 
-**TODO:** Currently, the activation of each user is done by making an
+
+TODO:
+-----
+
+Currently, the activation of each user is done by making an
 HTTP POST request to the "activate" endpoint. When the users are
 stored on several database servers (sharding), this method of
 activation can be fragile, because it assumes that the reverse-proxy
