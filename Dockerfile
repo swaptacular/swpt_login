@@ -3,8 +3,7 @@ FROM oryd/hydra:v1.9.2-alpine as hydra-image
 FROM python:3.7.9-alpine3.13 AS venv-image
 WORKDIR /usr/src/app
 
-ENV PIP_VERSION="21.0.1"
-ENV POETRY_VERSION="1.1.4"
+ENV POETRY_VERSION="1.1.15"
 RUN apk add --no-cache \
     file \
     make \
@@ -15,14 +14,13 @@ RUN apk add --no-cache \
     libffi-dev \
     postgresql-dev \
     supervisor \
-  && pip install --upgrade pip==$PIP_VERSION \
-  && curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python \
-  && ln -s "$HOME/.poetry/bin/poetry" "/usr/local/bin" \
-  && python -m venv /opt/venv
+  && curl -sSL https://install.python-poetry.org | python - \
+  && ln -s "$HOME/.local/bin/poetry" "/usr/local/bin"
 
-ENV PATH="/opt/venv/bin:$PATH"
 COPY pyproject.toml poetry.lock ./
-RUN poetry config virtualenvs.create false \
+RUN poetry config virtualenvs.create false --local \
+  && python -m venv /opt/venv \
+  && source /opt/venv/bin/activate \
   && poetry install --no-dev --no-interaction
 
 
