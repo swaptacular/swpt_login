@@ -1,6 +1,6 @@
-FROM oryd/hydra:v1.9.2-alpine as hydra-image
+FROM oryd/hydra:v1.11.10 as hydra-image
 
-FROM python:3.7.9-alpine3.13 AS venv-image
+FROM python:3.10.6-alpine3.16 AS venv-image
 WORKDIR /usr/src/app
 
 ENV POETRY_VERSION="1.1.15"
@@ -26,7 +26,7 @@ RUN poetry config virtualenvs.create false --local \
 
 # This is the final app image. Starting from a clean alpine image, it
 # copies over the previously created virtual environment.
-FROM python:3.7.9-alpine3.13 AS app-image
+FROM python:3.10.6-alpine3.16 AS app-image
 ARG FLASK_APP=swpt_login
 
 ENV FLASK_APP=$FLASK_APP
