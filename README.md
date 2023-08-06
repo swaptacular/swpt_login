@@ -123,27 +123,6 @@ APP_LOG_FORMAT=text
 ```
 
 
-TODO:
------
-
-Currently, the activation of each user is done by making an
-HTTP POST request to the "activate" endpoint. When the users are
-stored on several database servers (sharding), this method of
-activation can be fragile, because it assumes that the reverse-proxy
-server will always forward the request to the correct Web server among
-many. A more reliable method of activation would be to send the
-activation command via a RabbitMQ message. In this case, even if the
-reverse-proxy and the RabbitMQ broker temporarily route the same
-creditor ID to different database servers, this would not result in a
-disaster. Both [Debtors Agent] and [Creditors Agent] reference
-implementations, as an extension to the [Swaptacular Messaging
-Protocol], support `ActivateDebtor` and `ActivateCreditor` message
-types respectively. The user registration logic should be re-written
-to send these messages to activate users, instead of making HTTP POST
-requests.
-
-
-
 [Swaptacular]: https://swaptacular.github.io/overview
 [ORY Hydra]: https://www.ory.sh/hydra/docs/
 [Debtors Agent]: https://github.com/swaptacular/swpt_debtors
