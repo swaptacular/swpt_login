@@ -3,7 +3,7 @@ FROM oryd/hydra:v1.11.10 as hydra-image
 FROM python:3.10.6-alpine3.16 AS venv-image
 WORKDIR /usr/src/app
 
-ENV POETRY_VERSION="1.3.2"
+ENV POETRY_VERSION="1.5.1"
 RUN apk add --no-cache \
     file \
     make \
