@@ -6,15 +6,26 @@ provisional. Organizations running Swaptacular debtors and creditors
 agents are encouraged to use their own implementations, which take
 into account their concrete security and user management policies.**
 
-This service provides user registration, login, and authorization
-consent for [Swaptacular]. Internally, it uses the [ORY Hydra] OAuth
-2.0 authorization server. The ultimate deliverable is a docker image,
+This project implements user registration, login, and authorization
+consent for [Swaptacular]. The ultimate deliverable is a docker image,
 which is generated from the project's
-[Dockerfile](../master/Dockerfile). To find out what processes can be
-spawned from the generated image, see the
-[entrypoint](../master/docker/entrypoint.sh). This
-[example](https://github.com/swaptacular/swpt_debtors/blob/master/docker-compose-all.yml)
-shows how to use the generated image.
+[Dockerfile](../master/Dockerfile).
+
+
+Dependencies
+------------
+
+Containers started from the generated docker image must have access to
+the following servers:
+
+1. [PostgreSQL] server instance, which stores creditors' data.
+
+2. [Ory Hydra] [OAuth 2.0] authorization server, which generates and
+   verifies access tokens.
+
+To increase security and performance, it is highly recommended that
+you configure HTTP reverse-proxy server(s) (like [nginx]) between your
+clients and your login and Ory Hydra servers.
 
 
 Configuration
@@ -25,27 +36,11 @@ variables. Here are the most important settings with some random
 example values:
 
 ```shell
-# The URL for the PostgreSQL database that ORY Hydra should use.
-HYDRA_DSN=postgres://hydra_debtors:hydra_debtors@pg/hydra
-
-# Hydra configuration settings. See ORY Hydra's configuration docs.
-SERVE_PUBLIC_PORT=4444
-SERVE_ADMIN_PORT=4445
-SERVE_TLS_ALLOW_TERMINATION_FROM=0.0.0.0/0
-TTL_ACCESS_TOKEN=24h
-TTL_REFRESH_TOKEN=720h
-SECRETS_SYSTEM=keep-this-secret
-URLS_SELF_ISSUER=https://example.com/debtors-hydra/
-URLS_LOGIN=https://example.com/debtors-login/
-URLS_CONSENT=https://example.com/debtors-consent/
-URLS_ERROR=https://example.com/auth-error
-
-# Parameters that determine the logging configuration for ORY Hydra.
-HYDRA_LOG_LEVEL=warning
-HYDRA_LOG_FORMAT=json
-
-# Set this to the URL for ORY Hydra's admin API.
-HYDRA_ADMIN_URL=http://hydra:4445
+# Set this to the base URL of ORY Hydra's admin API. Note that Ory
+# Hydra 2.0 adds an "/admin/" prefix to all endpoints in the admin
+# API. Therefore, for Ory Hydra >= 2.0, the value of HYDRA_ADMIN_URL
+# would be something like this: "http://hydra:4445/admin/".
+HYDRA_ADMIN_URL=http://hydra:4445/
 
 # The prefix added the user ID to form the Oauth2 subject field. Should be
 # either "creditors:" or "debtors:". For example, if SUBJECT_PREFIX=creditors:,
@@ -58,12 +53,14 @@ WEBSERVER_PORT=8000
 WEBSERVER_PROCESSES=1
 WEBSERVER_THREADS=3
 
-# Optional path (only the path) to the login page. If not set, the value of
-# the URLS_LOGIN variable will be used to guess the login path.
+# Optional path (only the path) to the login page. If not set,
+# depending on the value of the SUBJECT_PREFIX variable, the default
+# will be either "/creditors-login" or "/debtors-login".
 LOGIN_PATH=
 
-# Optional path (only the path) to the consetn page. If not set, the value of
-# the URLS_CONSENT variable will be used to guess the consent path.
+# Optional path (only the path) to the consent page. If not set,
+# depending on the value of the SUBJECT_PREFIX variable, the default
+# will be either "/creditors-consent" or "/debtors-consent".
 CONSENT_PATH=
 
 # The URL for the PostgreSQL database that the login and consent apps should use.
@@ -122,9 +119,36 @@ APP_LOG_LEVEL=warning
 APP_LOG_FORMAT=text
 ```
 
+Available commands
+------------------
+
+The [entrypoint](../master/docker/entrypoint.sh) of the docker
+container allows you to execute the following *documented commands*:
+
+* `configure`
+
+  Initializes a new empty PostgreSQL database for the login Web
+  server.
+
+  **IMPORTANT NOTE: This command has to be run only once (at the
+  beginning), but running it multiple times should not do any harm.**
+
+* `webserver`
+
+  Starts a login Web server. This command allows you to start as many
+  web servers as necessary, to handle the incoming load.
+
+This [docker-compose
+example](https://github.com/swaptacular/swpt_debtors/blob/master/docker-compose-all.yml)
+shows how you can use the generated docker image.
+
 
 [Swaptacular]: https://swaptacular.github.io/overview
 [ORY Hydra]: https://www.ory.sh/hydra/docs/
 [Debtors Agent]: https://github.com/swaptacular/swpt_debtors
 [Creditors Agent]: https://github.com/swaptacular/swpt_creditors
 [Swaptacular Messaging Protocol]: https://github.com/swaptacular/swpt_accounts/blob/master/protocol.rst
+[PostgreSQL]: https://www.postgresql.org/
+[nginx]: https://en.wikipedia.org/wiki/Nginx
+[OAuth 2.0]: https://oauth.net/2/
+[Ory Hydra]: https://www.ory.sh/hydra/

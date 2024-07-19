@@ -57,8 +57,6 @@ WORKDIR /usr/src/app
 COPY docker/hydra.yaml .hydra.yaml
 COPY docker/entrypoint.sh \
      docker/gunicorn.conf.py \
-     docker/supervisord.conf \
-     docker/trigger_supervisor_process.py \
      wsgi.py \
      ./
 COPY migrations/ migrations/
@@ -70,4 +68,4 @@ RUN python -m compileall -x '^\./(migrations|tests)/' . \
 
 USER $FLASK_APP
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
-CMD ["all"]
+CMD ["webserver"]
