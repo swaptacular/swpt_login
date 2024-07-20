@@ -18,7 +18,7 @@ Dependencies
 Containers started from the generated docker image must have access to
 the following servers:
 
-1. [PostgreSQL] server instance, which stores creditors' data.
+1. [PostgreSQL] server instance, which stores users' data.
 
 2. [Ory Hydra] [OAuth 2.0] authorization server, which generates and
    verifies access tokens.
@@ -47,7 +47,7 @@ example values:
 # would be something like this: "http://hydra:4445/admin/".
 HYDRA_ADMIN_URL=http://hydra:4445/
 
-# The prefix added the user ID to form the Oauth2 subject field. Should be
+# The prefix added the user ID to form the Oauth2 subject field. Must be
 # either "creditors:" or "debtors:". For example, if SUBJECT_PREFIX=creditors:,
 # the OAuth2 subject for the user with ID=1234 would be "creditors:1234".
 SUBJECT_PREFIX=debtors:
@@ -55,8 +55,7 @@ SUBJECT_PREFIX=debtors:
 # The specified number of processes ("$WEBSERVER_PROCESSES") will be
 # spawned to handle HTTP requests (default 1), each process will run
 # "$WEBSERVER_THREADS" threads in parallel (default 3). The container
-# will listen for "fetch API" requests on port "$WEBSERVER_PORT"
-# (default 8080).
+# will listen for HTTP requests on port "$WEBSERVER_PORT" (default 8080).
 WEBSERVER_PORT=8000
 WEBSERVER_PROCESSES=1
 WEBSERVER_THREADS=3
@@ -93,9 +92,9 @@ STYLE_URL=
 # name of your mail server, and MAIL_PORT to the SMTP port on that
 # server. MAIL_DEFAULT_SENDER should be set to the email address from
 # which outgoing emails will be sent to users. Do not set
-# `MAIL_USERNAME` and `MAIL_PASSWORD` if the SMPT server does not
-# require username and password. "$MAIL_USE_SSL" detemines whether SSL
-# is required from the beginning, and "$MAIL_USE_TLS" determines
+# MAIL_USERNAME and MAIL_PASSWORD if the SMPT server does not
+# require username and password. MAIL_USE_SSL detemines whether SSL
+# is required from the beginning, and MAIL_USE_TLS determines
 # whether the STARTTLS extension should be used after the connection
 # to the mail server has bee established.
 MAIL_SERVER=my-mail-server
