@@ -24,6 +24,9 @@ case "$SUBJECT_PREFIX" in
         export LOGIN_PATH=${LOGIN_PATH:-/creditors-login}
         export CONSENT_PATH=${CONSENT_PATH:-/creditors-consent}
         ;;
+    *)
+        export SUBJECT_PREFIX=
+        ;;
 esac
 
 # This function tries to upgrade the login database schema with
@@ -64,6 +67,10 @@ case $1 in
         perform_db_upgrade
         ;;
     webserver)
+        if [[ -z "$SUBJECT_PREFIX" ]]; then
+            echo "Invalid SUBJECT_PREFIX."
+            exit 1
+        fi
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
         ;;
     *)
