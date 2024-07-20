@@ -156,9 +156,9 @@ container allows you to execute the following *documented commands*:
 
 * `flask signalbus flushmany`
 
-  Remove stale rows from the *registered_user_signal* table. Normally,
-  this should not be needed. But if for some reason, lots of stale
-  rows have accumulated there, this command will flush them out.
+  Removes stale rows from the *registered_user_signal* table.
+  Normally, this should not be needed. But if for some reason, lots of
+  stale rows have accumulated there, this command will flush them out.
 
 
 How to run all services together (production-like)
