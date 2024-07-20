@@ -50,7 +50,7 @@ RUN apk add --no-cache \
     gettext \
     && addgroup -S "$FLASK_APP" \
     && adduser -S -D -h "$APP_ROOT_DIR" "$FLASK_APP" "$FLASK_APP"
-RUN [ -e /etc/nsswitch.conf ] || 'hosts: files dns' > /etc/nsswitch.conf
+RUN [ -e /etc/nsswitch.conf ] || echo 'hosts: files dns' > /etc/nsswitch.conf
 
 COPY --from=hydra-image /usr/bin/hydra /usr/bin/hydra
 COPY --from=venv-image /opt/venv /opt/venv
