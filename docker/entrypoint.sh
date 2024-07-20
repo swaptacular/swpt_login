@@ -7,51 +7,27 @@ set -e
 export GUNICORN_WORKERS=${WEBSERVER_PROCESSES:-1}
 export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
 
-# HYDRA_LOG_LEVEL, HYDRA_LOG_FORMAT, HYDRA_DSN variables should be
-# used instead of LOG_LEVEL, LOG_FORMAT, and DSN variables, because
-# those names are less ambiguous. Also, for consistency we want to
-# allow the "warning" and "critical" log level names.
-case "$HYDRA_LOG_LEVEL" in
-    warning)
-        export LOG_LEVEL=warn
-        ;;
-    critical)
-        export LOG_LEVEL=fatal
-        ;;
-    ?*)
-        export LOG_LEVEL="$HYDRA_LOG_LEVEL"
-        ;;
-esac
-if [[ -n "$HYDRA_LOG_FORMAT" ]]; then
-    export LOG_FORMAT="$HYDRA_LOG_FORMAT"
-fi
-if [[ -n "$HYDRA_DSN" ]]; then
-    export DSN="$HYDRA_DSN"
-fi
-
 # When SUBJECT_PREFIX is set to one of the two standard values (which
-# almost certainly will be case), even if API_RESERVE_USER_ID_PATH
-# and/or API_USER_ID_FIELD_NAME variables are not set, we can guess
-# their values with certainty.
+# must always be case), even if API_RESERVE_USER_ID_PATH,
+# API_USER_ID_FIELD_NAME, LOGIN_PATH, CONSENT_PATH variables are not
+# set, we can guess their values with confidence.
 case "$SUBJECT_PREFIX" in
     debtors:)
         export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/debtors/.debtor-reserve}
         export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-debtorId}
+        export LOGIN_PATH=${LOGIN_PATH:-/debtors-login}
+        export CONSENT_PATH=${CONSENT_PATH:-/debtors-consent}
         ;;
     creditors:)
         export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/creditors/.creditor-reserve}
         export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-creditorId}
+        export LOGIN_PATH=${LOGIN_PATH:-/creditors-login}
+        export CONSENT_PATH=${CONSENT_PATH:-/creditors-consent}
+        ;;
+    *)
+        export SUBJECT_PREFIX=
         ;;
 esac
-
-# If not set, the values of LOGIN_PATH and CONSENT_PATH variables can
-# be guessed from the values of URLS_LOGIN and URLS_CONSENT.
-if [[ -z "$LOGIN_PATH" ]]; then
-    export LOGIN_PATH=$(echo "$URLS_LOGIN" | sed -E "s/^.*(\/[^\/]+)\/?$/\1/")
-fi
-if [[ -z "$CONSENT_PATH" ]]; then
-    export CONSENT_PATH=$(echo "$URLS_CONSENT" | sed -E "s/^.*(\/[^\/]+)\/?$/\1/")
-fi
 
 # This function tries to upgrade the login database schema with
 # exponential backoff. This is necessary during development, because
@@ -82,27 +58,6 @@ perform_db_initialization() {
     return 0
 }
 
-# This function tries to preform hydra's database migrations with
-# exponential backoff. This is necessary during development, because
-# the database might not be running yet when this script executes.
-perform_hydra_migrations() {
-    local retry_after=1
-    local time_limit=$(($retry_after << 5))
-    local error_file="$APP_ROOT_DIR/hydra-db-migration.error"
-    echo -n 'Running hydra schema migrations ...'
-    while [[ $retry_after -lt $time_limit ]]; do
-        if hydra migrate sql "$DSN" --yes &>$error_file; then
-            echo ' done.'
-            return 0
-        fi
-        sleep $retry_after
-        retry_after=$((2 * retry_after))
-    done
-    echo
-    cat "$error_file"
-    return 1
-}
-
 case $1 in
     develop-run-flask)
         shift;
@@ -110,17 +65,13 @@ case $1 in
         ;;
     configure)
         perform_db_upgrade
-        perform_hydra_migrations
         ;;
     webserver)
+        if [[ -z "$SUBJECT_PREFIX" ]]; then
+            echo "Invalid SUBJECT_PREFIX."
+            exit 1
+        fi
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
-        ;;
-    hydraserver)
-        exec hydra serve all --config "${APP_ROOT_DIR}/.hydra.yaml"
-        ;;
-    all)
-        # Spawns all the necessary processes in one container.
-        exec supervisord -c "$APP_ROOT_DIR/supervisord.conf"
         ;;
     *)
         exec "$@"

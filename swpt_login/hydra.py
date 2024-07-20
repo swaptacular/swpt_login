@@ -18,14 +18,13 @@ def invalidate_credentials(user_id):
 
 def revoke_consent_sessions(subject):
     timeout = float(current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS'])
-    hydra_consents_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/consent')
+    hydra_consents_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], 'oauth2/auth/sessions/consent')
     requests_session.delete(f'{hydra_consents_base_url}?subject={subject}&all=true', timeout=timeout)
-    pass
 
 
 def invalidate_login_sessions(subject):
     timeout = float(current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS'])
-    hydra_logins_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/login')
+    hydra_logins_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], 'oauth2/auth/sessions/login')
     requests_session.delete(f'{hydra_logins_base_url}?subject={subject}', timeout=timeout)
 
 
@@ -38,7 +37,7 @@ class LoginRequest:
     def __init__(self, challenge_id):
         self.challenge_id = quote_plus(challenge_id)
         self.timeout = float(current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS'])
-        base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/')
+        base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], 'oauth2/auth/requests/')
         self.fetch_url = urljoin(base_url, 'login')
         self.accept_url = urljoin(base_url, 'login/accept')
         self.reject_url = urljoin(base_url, 'login/reject')
@@ -92,7 +91,6 @@ class LoginRequest:
             json={
                 'error': 'too_many_logins',
                 'error_description': 'Too many login attempts have been made in a given period of time.',
-                'error_hint': 'Try again later.',
             },
         )
         r.raise_for_status()
@@ -103,7 +101,7 @@ class ConsentRequest:
     def __init__(self, challenge_id):
         self.challenge_id = quote_plus(challenge_id)
         self.timeout = float(current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS'])
-        base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/')
+        base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], 'oauth2/auth/requests/')
         self.fetch_url = urljoin(base_url, 'consent')
         self.accept_url = urljoin(base_url, 'consent/accept')
 
