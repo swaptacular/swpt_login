@@ -20,7 +20,6 @@ def revoke_consent_sessions(subject):
     timeout = float(current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS'])
     hydra_consents_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], 'oauth2/auth/sessions/consent')
     requests_session.delete(f'{hydra_consents_base_url}?subject={subject}&all=true', timeout=timeout)
-    pass
 
 
 def invalidate_login_sessions(subject):
