@@ -52,6 +52,9 @@ RUN apk add --no-cache \
     && adduser -S -D -h "$APP_ROOT_DIR" "$FLASK_APP" "$FLASK_APP"
 RUN [ -e /etc/nsswitch.conf ] || echo 'hosts: files dns' > /etc/nsswitch.conf
 
+# NOTE: We use the `hydra` client (version 1.11.10) to create OAuth2
+#       clients in the docker-compose examples. Thankfully, the hydra
+#       executable is small enough to not bother us.
 COPY --from=hydra-image /usr/bin/hydra /usr/bin/hydra
 COPY --from=venv-image /opt/venv /opt/venv
 
