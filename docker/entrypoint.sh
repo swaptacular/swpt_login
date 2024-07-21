@@ -73,6 +73,9 @@ case $1 in
         fi
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
         ;;
+    flush)
+        exec flask swpt_login "$@"
+        ;;
     *)
         exec "$@"
         ;;
