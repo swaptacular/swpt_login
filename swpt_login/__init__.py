@@ -79,6 +79,7 @@ def create_app(config_object=None):
     from . import extensions
     from .config import Configuration
     from .routes import login, consent
+    from .cli import swpt_login
 
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_port=1)
@@ -88,6 +89,7 @@ def create_app(config_object=None):
     app.register_blueprint(consent, url_prefix=app.config['CONSENT_PATH'])
     app.register_error_handler(500, _server_error)
     app.register_error_handler(403, _server_error)
+    app.cli.add_command(swpt_login)
     return app
 
 

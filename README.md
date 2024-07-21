@@ -71,7 +71,7 @@ LOGIN_PATH=
 CONSENT_PATH=
 
 # The URL for the PostgreSQL database that the login and consent apps should use.
-SQLALCHEMY_DATABASE_URI=postgresql://user:pass@db-server/login
+SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://swpt_login:swpt_login@localhost:5435/test
 
 # Set this to the URL for the Redis server instance that the login and
 # consent apps should use. It is highly recommended that your Redis instance
@@ -154,11 +154,15 @@ container allows you to execute the following *documented commands*:
   Starts a login Web server. This command allows you to start as many
   web servers as necessary, to handle the incoming load.
 
-* `flask signalbus flushmany`
+* `flush`
 
-  Removes stale rows from the *registered_user_signal* table.
-  Normally, this should not be needed. But if for some reason, lots of
-  stale rows have accumulated there, this command will flush them out.
+  Starts a process that periodically processes unprocessed rows from
+  the *registered_user_signal* table. When some Web server process is
+  unexpectedly terminated, some rows in that table may remain
+  unprocessed. This command will take care of them.
+
+  **IMPORTANT NOTE: You must start exactly one container with this
+  command.**
 
 
 How to run all services together (production-like)
