@@ -36,7 +36,7 @@ def flush(wait: float) -> None:
     while True:
         started_at = time.time()
         try:
-            count = signalbus.flushmany([RegisteredUserSignal])
+            count = signalbus.flush([RegisteredUserSignal])
         except Exception:
             logger.exception("Caught error while processing unprocessed rows.")
             sys.exit(1)
