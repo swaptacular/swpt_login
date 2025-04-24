@@ -28,9 +28,9 @@ class UserUpdateSignal(db.Model):
     user_update_signal_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), nullable=True)
 
-    def send_signalbus_message(self):
-        """Inform the other services that user's email has changed."""
-
+    def send_signalbus_message(self):  # pragma: nocover
+        """Inform the other services that user's email has changed.
+        """
         pass
 
 

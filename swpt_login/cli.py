@@ -23,7 +23,13 @@ def swpt_login():
         " If not specified, it defaults to 10 seconds."
     ),
 )
-def flush(wait: float) -> None:
+@click.option(
+    "--quit-early",
+    is_flag=True,
+    default=False,
+    help="Exit after some time (mainly useful during testing).",
+)
+def flush(wait: float, quit_early: bool) -> None:
     """Periodically process unprocessed `registered_user_signal` rows.
     """
     from swpt_pythonlib.flask_signalbus import SignalBus
@@ -37,7 +43,7 @@ def flush(wait: float) -> None:
         started_at = time.time()
         try:
             count = signalbus.flush([RegisteredUserSignal])
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.exception("Caught error while processing unprocessed rows.")
             sys.exit(1)
 
@@ -48,6 +54,9 @@ def flush(wait: float) -> None:
         else:
             logger.debug("0 unprocessed rows have been processed.")
 
-        time.sleep(max(0.0, wait + started_at - time.time()))
+        seconds_to_sleep = max(0.0, wait + started_at - time.time())
+        if quit_early:
+            break
+        time.sleep(seconds_to_sleep)  # pragma: no cover
 
     sys.exit(1)

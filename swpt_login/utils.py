@@ -9,31 +9,31 @@ import hashlib
 EMAIL_REGEX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 
 
-def is_invalid_email(email):
+def is_invalid_email(email) -> bool:
     if len(email) >= 255:
         return True
     return not EMAIL_REGEX.match(email)
 
 
-def generate_password_salt(num_bytes=16) -> str:
+def generate_password_salt(num_bytes: int = 16) -> str:
     """Generate a random Base64 encoded password salt.
     """
     return base64.b64encode(os.urandom(num_bytes)).decode('ascii')
 
 
-def generate_random_secret(num_bytes=15):
+def generate_random_secret(num_bytes: int = 15) -> str:
     return base64.urlsafe_b64encode(os.urandom(num_bytes)).decode('ascii')
 
 
-def generate_recovery_code(num_bytes=10):
+def generate_recovery_code(num_bytes: int = 10) -> str:
     return base64.b32encode(os.urandom(num_bytes)).decode('ascii')
 
 
-def normalize_recovery_code(recovery_code):
+def normalize_recovery_code(recovery_code: str) -> str:
     return recovery_code.strip().replace(' ', '').replace('0', 'O').replace('1', 'I').upper()
 
 
-def split_recovery_code_in_blocks(recovery_code, block_size=4):
+def split_recovery_code_in_blocks(recovery_code: str, block_size: int = 4) -> str:
     if recovery_code is None:
         return ''
     N = block_size
@@ -42,7 +42,7 @@ def split_recovery_code_in_blocks(recovery_code, block_size=4):
     return ' '.join(blocks)
 
 
-def generate_verification_code(num_digits=6):
+def generate_verification_code(num_digits: int = 6):
     assert 1 <= num_digits < 10
     random_number = struct.unpack('<L', os.urandom(4))[0] % (10 ** num_digits)
     return str(random_number).zfill(num_digits)
@@ -84,7 +84,7 @@ def calc_crypt_hash(salt: str, password: str) -> str:
     ).decode('ascii')
 
 
-def calc_sha256(computer_code):
+def calc_sha256(computer_code: str) -> str:
     m = hashlib.sha256()
     m.update(computer_code.encode())
     return base64.urlsafe_b64encode(m.digest()).decode('ascii')
