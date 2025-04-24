@@ -18,7 +18,7 @@ class CustomAlchemy(SignalBusMixin, SQLAlchemy):
 db = CustomAlchemy()
 migrate = Migrate()
 mail = Mail()
-redis_store = FlaskRedis(socket_timeout=5, charset="utf-8", decode_responses=True)
+redis_store = FlaskRedis(socket_timeout=5, encoding="utf-8", decode_responses=True)
 babel = Babel()
 requests_session = LocalProxy(get_requests_session)
 
