@@ -5,10 +5,8 @@ import string
 import base64
 import struct
 import hashlib
-from crypt import crypt
 
 EMAIL_REGEX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
-PASSWORD_SALT_CHARS = string.digits + string.ascii_letters + './'
 
 
 def is_invalid_email(email):
@@ -17,10 +15,10 @@ def is_invalid_email(email):
     return not EMAIL_REGEX.match(email)
 
 
-def generate_password_salt(method):
-    salt = '$%s$' % method if method else ''
-    salt += ''.join(random.choice(PASSWORD_SALT_CHARS) for _ in range(16))
-    return salt
+def generate_password_salt(num_bytes=16) -> str:
+    """Generate a random Base64 encoded password salt.
+    """
+    return base64.b64encode(os.urandom(num_bytes)).decode('ascii')
 
 
 def generate_random_secret(num_bytes=15):
@@ -50,8 +48,40 @@ def generate_verification_code(num_digits=6):
     return str(random_number).zfill(num_digits)
 
 
-def calc_crypt_hash(salt, message):
-    return crypt(message, salt)
+def calc_crypt_hash(salt: str, password: str) -> str:
+    """Return a Base64 encoded cryptographic hash.
+    """
+    if salt.startswith('$'):
+        # NOTE: Currently, only the default hashing method is
+        # supported.
+        method = salt[0:salt.rfind('$')]
+        raise ValueError(f'unsupported hashing method "{method}"')
+
+    salt_bytes = base64.b64decode(salt, validate=True)
+    password_bytes = password.encode('utf8')
+    if len(password_bytes) > 1024:
+        raise ValueError("The password is too long.")
+
+    return base64.b64encode(
+        # The generation of the Scrypt hash requires 128*n*r bytes of
+        # memory. In our case, that is 128KiB. This should be enough
+        # to render GPUs ineffective to a large extent. The number of
+        # rounds is given by "n". In our case we should be able to
+        # crunch about 2000-3000 hashes per second per CPU core, which
+        # should be enough to not be a bottleneck in case of a DoS
+        # attack. Given that a single CPU core can make no more than
+        # few hundreds of SSL handshakes per second, this means that
+        # the SSL handshakes will almost certainly be the real CPU
+        # bottleneck in case of a DoS attack.
+        hashlib.scrypt(
+            password=password_bytes,
+            salt=salt_bytes,
+            n=128,
+            r=8,
+            p=1,
+            dklen=32,
+        )
+    ).decode('ascii')
 
 
 def calc_sha256(computer_code):

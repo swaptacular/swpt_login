@@ -92,7 +92,6 @@ class Configuration(metaclass=MetaEnvReader):
     LANGUAGE_COOKE_NAME = 'user_lang'
     COMPUTER_CODE_COOKE_NAME = 'user_cc'
     LOGIN_VERIFICATION_COOKE_NAME = 'user_lv'
-    PASSWORD_HASHING_METHOD = '6'
     PASSWORD_MIN_LENGTH = _get_default_password_min_length(USE_RECOVERY_CODE)
     PASSWORD_MAX_LENGTH = 64
     SEND_FILE_MAX_AGE_DEFAULT = 12096000
