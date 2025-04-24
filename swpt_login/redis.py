@@ -142,7 +142,7 @@ class LoginVerificationRequest(RedisSecretHashRecord):
     def is_correct_recovery_code(self, recovery_code):
         user = UserRegistration.query.filter_by(user_id=self.user_id).one()
         normalized_recovery_code = utils.normalize_recovery_code(recovery_code)
-        return user.recovery_code_hash == utils.calc_crypt_hash(user.salt, normalized_recovery_code)
+        return user.recovery_code_hash == utils.calc_crypt_hash('', normalized_recovery_code)
 
     def register_code_failure(self):
         num_failures = _register_user_verification_code_failure(self.user_id)
@@ -164,7 +164,7 @@ class SignUpRequest(RedisSecretHashRecord):
     def is_correct_recovery_code(self, recovery_code):
         user = UserRegistration.query.filter_by(email=self.email).one()
         normalized_recovery_code = utils.normalize_recovery_code(recovery_code)
-        return user.recovery_code_hash == utils.calc_crypt_hash(user.salt, normalized_recovery_code)
+        return user.recovery_code_hash == utils.calc_crypt_hash('', normalized_recovery_code)
 
     def register_code_failure(self):
         num_failures = int(redis_store.hincrby(self.key, 'fails'))
@@ -188,10 +188,9 @@ class SignUpRequest(RedisSecretHashRecord):
             _clear_user_verification_code_failures(user.user_id)
 
         else:
-            salt = utils.generate_password_salt(current_app.config['PASSWORD_HASHING_METHOD'])
             if current_app.config['USE_RECOVERY_CODE']:
                 recovery_code = utils.generate_recovery_code()
-                recovery_code_hash = utils.calc_crypt_hash(salt, recovery_code)
+                recovery_code_hash = utils.calc_crypt_hash('', recovery_code)
             else:
                 recovery_code = None
                 recovery_code_hash = None
@@ -199,6 +198,7 @@ class SignUpRequest(RedisSecretHashRecord):
             user_id, reservation_id = _reserve_user_id()
             conflicting_user = UserRegistration.query.filter_by(user_id=user_id).one_or_none()
             if conflicting_user is None:
+                salt = utils.generate_password_salt()
                 db.session.add(UserRegistration(
                     user_id=user_id,
                     email=self.email,
@@ -257,6 +257,6 @@ class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
         self.delete()
         recovery_code = utils.generate_recovery_code()
         user = UserRegistration.query.filter_by(email=self.email).one()
-        user.recovery_code_hash = utils.calc_crypt_hash(user.salt, recovery_code)
+        user.recovery_code_hash = utils.calc_crypt_hash('', recovery_code)
         db.session.commit()
         return recovery_code
