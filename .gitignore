@@ -106,10 +106,9 @@ venv.bak/
 # direnv subdir
 .direnv/
 
+# Emacs files
 TAGS
 *~
-.projectile
-.dir-locals.el
 
 # swpt_login specifics
 !example/.env

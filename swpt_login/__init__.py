@@ -73,7 +73,7 @@ def configure_logging(level: str, format: str, associated_loggers: List[str]) ->
         gunicorn_logger.setLevel(app_logger_level)  # pragma: no cover
 
 
-def create_app(config_object=None):
+def create_app(config_dict={}):
     from werkzeug.middleware.proxy_fix import ProxyFix
     from flask import Flask
     from . import extensions
@@ -83,7 +83,8 @@ def create_app(config_object=None):
 
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_port=1)
-    app.config.from_object(config_object or Configuration)
+    app.config.from_object(Configuration)
+    app.config.from_mapping(config_dict)
     extensions.init_app(app)
     app.register_blueprint(login, url_prefix=app.config['LOGIN_PATH'])
     app.register_blueprint(consent, url_prefix=app.config['CONSENT_PATH'])

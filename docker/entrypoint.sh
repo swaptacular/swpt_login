@@ -63,6 +63,11 @@ case $1 in
         shift;
         exec flask run --host=0.0.0.0 --port $WEBSERVER_PORT --without-threads "$@"
         ;;
+    test)
+        # Do not run this in production!
+        perform_db_upgrade
+        exec pytest
+        ;;
     configure)
         perform_db_upgrade
         ;;
@@ -75,6 +80,12 @@ case $1 in
         ;;
     flush)
         exec flask swpt_login "$@"
+        ;;
+    await_migrations)
+        echo Awaiting database migrations to be applied...
+        while ! flask db current 2> /dev/null | grep '(head)'; do
+            sleep 10
+        done
         ;;
     *)
         exec "$@"

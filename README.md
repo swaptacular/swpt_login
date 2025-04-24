@@ -165,6 +165,49 @@ container allows you to execute the following *documented commands*:
   command.**
 
 
+How to run the tests
+--------------------
+
+1.  Install [Docker Engine] and [Docker Compose].
+
+2.  To create an *.env* file with reasonable defalut values, run this
+    command:
+
+        $ cp development.env .env
+
+3.  To run the unit tests, use the following commands:
+
+        $ docker-compose build
+        $ docker-compose run tests-config test
+
+
+How to setup a development environment
+--------------------------------------
+
+1.  Install [Poetry](https://poetry.eustace.io/docs/).
+
+2.  Create a new [Python](https://docs.python.org/) virtual
+    environment and activate it.
+
+3.  To install dependencies, run this command:
+
+        $ poetry install
+
+4.  To run the minimal set of services needed for development, use
+    this command:
+
+        $ docker-compose up --build
+
+    This will start its own PostgreSQL server instance in a docker
+    container, but will rely on being able to connect to a RabbitMQ
+    server instance at "amqp://guest:guest@localhost:5672". The OAuth
+    2.0 authorization will be bypassed.
+
+5.  You can use `flask run -p 5000` to run a local web server, and
+    `pytest --cov=swpt_login --cov-report=html` to run the tests and
+    generate a test coverage report.
+
+
 How to run all services together (production-like)
 --------------------------------------------------
 

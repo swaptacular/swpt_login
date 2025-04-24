@@ -1,4 +1,3 @@
-README.md
 .gitignore
 .dockerignore
 .env
@@ -12,6 +11,13 @@ dist/
 sdist/
 wheels/
 MANIFEST
+
+# Other unneeded directories
+htmlcov/
+submodules/
+hooks/
+.mypy_cache/
+.pytest_cache/
 
 # Byte-compiled files
 **/__pycache__/
