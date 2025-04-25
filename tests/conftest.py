@@ -12,6 +12,8 @@ config_dict = {
     "CONSENT_PATH": "/consent",
     "API_RESOURCE_SERVER": "https://resource-server.example.com",
     "API_RESERVE_USER_ID_PATH": "/debtors/.debtor-reserve",
+    "API_USER_ID_FIELD_NAME": "debtorId",
+    "SECRET_CODE_MAX_ATTEMPTS": 5,
 }
 
 

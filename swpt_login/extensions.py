@@ -1,6 +1,9 @@
 from werkzeug.local import LocalProxy
 from flask_sqlalchemy import SQLAlchemy
-from swpt_pythonlib.flask_signalbus import SignalBusMixin
+from swpt_pythonlib.flask_signalbus import (
+    SignalBusMixin,
+    AtomicProceduresMixin,
+)
 from flask_mail import Mail
 from flask_redis import FlaskRedis
 from flask_babel import Babel
@@ -8,11 +11,22 @@ from flask_migrate import Migrate
 from .api_requests_session import get_requests_session
 
 
-class CustomAlchemy(SignalBusMixin, SQLAlchemy):
-    def apply_driver_hacks(self, app, info, options):
-        if "isolation_level" not in options:
-            options["isolation_level"] = "REPEATABLE_READ"
-        return super().apply_driver_hacks(app, info, options)
+def select_locale():
+    from flask import current_app, request
+
+    language = request.cookies.get(current_app.config['LANGUAGE_COOKE_NAME'])
+    language_choices = [choices[0] for choices in current_app.config['LANGUAGE_CHOICES']]
+    if language in language_choices:
+        return language
+    return request.accept_languages.best_match(language_choices)
+
+
+def select_timezone():
+    return None
+
+
+class CustomAlchemy(AtomicProceduresMixin, SignalBusMixin, SQLAlchemy):
+    pass
 
 
 db = CustomAlchemy()
@@ -28,4 +42,8 @@ def init_app(app):
     migrate.init_app(app, db)
     mail.init_app(app)
     redis_store.init_app(app)
-    babel.init_app(app)
+    babel.init_app(
+        app,
+        locale_selector=select_locale,
+        timezone_selector=select_timezone,
+    )

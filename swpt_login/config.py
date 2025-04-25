@@ -1,3 +1,4 @@
+import json
 from os import environ
 
 SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
@@ -11,6 +12,13 @@ def _get_language_choices(fallback):
 
 def _get_default_password_min_length(fallback):
     return 12 if environ.get('USE_RECOVERY_CODE', str(bool(fallback))).lower() == 'true' else 6
+
+
+def _parse_dict(s: str) -> dict:
+    try:
+        return json.loads(s)
+    except ValueError:  # pragma: no cover
+        raise ValueError(f"Invalid JSON configuration value: {s}")
 
 
 class MetaEnvReader(type):
@@ -45,6 +53,11 @@ class MetaEnvReader(type):
 class Configuration(metaclass=MetaEnvReader):
     VERSION = '0.9.5'
 
+    SQLALCHEMY_DATABASE_URI = ""
+    SQLALCHEMY_ENGINE_OPTIONS: _parse_dict = _parse_dict('{"pool_size": 0}')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = False
+
     SECRET_KEY = 'dummy-secret'
     SITE_TITLE = 'Login Test Site'
     LANGUAGES = 'en'  # separated by a comma, for example 'en,bg'
@@ -56,11 +69,7 @@ class Configuration(metaclass=MetaEnvReader):
     CONSENT_PATH = '/consent'
     HYDRA_ADMIN_URL = 'http://hydra:4445/'
     REDIS_URL = 'redis://localhost:6379/0'
-    SQLALCHEMY_DATABASE_URI = ''
-    SQLALCHEMY_POOL_SIZE: int = None
-    SQLALCHEMY_POOL_TIMEOUT: int = None
-    SQLALCHEMY_POOL_RECYCLE: int = None
-    SQLALCHEMY_MAX_OVERFLOW: int = None
+
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 25
     MAIL_USE_TLS = False
@@ -70,8 +79,8 @@ class Configuration(metaclass=MetaEnvReader):
     MAIL_DEFAULT_SENDER: str = None
     MAIL_MAX_EMAILS: int = None
     MAIL_ASCII_ATTACHMENTS = False
-    RECAPTCHA_PUBLIC_KEY = '6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37'
-    RECAPTCHA_PIVATE_KEY = '6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q'
+    RECAPTCHA_PUBLIC_KEY = '6Ledx7wSAAAAAICFw8vB-2ghpDjzGogPRi6-3FCr'
+    RECAPTCHA_PIVATE_KEY = '6Ledx7wSAAAAAEskQ7Mbi-oqneHDSFVUkxGitn_y'
     RECAPTCHA_REQUEST_TIMEOUT_SECONDS = 5
 
     RECAPTCHA_CHALLENGE_URL = 'https://www.google.com/recaptcha/api.js'

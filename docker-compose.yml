@@ -14,6 +14,12 @@ services:
       - $POSTGRES_LOCAL_PORT:5432
 
 
+  tests-redis:
+    image: redis:$REDIS_VERSON
+    ports:
+      - $REDIS_LOCAL_PORT:6379
+
+
   tests-config:
     build:
       context: .
@@ -26,9 +32,11 @@ services:
     environment:
       - 'PYTHONDONTWRITEBYTECODE=1'
       - 'SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
+      - 'REDIS_URL=redis://tests-redis:6379/0'
     command: configure
     depends_on:
       - tests-pg
+      - tests-redis
 
   tests-flush:
     build:
@@ -41,7 +49,9 @@ services:
     environment:
       - 'PYTHONDONTWRITEBYTECODE=1'
       - 'SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
+      - 'REDIS_URL=redis://tests-redis:6379/0'
     command: flush
     depends_on:
       - tests-pg
+      - tests-redis
 

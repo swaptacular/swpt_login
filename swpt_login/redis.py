@@ -29,7 +29,7 @@ def _reserve_user_id():
     response_json = response.json()
     user_id = str(response_json[api_user_id_field_name])
     if not USER_ID_REGEX_PATTERN.match(user_id):
-        raise RuntimeError('Unvalid user ID.')
+        raise RuntimeError('Unvalid user ID.')  # pragma: no cover
     reservation_id = response_json['reservationId']
 
     return user_id, reservation_id
@@ -207,17 +207,32 @@ class SignUpRequest(RedisSecretHashRecord):
                     recovery_code_hash=recovery_code_hash,
                     two_factor_login=True,
                 ))
-            db.session.add(RegisteredUserSignal(
+
+            registered_user_signal = RegisteredUserSignal(
                 user_id=user_id,
                 reservation_id=reservation_id,
-            ))
+            )
+
+            # Try to immediately activate the user. If that fails, add
+            # a row in the `registered_user_signal` table. This table
+            # will be scanned periodically, and the activation attempt
+            # will be repeated until it has succeeded. The user do not
+            # need to know about this problem, because if the internal
+            # network is out, he will experience other problems down
+            # the road anyway, and if this is a short network glitch,
+            # the user will be activated pretty soon.
+            try:
+                registered_user_signal.send_signalbus_message()
+            except RegisteredUserSignal.SendingError:
+                db.session.add(registered_user_signal)
+
             if current_app.config['SEND_USER_UPDATE_SIGNAL']:
                 email = conflicting_user.email if conflicting_user else self.email
                 db.session.add(UserUpdateSignal(user_id=user_id, email=email))
 
         db.session.commit()
         if conflicting_user:
-            raise RuntimeError(
+            raise RuntimeError(  # pragma: no cover
                 'An attempt has been made to register a new user, '
                 'but another user with the same ID already exists.'
             )
