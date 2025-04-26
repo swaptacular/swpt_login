@@ -8,6 +8,7 @@ from swpt_login import utils
 from swpt_login import models as m
 
 
+USER_ID = '1234'
 USER_EMAIL = "test@example.com"
 USER_SALT = utils.generate_password_salt()
 USER_PASSWORD = "qwerty "
@@ -21,10 +22,11 @@ def acitivation_status_code(request):
 
 @pytest.fixture
 def user(db_session):
+    redis._clear_user_verification_code_failures(USER_ID)
     db_session.add(
         m.UserRegistration(
-            user_id="1234",
-            email="test@example.com",
+            user_id=USER_ID,
+            email=USER_EMAIL,
             salt=USER_SALT,
             password_hash=utils.calc_crypt_hash(USER_SALT, USER_PASSWORD),
             recovery_code_hash=utils.calc_crypt_hash('', USER_RECOVERY_CODE),
@@ -189,3 +191,101 @@ def test_password_recovery_flow_failure(app, db_session, user):
     with pytest.raises(redis.SignUpRequest.ExceededMaxAttempts):
         r2.register_code_failure()
     assert redis.SignUpRequest.from_secret(r1.secret) is None
+
+
+def test_login_flow(app, db_session, user):
+    # Simulate successfully entering user's email and password:
+    #
+    challenge_id = '45678'
+
+    computer_code = utils.generate_random_secret()
+    computer_code_hash = utils.calc_sha256(computer_code)
+    user_logins_history = redis.UserLoginsHistory(USER_ID)
+    assert not user_logins_history.contains(computer_code_hash)
+
+    verification_code = utils.generate_verification_code()
+    verification_cookie = utils.generate_random_secret()
+    verification_cookie_hash = utils.calc_sha256(verification_cookie)
+
+    redis.LoginVerificationRequest.create(
+        _secret=verification_cookie_hash,
+        user_id=USER_ID,
+        email=USER_EMAIL,
+        code=verification_code,
+        remember_me='no',
+        challenge_id=challenge_id,
+    )
+
+    # Simulate entering the verification code:
+    #
+    lvr = redis.LoginVerificationRequest.from_secret(verification_cookie_hash)
+    assert lvr.user_id == USER_ID
+    assert lvr.email == USER_EMAIL
+    assert lvr.code == verification_code
+    assert lvr.remember_me == 'no'
+    assert lvr.challenge_id == challenge_id
+    lvr.register_code_failure()
+
+    lvr.accept(clear_failures=True)
+    redis.UserLoginsHistory(USER_ID).add(computer_code_hash)
+    assert user_logins_history.contains(computer_code_hash)
+
+
+def test_login_flow_failure(app, db_session, user):
+    # Simulate successfully entering user's email and password:
+    #
+    challenge_id = '45678'
+    verification_code = utils.generate_verification_code()
+    verification_cookie = utils.generate_random_secret()
+    verification_cookie_hash = utils.calc_sha256(verification_cookie)
+
+    redis.LoginVerificationRequest.create(
+        _secret=verification_cookie_hash,
+        user_id=USER_ID,
+        email=USER_EMAIL,
+        code=verification_code,
+        remember_me='no',
+        challenge_id=challenge_id,
+    )
+
+    # Simulate entering the verification code:
+    #
+    lvr = redis.LoginVerificationRequest.from_secret(verification_cookie_hash)
+    assert lvr.user_id == USER_ID
+    assert lvr.email == USER_EMAIL
+    assert lvr.code == verification_code
+    assert lvr.remember_me == 'no'
+    assert lvr.challenge_id == challenge_id
+
+    for _ in range(4):
+        lvr.register_code_failure()
+        lvr = redis.LoginVerificationRequest.from_secret(verification_cookie_hash)
+        assert lvr is not None
+
+    with pytest.raises(lvr.ExceededMaxAttempts):
+        lvr.register_code_failure()
+    assert redis.LoginVerificationRequest.from_secret(verification_cookie_hash) is None
+
+
+def test_change_email_flow(app, db_session, user):
+    # Simulate successfully entering user's old email and password:
+    #
+    challenge_id = '45678'
+
+    lvr1 = redis.LoginVerificationRequest.create(
+        user_id=USER_ID,
+        email=USER_EMAIL,
+        challenge_id=challenge_id,
+    )
+
+    # Simulate "choose new email" dialog:
+    #
+    assert redis.LoginVerificationRequest.from_secret('wrong_secret') is None
+
+    lvr2 = redis.LoginVerificationRequest.from_secret(lvr1.secret)
+    assert lvr2 is not None
+
+    assert not lvr2.is_correct_recovery_code(utils.generate_recovery_code())
+    assert lvr2.is_correct_recovery_code(USER_RECOVERY_CODE)
+    lvr2.accept()
+    assert redis.LoginVerificationRequest.from_secret(lvr1.secret) is None
