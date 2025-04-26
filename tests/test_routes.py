@@ -164,3 +164,48 @@ def test_change_password(mocker, client, db_session, user):
     assert m.UserRegistration.query.filter_by(
         password_hash=utils.calc_crypt_hash(USER_SALT, "my shiny new password"),
     ).one_or_none()
+
+
+def test_change_recovery_code(client, db_session, user):
+    r = client.get("/login/change-recovery-code")
+    assert r.status_code == 200
+    assert "Change Recovery Code" in r.get_data(as_text=True)
+    assert "Enter your email" in r.get_data(as_text=True)
+
+    with mail.record_messages() as outbox:
+        r = client.post("/login/change-recovery-code", data={
+            "email": USER_EMAIL,
+        })
+        assert r.status_code == 302
+        r = client.get(r.location)
+        assert "An email has been sent" in r.get_data(as_text=True)
+        assert len(outbox) == 1
+        assert outbox[0].subject == "Change Recovery Code"
+        msg = str(outbox[0])
+
+    match = re.search(r"^http://localhost(/login/recovery-code/[^/\s]+)", msg, flags=re.M)
+    assert match
+    received_link = match[1]
+    r = client.get(received_link)
+    assert r.status_code == 200
+    assert "Change Recovery Code" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+
+    r = client.post(received_link, data={
+        "password": "wrong_password",
+    })
+    assert r.status_code == 200
+    assert "Incorrect password" in r.get_data(as_text=True)
+    assert m.UserRegistration.query.filter_by(
+        recovery_code_hash=utils.calc_crypt_hash('', USER_RECOVERY_CODE),
+    ).one_or_none()
+
+    r = client.post(received_link, data={
+        "password": USER_PASSWORD,
+    })
+    assert r.status_code == 200
+    print(r.get_data(as_text=True))
+    assert "Your account recovery code has been changed" in r.get_data(as_text=True)
+    assert not m.UserRegistration.query.filter_by(
+        recovery_code_hash=utils.calc_crypt_hash('', USER_RECOVERY_CODE),
+    ).one_or_none()
