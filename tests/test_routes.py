@@ -78,7 +78,6 @@ def test_signup(mocker, client):
 
     mocker.patch("swpt_login.redis.requests_session", ReservationMock())
     mocker.patch("swpt_login.models.requests_session", ActivationMock())
-    mocker.patch("swpt_login.routes.hydra", Mock())
 
     r = client.get("/login/signup")
     assert r.status_code == 200
@@ -95,9 +94,9 @@ def test_signup(mocker, client):
         assert outbox[0].subject == "Create a New Account"
         msg = str(outbox[0])
 
-    m = re.search(r"^http://localhost(/login/password/[^/\s]+)", msg, flags=re.M)
-    assert m
-    received_link = m[1]
+    match = re.search(r"^http://localhost(/login/password/[^/\s]+)", msg, flags=re.M)
+    assert match
+    received_link = match[1]
     r = client.get(received_link)
     assert r.status_code == 200
     assert "Choose Password" in r.get_data(as_text=True)
@@ -108,3 +107,9 @@ def test_signup(mocker, client):
     })
     assert r.status_code == 200
     assert "Your account recovery code is" in r.get_data(as_text=True)
+
+    user = m.UserRegistration.query.one_or_none()
+    assert user
+    assert user.user_id == "1234"
+    assert user.email == USER_EMAIL
+    assert user.password_hash == utils.calc_crypt_hash(user.salt, USER_PASSWORD)
