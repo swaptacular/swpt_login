@@ -11,7 +11,7 @@ from swpt_login import models as m
 USER_ID = '1234'
 USER_EMAIL = "test@example.com"
 USER_SALT = utils.generate_password_salt()
-USER_PASSWORD = "qwerty "
+USER_PASSWORD = "qwerty"
 USER_RECOVERY_CODE = utils.generate_recovery_code()
 
 

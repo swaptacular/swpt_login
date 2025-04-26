@@ -7,7 +7,6 @@ from . import utils, captcha, emails, hydra
 from .redis import SignUpRequest, LoginVerificationRequest, ChangeEmailRequest,\
     ChangeRecoveryCodeRequest, UserLoginsHistory
 from .models import UserRegistration
-from .extensions import babel
 
 login = Blueprint('login', __name__, template_folder='templates', static_folder='static')
 consent = Blueprint('consent', __name__, template_folder='templates', static_folder='static')

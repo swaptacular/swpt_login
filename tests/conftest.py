@@ -16,6 +16,7 @@ config_dict = {
     "SECRET_CODE_MAX_ATTEMPTS": 5,
     "MAIL_SUPPRESS_SEND": False,
     "LOGIN_VERIFIED_DEVICES_MAX_COUNT": 3,
+    "SHOW_CAPTCHA_ON_SIGNUP": False,
 }
 
 
