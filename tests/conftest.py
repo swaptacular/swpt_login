@@ -14,6 +14,8 @@ config_dict = {
     "API_RESERVE_USER_ID_PATH": "/debtors/.debtor-reserve",
     "API_USER_ID_FIELD_NAME": "debtorId",
     "SECRET_CODE_MAX_ATTEMPTS": 5,
+    "MAIL_SUPPRESS_SEND": False,
+    "LOGIN_VERIFIED_DEVICES_MAX_COUNT": 3,
 }
 
 

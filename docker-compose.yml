@@ -20,6 +20,13 @@ services:
       - $REDIS_LOCAL_PORT:6379
 
 
+  tests-mail:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - $MAILHOG_LOCAL_PORT:8025
+      - $SMTP_LOCAL_PORT:1025
+
+
   tests-config:
     build:
       context: .
@@ -33,10 +40,14 @@ services:
       - 'PYTHONDONTWRITEBYTECODE=1'
       - 'SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
       - 'REDIS_URL=redis://tests-redis:6379/0'
+      - 'MAIL_SERVER=tests-mail'
+      - 'MAIL_PORT=1025'
+      - 'MAIL_DEFAULT_SENDER=Swaptacular <no-reply@example.com>'
     command: configure
     depends_on:
       - tests-pg
       - tests-redis
+      - tests-mail
 
   tests-flush:
     build:
@@ -54,4 +65,5 @@ services:
     depends_on:
       - tests-pg
       - tests-redis
+      - tests-mail
 
