@@ -52,7 +52,7 @@ def test_404_error(client):
     assert r.status_code == 404
 
 
-def test_signup(mocker, client):
+def test_signup(mocker, client, db_session):
     class ReservationMock:
         post = Mock(return_value=Response(
             200,
@@ -113,3 +113,54 @@ def test_signup(mocker, client):
     assert user.user_id == "1234"
     assert user.email == USER_EMAIL
     assert user.password_hash == utils.calc_crypt_hash(user.salt, USER_PASSWORD)
+
+
+def test_change_password(mocker, client, db_session, user):
+    invalidate_credentials = Mock()
+    mocker.patch("swpt_login.hydra.invalidate_credentials", invalidate_credentials)
+
+    r = client.get("/login/signup?recover=true")
+    assert r.status_code == 200
+    assert "Change Account Password" in r.get_data(as_text=True)
+
+    with mail.record_messages() as outbox:
+        r = client.post("/login/signup?recover=true", data={
+            "email": USER_EMAIL,
+        })
+        assert r.status_code == 302
+        r = client.get(r.location)
+        assert "Please check your inbox" in r.get_data(as_text=True)
+        assert len(outbox) == 1
+        assert outbox[0].subject == "Change Account Password"
+        msg = str(outbox[0])
+
+    match = re.search(r"^http://localhost(/login/password/[^/\s]+)", msg, flags=re.M)
+    assert match
+    received_link = match[1]
+    r = client.get(received_link)
+    assert r.status_code == 200
+    assert "Choose Password" in r.get_data(as_text=True)
+
+    r = client.post(received_link, data={
+        "recovery_code": "wrong_recovery_code",
+        "password": "my shiny new password",
+        "confirm": "my shiny new password",
+    })
+    assert r.status_code == 200
+    assert "Incorrect recovery code" in r.get_data(as_text=True)
+    invalidate_credentials.assert_not_called()
+    assert m.UserRegistration.query.filter_by(
+        password_hash=utils.calc_crypt_hash(USER_SALT, USER_PASSWORD),
+    ).one_or_none()
+
+    r = client.post(received_link, data={
+        "recovery_code": USER_RECOVERY_CODE,
+        "password": "my shiny new password",
+        "confirm": "my shiny new password",
+    })
+    assert r.status_code == 200
+    invalidate_credentials.assert_called_with(USER_ID)
+    assert "Your password has been successfully reset" in r.get_data(as_text=True)
+    assert m.UserRegistration.query.filter_by(
+        password_hash=utils.calc_crypt_hash(USER_SALT, "my shiny new password"),
+    ).one_or_none()
