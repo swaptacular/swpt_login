@@ -9,6 +9,20 @@ from swpt_login import models as m
 from swpt_login.extensions import mail
 
 
+def get_cookie(response, name):
+    """Checks for a cookie and return its value, or None.
+    """
+    from werkzeug.http import parse_cookie
+
+    cookies = response.headers.getlist('Set-Cookie')
+    for cookie in cookies:
+        c_key, c_value = next(parse_cookie(cookie).items())
+        if c_key == name:
+            return c_value
+
+    assert None
+
+
 @dataclass
 class Response:
     status_code: int
@@ -58,7 +72,7 @@ def test_set_language(client):
     r = client.get("/login/language/en?to=http://localhost/login/signup")
     assert r.status_code == 302
     assert r.location == "http://localhost/login/signup"
-    assert r.headers["Set-Cookie"].startswith("user_lang=en;")
+    assert get_cookie(r, "user_lang") == "en"
 
 
 def test_signup(mocker, client, db_session):
@@ -366,3 +380,68 @@ def test_change_email_failure(mocker, client, db_session, user):
         user_id="1",
         email="new-email@example.com",
     ).one_or_none()
+
+
+def test_login_flow(mocker, client, app, db_session, user):
+    @dataclass
+    class LoginRequestMock:
+        fetch = Mock(return_value=None)
+        accept = Mock(return_value="http://example.com/after-login/")
+        challenge_id = '9876'
+
+    mocker.patch(
+        "swpt_login.hydra.LoginRequest",
+        Mock(return_value=LoginRequestMock()),
+    )
+
+    r = client.get("/login/?login_challenge=9876")
+    assert r.status_code == 200
+    assert "Enter your email" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+
+    r = client.post("/login/?login_challenge=9876", data={
+        "email": USER_EMAIL,
+        "password": "wrong_password",
+    })
+    assert r.status_code == 200
+    assert "Enter your email" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+    assert "Incorrect email or password" in r.get_data(as_text=True)
+
+    with mail.record_messages() as outbox:
+        r = client.post("/login/?login_challenge=9876", data={
+            "email": USER_EMAIL,
+            "password": USER_PASSWORD,
+        })
+        assert r.status_code == 302
+        redirect_location = r.location
+        assert get_cookie(r, "user_cc") is not None
+        assert get_cookie(r, "user_lv") is not None
+
+        # TODO: pass the cookie here?
+        r = client.get(redirect_location)
+        assert r.status_code == 200
+        assert "An email has been sent to" in r.get_data(as_text=True)
+        assert "Enter the verification code" in r.get_data(as_text=True)
+
+        assert len(outbox) == 1
+        assert outbox[0].subject.startswith("New login from")
+        assert USER_EMAIL in outbox[0].recipients
+        msg = str(outbox[0])
+
+    match = re.search(r"^The login verification code is: (\d+)", msg, flags=re.M)
+    assert match
+    verivication_code = match[1]
+
+    r = client.post(redirect_location, data={
+        "verification_code": "wrong_verivication_code",
+    })
+    assert r.status_code == 200
+    assert "Enter the verification code" in r.get_data(as_text=True)
+    assert "Invalid verification code" in r.get_data(as_text=True)
+
+    r = client.post(redirect_location, data={
+        "verification_code": verivication_code,
+    })
+    assert r.status_code == 302
+    assert r.location == "http://example.com/after-login/"

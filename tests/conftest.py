@@ -10,6 +10,7 @@ config_dict = {
     "PREFERRED_URL_SCHEME": "http",
     "LOGIN_PATH": "/login",
     "CONSENT_PATH": "/consent",
+    "SUBJECT_PREFIX": "debtors:",
     "API_RESOURCE_SERVER": "https://resource-server.example.com",
     "API_RESERVE_USER_ID_PATH": "/debtors/.debtor-reserve",
     "API_USER_ID_FIELD_NAME": "debtorId",
