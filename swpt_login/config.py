@@ -17,7 +17,7 @@ def _get_default_password_min_length(fallback):
 def _parse_dict(s: str) -> dict:
     try:
         return json.loads(s)
-    except ValueError:  # pragma: no cover
+    except ValueError:
         raise ValueError(f"Invalid JSON configuration value: {s}")
 
 
@@ -39,7 +39,7 @@ class MetaEnvReader(type):
         for key, value in environ.items():
             if hasattr(cls, key):
                 target_type = annotations.get(key) or type(getattr(cls, key))
-                if target_type is NoneType:  # pragma: no cover
+                if target_type is NoneType:
                     target_type = str
 
                 if target_type is bool:

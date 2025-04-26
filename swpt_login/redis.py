@@ -29,7 +29,7 @@ def _reserve_user_id():
     response_json = response.json()
     user_id = str(response_json[api_user_id_field_name])
     if not USER_ID_REGEX_PATTERN.match(user_id):
-        raise RuntimeError('Unvalid user ID.')  # pragma: no cover
+        raise RuntimeError('Unvalid user ID.')
     reservation_id = response_json['reservationId']
 
     return user_id, reservation_id
@@ -232,7 +232,7 @@ class SignUpRequest(RedisSecretHashRecord):
 
         db.session.commit()
         if conflicting_user:
-            raise RuntimeError(  # pragma: no cover
+            raise RuntimeError(
                 'An attempt has been made to register a new user, '
                 'but another user with the same ID already exists.'
             )

@@ -6,13 +6,13 @@ from typing import List
 from flask import render_template
 
 
-def _excepthook(exc_type, exc_value, traceback):  # pragma: nocover
+def _excepthook(exc_type, exc_value, traceback):
     logging.error("Uncaught exception occured", exc_info=(exc_type, exc_value, traceback))
 
 
 def _remove_handlers(logger):
     for h in logger.handlers:
-        logger.removeHandler(h)  # pragma: nocover
+        logger.removeHandler(h)
 
 
 def _add_console_hander(logger, format: str):
@@ -21,10 +21,10 @@ def _add_console_hander(logger, format: str):
 
     if format == 'text':
         handler.setFormatter(logging.Formatter(fmt, datefmt="%Y-%m-%d %H:%M:%S%z"))
-    elif format == 'json':  # pragma: nocover
+    elif format == 'json':
         from pythonjsonlogger import jsonlogger
         handler.setFormatter(jsonlogger.JsonFormatter(fmt, datefmt="%Y-%m-%dT%H:%M:%S%z"))
-    else:  # pragma: nocover
+    else:
         raise RuntimeError(f'invalid log format: {format}')
 
     logger.addHandler(handler)
@@ -60,7 +60,7 @@ def configure_logging(level: str, format: str, associated_loggers: List[str]) ->
     # level for all third party libraires) is not lower than the
     # specified level.
     if app_logger_level > root_logger.getEffectiveLevel():
-        root_logger.setLevel(app_logger_level)  # pragma: no cover
+        root_logger.setLevel(app_logger_level)
 
     # Delete all gunicorn's log handlers (they are not needed in a
     # docker container because everything goes to the stdout anyway),
@@ -70,7 +70,7 @@ def configure_logging(level: str, format: str, associated_loggers: List[str]) ->
     gunicorn_logger.propagate = True
     _remove_handlers(gunicorn_logger)
     if app_logger_level > gunicorn_logger.getEffectiveLevel():
-        gunicorn_logger.setLevel(app_logger_level)  # pragma: no cover
+        gunicorn_logger.setLevel(app_logger_level)
 
 
 def create_app(config_dict={}):

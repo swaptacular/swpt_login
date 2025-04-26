@@ -29,7 +29,7 @@ class UserUpdateSignal(db.Model):
     user_update_signal_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), nullable=True)
 
-    def send_signalbus_message(self):  # pragma: nocover
+    def send_signalbus_message(self):
         """Inform the other services that user's email has changed.
         """
         pass
@@ -59,5 +59,5 @@ class RegisteredUserSignal(db.Model):
                 raise self.SendingError(
                     f'Unexpected status code ({status_code}) while trying to activate an user.'
                 )
-        except (requests.ConnectionError, requests.Timeout):  # pragma: no cover
+        except (requests.ConnectionError, requests.Timeout):
             raise self.SendingError('connection problem')

@@ -3,6 +3,7 @@ import re
 from typing import Callable
 from dataclasses import dataclass
 from unittest.mock import Mock
+from swpt_login import redis
 from swpt_login import utils
 from swpt_login import models as m
 from swpt_login.extensions import mail
@@ -34,6 +35,7 @@ def acitivation_status_code(request):
 
 @pytest.fixture
 def user(db_session):
+    redis._clear_user_verification_code_failures(USER_ID)
     db_session.add(
         m.UserRegistration(
             user_id=USER_ID,
@@ -50,6 +52,13 @@ def user(db_session):
 def test_404_error(client):
     r = client.get("/login/invalid-path")
     assert r.status_code == 404
+
+
+def test_set_language(client):
+    r = client.get("/login/language/en?to=http://localhost/login/signup")
+    assert r.status_code == 302
+    assert r.location == "http://localhost/login/signup"
+    assert r.headers["Set-Cookie"].startswith("user_lang=en;")
 
 
 def test_signup(mocker, client, db_session):
@@ -167,7 +176,7 @@ def test_change_password(mocker, client, db_session, user):
 
 
 def test_change_recovery_code(client, db_session, user):
-    r = client.get("/login/change-recovery-code")
+    r = client.get("/login/change-recovery-code?login_challenge=9876")
     assert r.status_code == 200
     assert "Change Recovery Code" in r.get_data(as_text=True)
     assert "Enter your email" in r.get_data(as_text=True)
@@ -204,8 +213,156 @@ def test_change_recovery_code(client, db_session, user):
         "password": USER_PASSWORD,
     })
     assert r.status_code == 200
-    print(r.get_data(as_text=True))
     assert "Your account recovery code has been changed" in r.get_data(as_text=True)
     assert not m.UserRegistration.query.filter_by(
         recovery_code_hash=utils.calc_crypt_hash('', USER_RECOVERY_CODE),
+    ).one_or_none()
+
+
+def test_change_email(mocker, client, db_session, user):
+    invalidate_credentials = Mock()
+    mocker.patch("swpt_login.hydra.invalidate_credentials", invalidate_credentials)
+
+    r = client.get("/login/change-email?login_challenge=9876")
+    assert r.status_code == 200
+    assert "Change Email Address" in r.get_data(as_text=True)
+    assert "Enter your old email" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+
+    r = client.post("/login/change-email?login_challenge=9876", data={
+        "email": USER_EMAIL,
+        "password": "wrong_password",
+    })
+    assert r.status_code == 200
+    assert "Change Email Address" in r.get_data(as_text=True)
+    assert "Enter your old email" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+    assert "Incorrect email or password" in r.get_data(as_text=True)
+
+    with mail.record_messages() as outbox:
+        r = client.post("/login/change-email?login_challenge=9876", data={
+            "email": USER_EMAIL,
+            "password": USER_PASSWORD,
+        })
+        assert r.status_code == 302
+        assert len(outbox) == 1
+        assert outbox[0].subject == "Change Email Address"
+        assert USER_EMAIL in outbox[0].recipients
+        redirect_location = r.location
+
+    r = client.get(redirect_location)
+    assert r.status_code == 200
+    assert "Change Email Address" in r.get_data(as_text=True)
+    assert "Enter your recovery code" in r.get_data(as_text=True)
+    assert "Enter your new email" in r.get_data(as_text=True)
+
+    r = client.post(redirect_location, data={
+        "recovery_code": "wrong_recovery_code",
+        "email": "new-email@example.com",
+    })
+    assert r.status_code == 200
+    assert "Change Email Address" in r.get_data(as_text=True)
+    assert "Incorrect recovery code" in r.get_data(as_text=True)
+
+    with mail.record_messages() as outbox:
+        r = client.post(redirect_location, data={
+            "recovery_code": USER_RECOVERY_CODE,
+            "email": "new-email@example.com",
+        })
+        assert r.status_code == 302
+        second_redirect_location = r.location
+
+        r = client.get(second_redirect_location)
+        assert r.status_code == 200
+        assert "An email has been sent to" in r.get_data(as_text=True)
+
+        assert len(outbox) == 1
+        assert outbox[0].subject == "Change Email Address"
+        assert "new-email@example.com" in outbox[0].recipients
+        msg = str(outbox[0])
+
+    match = re.search(r"^http://localhost(/login/change-email/[^/\s]+)", msg, flags=re.M)
+    assert match
+    received_link = match[1]
+    r = client.get(received_link)
+    assert r.status_code == 200
+    assert "Change Email Address" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+    invalidate_credentials.assert_not_called()
+
+    # The password must be entered once again in case the last email
+    # has been read by someone else, who have followed the link.
+    r = client.post(received_link, data={
+        "password": "wrong_password",
+    })
+    assert r.status_code == 200
+    assert "Incorrect password" in r.get_data(as_text=True)
+
+    r = client.post(received_link, data={
+        "password": USER_PASSWORD,
+    })
+    assert r.status_code == 302
+    third_redirect_location = r.location
+
+    r = client.get(third_redirect_location)
+    assert r.status_code == 200
+    assert "The email address on your account has been successfully changed" in r.get_data(as_text=True)
+
+    invalidate_credentials.assert_called_with(USER_ID)
+    assert not m.UserRegistration.query.filter_by(email=USER_EMAIL).one_or_none()
+    assert m.UserRegistration.query.filter_by(email="new-email@example.com").one_or_none()
+
+
+def test_change_email_failure(mocker, client, db_session, user):
+    invalidate_credentials = Mock()
+    mocker.patch("swpt_login.hydra.invalidate_credentials", invalidate_credentials)
+
+    # An user with the desired new email already exists!
+    db_session.add(
+        m.UserRegistration(
+            user_id='1',
+            email='new-email@example.com',
+            salt='abcd',
+            password_hash='1234',
+            recovery_code_hash='7890',
+            two_factor_login=True,
+        )
+    )
+    db_session.commit()
+
+    r = client.post("/login/change-email?login_challenge=9876", data={
+        "email": USER_EMAIL,
+        "password": USER_PASSWORD,
+    })
+    redirect_location = r.location
+
+    with mail.record_messages() as outbox:
+        r = client.post(redirect_location, data={
+            "recovery_code": USER_RECOVERY_CODE,
+            "email": "new-email@example.com",
+        })
+        msg = str(outbox[0])
+
+    match = re.search(r"^http://localhost(/login/change-email/[^/\s]+)", msg, flags=re.M)
+    received_link = match[1]
+    r = client.get(received_link)
+    # invalidate_credentials.assert_not_called()
+
+    r = client.post(received_link, data={
+        "password": USER_PASSWORD,
+    })
+    third_redirect_location = r.location
+
+    r = client.get(third_redirect_location)
+    assert r.status_code == 200
+    assert "The email address on your account can not be changed to" in r.get_data(as_text=True)
+
+    invalidate_credentials.assert_not_called()
+    assert m.UserRegistration.query.filter_by(
+        user_id=USER_ID,
+        email=USER_EMAIL,
+    ).one_or_none()
+    assert m.UserRegistration.query.filter_by(
+        user_id="1",
+        email="new-email@example.com",
     ).one_or_none()
