@@ -91,7 +91,7 @@ class RedisSecretHashRecord:
         instance.secret = _secret or utils.generate_random_secret()
         instance._data = data
         with redis_store.pipeline() as p:
-            p.hmset(instance.key, data)
+            p.hset(instance.key, mapping=data)
             p.expire(instance.key, current_app.config[cls.EXPIRATION_SECONDS_CONFIG_FIELD])
             p.execute()
         return instance
