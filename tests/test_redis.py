@@ -31,7 +31,6 @@ def user(db_session):
             salt=USER_SALT,
             password_hash=utils.calc_crypt_hash(USER_SALT, USER_PASSWORD),
             recovery_code_hash=utils.calc_crypt_hash('', USER_RECOVERY_CODE),
-            two_factor_login=True,
         )
     )
     db_session.commit()
@@ -92,7 +91,6 @@ def test_signup_flow(mocker, app, db_session, acitivation_status_code):
     r2 = redis.SignUpRequest.from_secret(r1.secret)
     assert r2 is not None
     assert r2.recover != 'yes'
-    assert r2.has_rc != 'yes'
 
     recovery_code = r2.accept(password)
     assert (
@@ -139,7 +137,6 @@ def test_password_recovery_flow(app, db_session, user):
         email=USER_EMAIL,
         cc=computer_code_hash,
         recover='yes',
-        has_rc='yes',
     )
 
     # Simulate the choose password screen:
@@ -147,7 +144,6 @@ def test_password_recovery_flow(app, db_session, user):
     r2 = redis.SignUpRequest.from_secret(r1.secret)
     assert r2 is not None
     assert r2.recover == 'yes'
-    assert r2.has_rc == 'yes'
 
     assert not r2.is_correct_recovery_code('wrong_recovery_code')
     r2.register_code_failure()
@@ -171,7 +167,6 @@ def test_password_recovery_flow_failure(app, db_session, user):
         email=USER_EMAIL,
         cc=computer_code_hash,
         recover='yes',
-        has_rc='yes',
     )
 
     # Simulate the choose password screen:
@@ -308,8 +303,7 @@ def test_change_email_flow_failure(app, db_session, user):
             salt=salt,
             password_hash=utils.calc_crypt_hash(salt, 'some password'),
             recovery_code_hash=utils.calc_crypt_hash('', utils.generate_recovery_code()),
-            two_factor_login=True,
-        )
+          )
     )
     db_session.commit()
 

@@ -41,7 +41,6 @@ def db_session(app):
     db.session.remove()
     for cmd in [
         "TRUNCATE TABLE user_registration",
-        "TRUNCATE TABLE user_update_signal",
         "TRUNCATE TABLE registered_user_signal",
     ]:
         db.session.execute(sqlalchemy.text(cmd))

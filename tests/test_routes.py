@@ -57,7 +57,6 @@ def user(db_session):
             salt=USER_SALT,
             password_hash=utils.calc_crypt_hash(USER_SALT, USER_PASSWORD),
             recovery_code_hash=utils.calc_crypt_hash('', USER_RECOVERY_CODE),
-            two_factor_login=True,
         )
     )
     db_session.commit()
@@ -339,7 +338,6 @@ def test_change_email_failure(mocker, client, db_session, user):
             salt='abcd',
             password_hash='1234',
             recovery_code_hash='7890',
-            two_factor_login=True,
         )
     )
     db_session.commit()

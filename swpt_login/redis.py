@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from sqlalchemy.exc import IntegrityError
 from flask import current_app
 from . import utils
-from .models import UserRegistration, UserUpdateSignal, RegisteredUserSignal
+from .models import UserRegistration, RegisteredUserSignal
 from .extensions import db, redis_store, requests_session
 
 USER_ID_REGEX_PATTERN = re.compile(r'^[0-9A-Za-z_=-]{1,64}$')
@@ -157,7 +157,7 @@ class LoginVerificationRequest(RedisSecretHashRecord):
 class SignUpRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS_CONFIG_FIELD = 'SIGNUP_REQUEST_EXPIRATION_SECONDS'
     REDIS_PREFIX = 'signup:'
-    ENTRIES = ['email', 'cc', 'recover', 'has_rc']
+    ENTRIES = ['email', 'cc', 'recover']
 
     def is_correct_recovery_code(self, recovery_code):
         user = UserRegistration.query.filter_by(email=self.email).one()
@@ -186,15 +186,11 @@ class SignUpRequest(RedisSecretHashRecord):
             _clear_user_verification_code_failures(user.user_id)
 
         else:
-            if current_app.config['USE_RECOVERY_CODE']:
-                recovery_code = utils.generate_recovery_code()
-                recovery_code_hash = utils.calc_crypt_hash('', recovery_code)
-            else:
-                recovery_code = None
-                recovery_code_hash = None
-
+            recovery_code = utils.generate_recovery_code()
+            recovery_code_hash = utils.calc_crypt_hash('', recovery_code)
             user_id, reservation_id = _reserve_user_id()
             conflicting_user = UserRegistration.query.filter_by(user_id=user_id).one_or_none()
+
             if conflicting_user is None:
                 salt = utils.generate_password_salt()
                 db.session.add(UserRegistration(
@@ -203,7 +199,6 @@ class SignUpRequest(RedisSecretHashRecord):
                     salt=salt,
                     password_hash=utils.calc_crypt_hash(salt, password),
                     recovery_code_hash=recovery_code_hash,
-                    two_factor_login=True,
                 ))
 
             registered_user_signal = RegisteredUserSignal(
@@ -223,10 +218,6 @@ class SignUpRequest(RedisSecretHashRecord):
                 registered_user_signal.send_signalbus_message()
             except RegisteredUserSignal.SendingError:
                 db.session.add(registered_user_signal)
-
-            if current_app.config['SEND_USER_UPDATE_SIGNAL']:
-                email = conflicting_user.email if conflicting_user else self.email
-                db.session.add(UserUpdateSignal(user_id=user_id, email=email))
 
         db.session.commit()
         if conflicting_user:
@@ -252,8 +243,7 @@ class ChangeEmailRequest(RedisSecretHashRecord):
         user_id = self.user_id
         user = UserRegistration.query.filter_by(user_id=user_id, email=self.old_email).one()
         user.email = self.email
-        if current_app.config['SEND_USER_UPDATE_SIGNAL']:
-            db.session.add(UserUpdateSignal(user_id=user_id, email=self.email))
+
         try:
             db.session.commit()
         except IntegrityError:

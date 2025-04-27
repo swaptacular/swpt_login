@@ -10,10 +10,6 @@ def _get_language_choices(fallback):
     return [(lg, SUPPORTED_LANGUAGES[lg]) for lg in languages if lg in SUPPORTED_LANGUAGES]
 
 
-def _get_default_password_min_length(fallback):
-    return 12 if environ.get('USE_RECOVERY_CODE', str(bool(fallback))).lower() == 'true' else 6
-
-
 def _parse_dict(s: str) -> dict:
     try:
         return json.loads(s)
@@ -61,7 +57,6 @@ class Configuration(metaclass=MetaEnvReader):
     SECRET_KEY = 'dummy-secret'
     SITE_TITLE = 'Login Test Site'
     LANGUAGES = 'en'  # separated by a comma, for example 'en,bg'
-    USE_RECOVERY_CODE = True
     SUBJECT_PREFIX = ''
     ABOUT_URL = 'https://swaptacular.github.io/overview'
     STYLE_URL = ''
@@ -87,7 +82,6 @@ class Configuration(metaclass=MetaEnvReader):
     RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
     APP_SIGNUP_REDIRECT_URL = ''
     HYDRA_REQUEST_TIMEOUT_SECONDS = 5
-    SEND_USER_UPDATE_SIGNAL = False
     SHOW_CAPTCHA_ON_SIGNUP = True
     HIDE_REMEMBER_ME_CHECKBOX = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
@@ -101,7 +95,7 @@ class Configuration(metaclass=MetaEnvReader):
     LANGUAGE_COOKIE_NAME = 'user_lang'
     COMPUTER_CODE_COOKIE_NAME = 'user_cc'
     LOGIN_VERIFICATION_COOKIE_NAME = 'user_lv'
-    PASSWORD_MIN_LENGTH = _get_default_password_min_length(USE_RECOVERY_CODE)
+    PASSWORD_MIN_LENGTH = 12
     PASSWORD_MAX_LENGTH = 64
     SEND_FILE_MAX_AGE_DEFAULT = 12096000
     MAX_CONTENT_LENGTH = 1024

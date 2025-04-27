@@ -30,9 +30,7 @@
 {% endblock form_body %}
 
 {% block form_footer %}
-  {% if config.USE_RECOVERY_CODE %}
-    <ul class="login-footer-links">
-      <li><a href="{{url_for('.choose_new_email', secret=verification_cookie_hash)|safe}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
-    </ul>
-  {% endif %}
+  <ul class="login-footer-links">
+    <li><a href="{{url_for('.choose_new_email', secret=verification_cookie_hash)|safe}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
+  </ul>
 {% endblock form_footer %}

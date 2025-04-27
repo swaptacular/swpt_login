@@ -145,7 +145,6 @@ def signup():
                         email=email,
                         cc=computer_code_hash,
                         recover='yes',
-                        has_rc='yes' if user.recovery_code_hash else 'no',
                     )
                     emails.send_change_password_email(
                         email,
@@ -218,9 +217,6 @@ def choose_password(secret):
         return render_template('report_expired_link.html')
 
     is_recovery = signup_request.recover == 'yes'
-    require_recovery_code = (is_recovery
-                             and signup_request.has_rc == 'yes'
-                             and current_app.config['USE_RECOVERY_CODE'])
 
     if request.method == 'POST':
         recovery_code = request.form.get('recovery_code', '')
@@ -241,7 +237,7 @@ def choose_password(secret):
         elif password != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
         elif (
-                require_recovery_code
+                is_recovery
                 and not signup_request.is_correct_recovery_code(recovery_code)
         ):
             try:
@@ -299,7 +295,7 @@ def choose_password(secret):
 
     return render_template(
         'choose_password.html',
-        require_recovery_code=require_recovery_code,
+        require_recovery_code=is_recovery,
     )
 
 
@@ -380,14 +376,6 @@ def choose_new_email(secret):
         .filter_by(user_id=verification_request.user_id)
         .one()
     )
-
-    require_recovery_code = user.recovery_code_hash and current_app.config['USE_RECOVERY_CODE']
-    if not require_recovery_code:
-        # Allowing the user to change her account email address
-        # without supplying a recovery code is a bad idea, because in
-        # this case her account could be hijacked when her password is
-        # known. (Instead of only when her email is being read.)
-        return render_template('report_missing_recovery_code.html')
 
     if request.method == 'POST':
         captcha_passed, captcha_error_message = verify_captcha()
@@ -533,9 +521,6 @@ def change_recovery_code():
     email address. Because of this, it includes a CAPCHA challenge.
     """
 
-    if not current_app.config['USE_RECOVERY_CODE']:
-        abort(404)
-
     email = request.args.get('email', '')
 
     if request.method == 'POST':
@@ -642,9 +627,6 @@ def login_form():
                 == utils.calc_crypt_hash(user.salt, password)
         ):
             oauth2_subject = hydra.get_subject(user.user_id)
-
-            if not user.two_factor_login:
-                return redirect(login_request.accept(oauth2_subject, remember_me))
 
             # NOTE: The `UserLoginsHistory` instance contains the
             # cryptographic hashes of the "computer code"s for the

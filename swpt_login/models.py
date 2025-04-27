@@ -19,20 +19,7 @@ class UserRegistration(db.Model):
     #
     salt = db.Column(db.String(32), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    recovery_code_hash = db.Column(db.String(128), nullable=True)
-
-    two_factor_login = db.Column(db.Boolean, nullable=False)
-
-
-class UserUpdateSignal(db.Model):
-    user_id = db.Column(db.String(64), primary_key=True)
-    user_update_signal_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(255), nullable=True)
-
-    def send_signalbus_message(self):
-        """Inform the other services that user's email has changed.
-        """
-        pass
+    recovery_code_hash = db.Column(db.String(128), nullable=False)
 
 
 class RegisteredUserSignal(db.Model):

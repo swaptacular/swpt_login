@@ -9,7 +9,6 @@ def test_user_registration(db_session):
             salt='abcd',
             password_hash='1234',
             recovery_code_hash='7890',
-            two_factor_login=True,
         )
     )
     db_session.commit()
@@ -19,4 +18,3 @@ def test_user_registration(db_session):
     assert ur.salt == 'abcd'
     assert ur.password_hash == '1234'
     assert ur.recovery_code_hash == '7890'
-    assert ur.two_factor_login is True
