@@ -16,17 +16,17 @@ package-mode = false
 [tool.poetry.dependencies]
 gunicorn = "*"
 python-json-logger = "^2.0.4"
-sqlalchemy = "1.4.18"  # TODO: this is old
-alembic = "1.5.3"  # TODO: this is old
+sqlalchemy = "^2.0.19"
+alembic = "^1.8.1"
 redis = "^3.5"
 requests = "^2.24"
 user-agents = "^2.2"
-psycopg2-binary = "^2.8"
+psycopg = {extras = ["binary"], version = "^3.1.10"}
 requests-oauthlib = "^1.3"
 flask = "^3.0.2"
 flask-sqlalchemy = "3.0.5"
 flask-mail = "^0.10.0"
-flask-migrate = "^2.4"  # TODO: this is old
+flask-migrate = "^4.0.4"
 flask-redis = "^0.4.0"
 flask-babel = "^4.0.0"
 swpt_pythonlib = {git = "https://github.com/swaptacular/swpt_pythonlib.git", tag = "v0.10.6"}
