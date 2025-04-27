@@ -222,7 +222,7 @@ def test_login_flow(app, db_session, user):
     assert lvr.challenge_id == challenge_id
     lvr.register_code_failure()
 
-    lvr.accept(clear_failures=True)
+    lvr.accept()
     redis.UserLoginsHistory(USER_ID).add(computer_code_hash)
     assert user_logins_history.contains(computer_code_hash)
 
