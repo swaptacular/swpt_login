@@ -293,10 +293,12 @@ def choose_password(secret):
                 response.headers['Cache-Control'] = 'no-store'
                 return response
 
-    return render_template(
+    response = make_response(render_template(
         'choose_password.html',
         require_recovery_code=is_recovery,
-    )
+    ))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @login.route('/change-email', methods=['GET', 'POST'])
@@ -410,11 +412,13 @@ def choose_new_email(secret):
                 login_challenge=verification_request.challenge_id,
             ))
 
-    return make_response(render_template(
+    response = make_response(render_template(
         'choose_new_email.html',
         require_recovery_code=True,
         display_captcha=captcha.display_html,
     ))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @login.route('/change-email/<secret>', methods=['GET', 'POST'])
