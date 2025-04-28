@@ -10,6 +10,14 @@ config_dict = {
     "PREFERRED_URL_SCHEME": "http",
     "LOGIN_PATH": "/login",
     "CONSENT_PATH": "/consent",
+    "SUBJECT_PREFIX": "debtors:",
+    "API_RESOURCE_SERVER": "https://resource-server.example.com",
+    "API_RESERVE_USER_ID_PATH": "/debtors/.debtor-reserve",
+    "API_USER_ID_FIELD_NAME": "debtorId",
+    "SECRET_CODE_MAX_ATTEMPTS": 5,
+    "MAIL_SUPPRESS_SEND": False,
+    "LOGIN_VERIFIED_DEVICES_MAX_COUNT": 3,
+    "SHOW_CAPTCHA_ON_SIGNUP": False,
 }
 
 
@@ -33,7 +41,6 @@ def db_session(app):
     db.session.remove()
     for cmd in [
         "TRUNCATE TABLE user_registration",
-        "TRUNCATE TABLE user_update_signal",
         "TRUNCATE TABLE registered_user_signal",
     ]:
         db.session.execute(sqlalchemy.text(cmd))

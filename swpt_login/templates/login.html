@@ -26,16 +26,6 @@
              required
              >
     </p>
-    {% if not config.HIDE_REMEMBER_ME_CHECKBOX %}
-    <p class="remember-me-checkbox">
-      <label for="remember_me" onclick="return false">{% trans %}Remember me on this computer{% endtrans %}</label>
-      <input id="remember_me"
-             name="remember_me"
-             type="checkbox"
-             {% if 'remember_me' in request.form %}checked{% endif %}
-             >
-    </p>
-    {% endif %}
     <p>
       <input type="submit" value="{% trans %}Log in{% endtrans %}">
     </p>
@@ -48,10 +38,8 @@
       <ul class="login-footer-links">
         <li><a href="{{url_for('.signup', login_challenge=login_challenge)}}">{% trans %}Create a new account{% endtrans %}</a></li>
         <li><a href="{{url_for('.signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot password?{% endtrans %}</a></li>
-        {% if config.USE_RECOVERY_CODE %}
-          <li><a href="{{url_for('.change_recovery_code', login_challenge=login_challenge)}}">{% trans %}Lost your recovery code?{% endtrans %}</a></li>
-          <li><a href="{{url_for('.change_email_login', login_challenge=login_challenge)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
-        {% endif %}
+        <li><a href="{{url_for('.change_recovery_code', login_challenge=login_challenge)}}">{% trans %}Lost your recovery code?{% endtrans %}</a></li>
+        <li><a href="{{url_for('.change_email_login', login_challenge=login_challenge)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
       </ul>
     {% endautoescape %}
   {% endwith %}
