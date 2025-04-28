@@ -26,16 +26,6 @@
              required
              >
     </p>
-    {% if not config.HIDE_REMEMBER_ME_CHECKBOX %}
-    <p class="remember-me-checkbox">
-      <label for="remember_me" onclick="return false">{% trans %}Remember me on this computer{% endtrans %}</label>
-      <input id="remember_me"
-             name="remember_me"
-             type="checkbox"
-             {% if 'remember_me' in request.form %}checked{% endif %}
-             >
-    </p>
-    {% endif %}
     <p>
       <input type="submit" value="{% trans %}Log in{% endtrans %}">
     </p>

@@ -623,7 +623,6 @@ def login_form():
     if request.method == 'POST':
         email = request.form['email'].strip()
         password = request.form['password']
-        remember_me = not current_app.config['HIDE_REMEMBER_ME_CHECKBOX'] and 'remember_me' in request.form
         user = UserRegistration.query.filter_by(email=email).one_or_none()
 
         if (
@@ -653,7 +652,7 @@ def login_form():
                 # computer.
                 #
                 # We have our "2 factors", so we let the user in.
-                return redirect(login_request.accept(oauth2_subject, remember_me))
+                return redirect(login_request.accept(oauth2_subject))
 
             # NOTE: At this point now we know that the person who
             # wants to log in knows the password, but we are missing
@@ -682,7 +681,6 @@ def login_form():
                     user_id=user.user_id,
                     email=email,
                     code=verification_code,
-                    remember_me='yes' if remember_me else 'no',
                     challenge_id=login_request.challenge_id,
                 )
             except LoginVerificationRequest.ExceededMaxAttempts:
@@ -747,8 +745,7 @@ def enter_verification_code():
             # Tell Hydra this user must be let in.
             login_request = hydra.LoginRequest(lvr.challenge_id)
             oauth2_subject = hydra.get_subject(lvr.user_id)
-            remember_me = lvr.remember_me == 'yes'
-            return redirect(login_request.accept(oauth2_subject, remember_me))
+            return redirect(login_request.accept(oauth2_subject))
 
         try:
             lvr.register_code_failure()

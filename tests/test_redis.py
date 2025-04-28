@@ -203,7 +203,6 @@ def test_login_flow(app, db_session, user):
         user_id=USER_ID,
         email=USER_EMAIL,
         code=verification_code,
-        remember_me='no',
         challenge_id=challenge_id,
     )
 
@@ -213,7 +212,6 @@ def test_login_flow(app, db_session, user):
     assert lvr.user_id == USER_ID
     assert lvr.email == USER_EMAIL
     assert lvr.code == verification_code
-    assert lvr.remember_me == 'no'
     assert lvr.challenge_id == challenge_id
     lvr.register_code_failure()
 
@@ -235,7 +233,6 @@ def test_login_flow_failure(app, db_session, user):
         user_id=USER_ID,
         email=USER_EMAIL,
         code=verification_code,
-        remember_me='no',
         challenge_id=challenge_id,
     )
 

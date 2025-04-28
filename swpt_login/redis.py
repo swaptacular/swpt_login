@@ -128,7 +128,7 @@ class ExceededValueLimitError(Exception):
 class LoginVerificationRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS_CONFIG_FIELD = 'LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'
     REDIS_PREFIX = 'vcode:'
-    ENTRIES = ['user_id', 'code', 'challenge_id', 'email', 'remember_me']
+    ENTRIES = ['user_id', 'code', 'challenge_id', 'email']
 
     @classmethod
     def create(cls, **data):
