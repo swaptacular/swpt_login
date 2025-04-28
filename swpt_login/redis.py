@@ -266,6 +266,11 @@ class ChangeEmailRequest(RedisSecretHashRecord):
             db.session.rollback()
             raise self.EmailAlredyRegistered()
 
+        # After changing the email address, we "forget" past login
+        # verification failures, thus guaranteeing that the user will
+        # be able to log in immediately.
+        _clear_user_verification_code_failures(user.user_id)
+
 
 class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS_CONFIG_FIELD = "CHANGE_RECOVERY_CODE_REQUEST_EXPIRATION_SECONDS"
