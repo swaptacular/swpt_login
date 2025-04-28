@@ -7,7 +7,9 @@ from flask import render_template
 
 
 def _excepthook(exc_type, exc_value, traceback):
-    logging.error("Uncaught exception occured", exc_info=(exc_type, exc_value, traceback))
+    logging.error(
+        "Uncaught exception occured", exc_info=(exc_type, exc_value, traceback)
+    )
 
 
 def _remove_handlers(logger):
@@ -17,15 +19,18 @@ def _remove_handlers(logger):
 
 def _add_console_hander(logger, format: str):
     handler = logging.StreamHandler(sys.stdout)
-    fmt = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
+    fmt = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"
 
-    if format == 'text':
+    if format == "text":
         handler.setFormatter(logging.Formatter(fmt, datefmt="%Y-%m-%d %H:%M:%S%z"))
-    elif format == 'json':
+    elif format == "json":
         from pythonjsonlogger import jsonlogger
-        handler.setFormatter(jsonlogger.JsonFormatter(fmt, datefmt="%Y-%m-%dT%H:%M:%S%z"))
+
+        handler.setFormatter(
+            jsonlogger.JsonFormatter(fmt, datefmt="%Y-%m-%dT%H:%M:%S%z")
+        )
     else:
-        raise RuntimeError(f'invalid log format: {format}')
+        raise RuntimeError(f"invalid log format: {format}")
 
     logger.addHandler(handler)
 
@@ -40,7 +45,7 @@ def _configure_root_logger(format: str) -> logging.Logger:
 
 
 def _server_error(error=None):
-    return render_template('500.html')
+    return render_template("500.html")
 
 
 def configure_logging(level: str, format: str, associated_loggers: List[str]) -> None:
@@ -66,7 +71,7 @@ def configure_logging(level: str, format: str, associated_loggers: List[str]) ->
     # docker container because everything goes to the stdout anyway),
     # and make sure that the gunicorn logger's log level is not lower
     # than the specified level.
-    gunicorn_logger = logging.getLogger('gunicorn.error')
+    gunicorn_logger = logging.getLogger("gunicorn.error")
     gunicorn_logger.propagate = True
     _remove_handlers(gunicorn_logger)
     if app_logger_level > gunicorn_logger.getEffectiveLevel():
@@ -86,8 +91,8 @@ def create_app(config_dict={}):
     app.config.from_object(Configuration)
     app.config.from_mapping(config_dict)
     extensions.init_app(app)
-    app.register_blueprint(login, url_prefix=app.config['LOGIN_PATH'])
-    app.register_blueprint(consent, url_prefix=app.config['CONSENT_PATH'])
+    app.register_blueprint(login, url_prefix=app.config["LOGIN_PATH"])
+    app.register_blueprint(consent, url_prefix=app.config["CONSENT_PATH"])
     app.register_error_handler(500, _server_error)
     app.register_error_handler(403, _server_error)
     app.cli.add_command(swpt_login)
@@ -95,8 +100,8 @@ def create_app(config_dict={}):
 
 
 configure_logging(
-    level=os.environ.get('APP_LOG_LEVEL', 'warning'),
-    format=os.environ.get('APP_LOG_FORMAT', 'text'),
-    associated_loggers=os.environ.get('APP_ASSOCIATED_LOGGERS', '').split(),
+    level=os.environ.get("APP_LOG_LEVEL", "warning"),
+    format=os.environ.get("APP_LOG_FORMAT", "text"),
+    associated_loggers=os.environ.get("APP_ASSOCIATED_LOGGERS", "").split(),
 )
 sys.excepthook = _excepthook

@@ -8,7 +8,7 @@ from swpt_login import utils
 from swpt_login import models as m
 
 
-USER_ID = '1234'
+USER_ID = "1234"
 USER_EMAIL = "test@example.com"
 USER_SALT = utils.generate_password_salt()
 USER_PASSWORD = "qwerty"
@@ -30,7 +30,7 @@ def user(db_session):
             email=USER_EMAIL,
             salt=USER_SALT,
             password_hash=utils.calc_crypt_hash(USER_SALT, USER_PASSWORD),
-            recovery_code_hash=utils.calc_crypt_hash('', USER_RECOVERY_CODE),
+            recovery_code_hash=utils.calc_crypt_hash("", USER_RECOVERY_CODE),
         )
     )
     db_session.commit()
@@ -45,27 +45,31 @@ class Response:
 
 def test_signup_flow(mocker, app, db_session, acitivation_status_code):
     class ReservationMock:
-        post = Mock(return_value=Response(
-            200,
-            lambda: {
-                "type": "DebtorReservation",
-                "createdAt": "2019-08-24T14:15:22Z",
-                "debtorId": "1234",
-                "reservationId": "456",
-                "validUntil": "2099-08-24T14:15:22Z"
-            },
-        ))
+        post = Mock(
+            return_value=Response(
+                200,
+                lambda: {
+                    "type": "DebtorReservation",
+                    "createdAt": "2019-08-24T14:15:22Z",
+                    "debtorId": "1234",
+                    "reservationId": "456",
+                    "validUntil": "2099-08-24T14:15:22Z",
+                },
+            )
+        )
 
     class ActivationMock:
-        post = Mock(return_value=Response(
-            acitivation_status_code,
-            lambda: {
-                "type": "Debtor",
-                "uri": "/debtors/1234/",
-                # The real response has more fields, but they will be
-                # ignored.
-            },
-        ))
+        post = Mock(
+            return_value=Response(
+                acitivation_status_code,
+                lambda: {
+                    "type": "Debtor",
+                    "uri": "/debtors/1234/",
+                    # The real response has more fields, but they will be
+                    # ignored.
+                },
+            )
+        )
 
     reservation_session = ReservationMock()
     activation_session = ActivationMock()
@@ -74,7 +78,7 @@ def test_signup_flow(mocker, app, db_session, acitivation_status_code):
 
     # Simulate the initial sign-up screen:
     #
-    email = 'email@example.com'
+    email = "email@example.com"
     computer_code = utils.generate_random_secret()
     computer_code_hash = utils.calc_sha256(computer_code)
     r1 = redis.SignUpRequest.create(
@@ -84,35 +88,38 @@ def test_signup_flow(mocker, app, db_session, acitivation_status_code):
 
     # Simulate the choose passwoerd screen:
     #
-    password = '12345678+abcdefgh'
+    password = "12345678+abcdefgh"
     assert isinstance(r1.secret, str)
-    assert redis.SignUpRequest.from_secret('wrong_secret') is None
+    assert redis.SignUpRequest.from_secret("wrong_secret") is None
 
     r2 = redis.SignUpRequest.from_secret(r1.secret)
     assert r2 is not None
-    assert r2.recover != 'yes'
+    assert r2.recover != "yes"
 
     recovery_code = r2.accept(password)
-    assert (
-        len(base64.b32decode(recovery_code))
-        == len(base64.b32decode(utils.generate_recovery_code()))
+    assert len(base64.b32decode(recovery_code)) == len(
+        base64.b32decode(utils.generate_recovery_code())
     )
-    assert r2.user_id == '1234'
+    assert r2.user_id == "1234"
 
-    reservation_session.post.assert_has_calls([
-        call(
-            url='https://resource-server.example.com/debtors/.debtor-reserve',
-            json={},
-            verify=False,
-        ),
-    ])
-    activation_session.post.assert_has_calls([
-        call(
-            url='https://resource-server.example.com/debtors/1234/activate',
-            json={'reservationId': '456'},
-            verify=False,
-        ),
-    ])
+    reservation_session.post.assert_has_calls(
+        [
+            call(
+                url="https://resource-server.example.com/debtors/.debtor-reserve",
+                json={},
+                verify=False,
+            ),
+        ]
+    )
+    activation_session.post.assert_has_calls(
+        [
+            call(
+                url="https://resource-server.example.com/debtors/1234/activate",
+                json={"reservationId": "456"},
+                verify=False,
+            ),
+        ]
+    )
 
     if acitivation_status_code == 200:
         # Successful activation.
@@ -121,8 +128,8 @@ def test_signup_flow(mocker, app, db_session, acitivation_status_code):
         # Failed activations create an RegisteredUserSignal.
         users = m.RegisteredUserSignal.query.all()
         assert len(users) == 1
-        assert users[0].user_id == '1234'
-        assert users[0].reservation_id == '456'
+        assert users[0].user_id == "1234"
+        assert users[0].reservation_id == "456"
 
 
 def test_password_recovery_flow(app, db_session, user):
@@ -136,20 +143,20 @@ def test_password_recovery_flow(app, db_session, user):
     r1 = redis.SignUpRequest.create(
         email=USER_EMAIL,
         cc=computer_code_hash,
-        recover='yes',
+        recover="yes",
     )
 
     # Simulate the choose password screen:
     #
     r2 = redis.SignUpRequest.from_secret(r1.secret)
     assert r2 is not None
-    assert r2.recover == 'yes'
+    assert r2.recover == "yes"
 
-    assert not r2.is_correct_recovery_code('wrong_recovery_code')
+    assert not r2.is_correct_recovery_code("wrong_recovery_code")
     r2.register_code_failure()
 
     assert r2.is_correct_recovery_code(USER_RECOVERY_CODE)
-    new_password = '12345678+abcdefgh'
+    new_password = "12345678+abcdefgh"
     r2.accept(new_password)
 
     user = m.UserRegistration.query.filter_by(email=USER_EMAIL).one()
@@ -166,7 +173,7 @@ def test_password_recovery_flow_failure(app, db_session, user):
     r1 = redis.SignUpRequest.create(
         email=USER_EMAIL,
         cc=computer_code_hash,
-        recover='yes',
+        recover="yes",
     )
 
     # Simulate the choose password screen:
@@ -187,7 +194,7 @@ def test_password_recovery_flow_failure(app, db_session, user):
 def test_login_flow(app, db_session, user):
     # Simulate successfully entering user's email and password:
     #
-    challenge_id = '45678'
+    challenge_id = "45678"
 
     computer_code = utils.generate_random_secret()
     computer_code_hash = utils.calc_sha256(computer_code)
@@ -223,7 +230,7 @@ def test_login_flow(app, db_session, user):
 def test_login_flow_failure(app, db_session, user):
     # Simulate successfully entering user's email and password:
     #
-    challenge_id = '45678'
+    challenge_id = "45678"
     verification_code = utils.generate_verification_code()
     verification_cookie = utils.generate_random_secret()
     verification_cookie_hash = utils.calc_sha256(verification_cookie)
@@ -252,7 +259,7 @@ def test_login_flow_failure(app, db_session, user):
 def test_change_email_flow(app, db_session, user):
     # Simulate successfully entering user's old email and password:
     #
-    challenge_id = '45678'
+    challenge_id = "45678"
 
     lvr1 = redis.LoginVerificationRequest.create(
         user_id=USER_ID,
@@ -262,7 +269,7 @@ def test_change_email_flow(app, db_session, user):
 
     # Simulate the "choose new email" dialog:
     #
-    assert redis.LoginVerificationRequest.from_secret('wrong_secret') is None
+    assert redis.LoginVerificationRequest.from_secret("wrong_secret") is None
 
     lvr2 = redis.LoginVerificationRequest.from_secret(lvr1.secret)
     assert lvr2 is not None
@@ -287,7 +294,9 @@ def test_change_email_flow(app, db_session, user):
     assert cer2 is not None
     cer2.accept()
     assert redis.ChangeEmailRequest.from_secret(cer.secret) is None
-    assert m.UserRegistration.query.filter_by(user_id=USER_ID, email=new_email).one_or_none()
+    assert m.UserRegistration.query.filter_by(
+        user_id=USER_ID, email=new_email
+    ).one_or_none()
 
 
 def test_change_email_flow_failure(app, db_session, user):
@@ -298,15 +307,17 @@ def test_change_email_flow_failure(app, db_session, user):
             user_id="567890",
             email=new_email,
             salt=salt,
-            password_hash=utils.calc_crypt_hash(salt, 'some password'),
-            recovery_code_hash=utils.calc_crypt_hash('', utils.generate_recovery_code()),
-          )
+            password_hash=utils.calc_crypt_hash(salt, "some password"),
+            recovery_code_hash=utils.calc_crypt_hash(
+                "", utils.generate_recovery_code()
+            ),
+        )
     )
     db_session.commit()
 
     # Simulate successfully entering user's old email and password:
     #
-    challenge_id = '45678'
+    challenge_id = "45678"
 
     lvr1 = redis.LoginVerificationRequest.create(
         user_id=USER_ID,
@@ -330,7 +341,9 @@ def test_change_email_flow_failure(app, db_session, user):
     cer2 = redis.ChangeEmailRequest.from_secret(cer.secret)
     with pytest.raises(cer2.EmailAlredyRegistered):
         cer2.accept()
-    assert m.UserRegistration.query.filter_by(user_id=USER_ID, email=USER_EMAIL).one_or_none()
+    assert m.UserRegistration.query.filter_by(
+        user_id=USER_ID, email=USER_EMAIL
+    ).one_or_none()
 
 
 def test_change_recovery_code_flow(app, db_session, user):
@@ -347,21 +360,15 @@ def test_change_recovery_code_flow(app, db_session, user):
     assert redis.ChangeRecoveryCodeRequest.from_secret(crcr1.secret) is None
     assert m.UserRegistration.query.filter_by(
         user_id=USER_ID,
-        recovery_code_hash=utils.calc_crypt_hash('', new_recovery_code),
+        recovery_code_hash=utils.calc_crypt_hash("", new_recovery_code),
     ).one_or_none()
 
 
 def test_increment_key_with_limit(app):
     key = utils.generate_random_secret()
-    assert redis.increment_key_with_limit(
-        key, limit=3, period_seconds=1000000
-    ) == 1
-    assert redis.increment_key_with_limit(
-        key, limit=3, period_seconds=1000000
-    ) == 2
-    assert redis.increment_key_with_limit(
-        key, limit=3, period_seconds=1000000
-    ) == 3
+    assert redis.increment_key_with_limit(key, limit=3, period_seconds=1000000) == 1
+    assert redis.increment_key_with_limit(key, limit=3, period_seconds=1000000) == 2
+    assert redis.increment_key_with_limit(key, limit=3, period_seconds=1000000) == 3
 
     with pytest.raises(redis.ExceededValueLimitError):
         redis.increment_key_with_limit(key, limit=3, period_seconds=1000000)
@@ -369,35 +376,35 @@ def test_increment_key_with_limit(app):
 
 def test_user_logins_history(app):
     ulh = redis.UserLoginsHistory(USER_ID)
-    assert not ulh.contains('1')
-    assert not ulh.contains('2')
-    ulh.add('1')
-    assert ulh.contains('1')
-    assert not ulh.contains('2')
+    assert not ulh.contains("1")
+    assert not ulh.contains("2")
+    ulh.add("1")
+    assert ulh.contains("1")
+    assert not ulh.contains("2")
 
-    ulh.add('2')
-    ulh.add('3')
-    assert ulh.contains('1')
-    assert ulh.contains('2')
-    assert ulh.contains('3')
-    assert not ulh.contains('4')
+    ulh.add("2")
+    ulh.add("3")
+    assert ulh.contains("1")
+    assert ulh.contains("2")
+    assert ulh.contains("3")
+    assert not ulh.contains("4")
 
-    ulh.add('4')
-    assert not ulh.contains('1')
-    assert ulh.contains('2')
-    assert ulh.contains('3')
-    assert ulh.contains('4')
+    ulh.add("4")
+    assert not ulh.contains("1")
+    assert ulh.contains("2")
+    assert ulh.contains("3")
+    assert ulh.contains("4")
 
-    ulh.add('5')
-    assert not ulh.contains('1')
-    assert not ulh.contains('2')
-    assert ulh.contains('3')
-    assert ulh.contains('4')
-    assert ulh.contains('5')
+    ulh.add("5")
+    assert not ulh.contains("1")
+    assert not ulh.contains("2")
+    assert ulh.contains("3")
+    assert ulh.contains("4")
+    assert ulh.contains("5")
 
     ulh.clear()
-    assert not ulh.contains('1')
-    assert not ulh.contains('2')
-    assert not ulh.contains('3')
-    assert not ulh.contains('4')
-    assert not ulh.contains('5')
+    assert not ulh.contains("1")
+    assert not ulh.contains("2")
+    assert not ulh.contains("3")
+    assert not ulh.contains("4")
+    assert not ulh.contains("5")

@@ -4,9 +4,9 @@ from swpt_login import utils
 
 
 def test_is_invalid_email():
-    assert utils.is_invalid_email('invalid_email')
-    assert utils.is_invalid_email('too-l' + 500 * 'o' + 'ng@email.com')
-    assert not utils.is_invalid_email('valid@email.com')
+    assert utils.is_invalid_email("invalid_email")
+    assert utils.is_invalid_email("too-l" + 500 * "o" + "ng@email.com")
+    assert not utils.is_invalid_email("valid@email.com")
 
 
 def test_generate_password_salt():
@@ -31,9 +31,10 @@ def test_generate_recovery_code():
 
 
 def test_split_recovery_code_in_blocks():
-    assert utils.split_recovery_code_in_blocks('IZ5IFBSATO2CKMZJ') \
-        == 'IZ5I FBSA TO2C KMZJ'
-    assert utils.split_recovery_code_in_blocks(None) == ''
+    assert (
+        utils.split_recovery_code_in_blocks("IZ5IFBSATO2CKMZJ") == "IZ5I FBSA TO2C KMZJ"
+    )
+    assert utils.split_recovery_code_in_blocks(None) == ""
 
 
 def test_normalize_recovery_code():
@@ -41,15 +42,13 @@ def test_normalize_recovery_code():
     assert utils.normalize_recovery_code(rc) == rc
     assert utils.normalize_recovery_code(rc.lower()) == rc
     assert utils.normalize_recovery_code(rc.upper()) == rc
-    assert utils.normalize_recovery_code('*' + rc[1:]) != rc
-    assert utils.normalize_recovery_code(
-        utils.split_recovery_code_in_blocks(rc)
-    ) == rc
+    assert utils.normalize_recovery_code("*" + rc[1:]) != rc
+    assert utils.normalize_recovery_code(utils.split_recovery_code_in_blocks(rc)) == rc
 
-    rc = 'IZ5IFBSATO2CKMZJ'
-    assert utils.normalize_recovery_code(rc.replace('I', '1')) == rc
-    assert utils.normalize_recovery_code(rc.replace('O', '0')) == rc
-    assert utils.normalize_recovery_code('   IZ5I  FB SATO2C KMZJ  \n') == rc
+    rc = "IZ5IFBSATO2CKMZJ"
+    assert utils.normalize_recovery_code(rc.replace("I", "1")) == rc
+    assert utils.normalize_recovery_code(rc.replace("O", "0")) == rc
+    assert utils.normalize_recovery_code("   IZ5I  FB SATO2C KMZJ  \n") == rc
 
 
 def test_generate_verification_code():
@@ -67,20 +66,20 @@ def test_generate_verification_code():
 
 
 def test_calc_crypt_hash():
-    h = utils.calc_crypt_hash('salt', 'password')
+    h = utils.calc_crypt_hash("salt", "password")
     assert isinstance(h, str)
     assert len(base64.b64decode(h)) == 32
-    assert h == 'QgiDbOU4LtyTKpfVGGRkaInIx2UxtoKai1g3W4d6U7I='
+    assert h == "QgiDbOU4LtyTKpfVGGRkaInIx2UxtoKai1g3W4d6U7I="
 
     with pytest.raises(ValueError):
-        utils.calc_crypt_hash('$unkonwn_method$salt', 'password')
+        utils.calc_crypt_hash("$unkonwn_method$salt", "password")
 
     with pytest.raises(ValueError):
-        utils.calc_crypt_hash('salt', 'too_long' * 1000)
+        utils.calc_crypt_hash("salt", "too_long" * 1000)
 
 
 def test_calc_sha256():
-    sha256 = utils.calc_sha256('123')
+    sha256 = utils.calc_sha256("123")
     assert isinstance(sha256, str)
     assert len(base64.urlsafe_b64decode(sha256)) == 32
-    assert sha256 == 'pmWkWSBCL51Bfkhn79xPuKBKHz__H6B-mY6G9_eieuM='
+    assert sha256 == "pmWkWSBCL51Bfkhn79xPuKBKHz__H6B-mY6G9_eieuM="

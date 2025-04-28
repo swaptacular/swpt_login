@@ -18,10 +18,10 @@ def test_flush_messages_success(mocker, app, db_session):
     mocker.patch("swpt_login.models.requests_session", requests_session)
     assert len(m.RegisteredUserSignal.query.all()) == 0
     db.session.execute(
-         sqlalchemy.text(
-             "INSERT INTO registered_user_signal (user_id, reservation_id) "
-             "VALUES ('123', '456')"
-         )
+        sqlalchemy.text(
+            "INSERT INTO registered_user_signal (user_id, reservation_id) "
+            "VALUES ('123', '456')"
+        )
     )
     db.session.commit()
     assert len(m.RegisteredUserSignal.query.all()) == 1
@@ -40,8 +40,8 @@ def test_flush_messages_success(mocker, app, db_session):
     assert result.exit_code == 1
     requests_session.post.assert_called_once()
     requests_session.post.assert_called_with(
-        json={'reservationId': '456'},
-        url='https://resource-server.example.com/debtors/123/activate',
+        json={"reservationId": "456"},
+        url="https://resource-server.example.com/debtors/123/activate",
         verify=False,
     )
     assert len(m.RegisteredUserSignal.query.all()) == 0
@@ -69,10 +69,10 @@ def test_flush_messages_failure(mocker, app, db_session):
     mocker.patch("swpt_login.models.requests_session", requests_session)
     assert len(m.RegisteredUserSignal.query.all()) == 0
     db.session.execute(
-         sqlalchemy.text(
-             "INSERT INTO registered_user_signal (user_id, reservation_id) "
-             "VALUES ('123', '456')"
-         )
+        sqlalchemy.text(
+            "INSERT INTO registered_user_signal (user_id, reservation_id) "
+            "VALUES ('123', '456')"
+        )
     )
     db.session.commit()
     assert len(m.RegisteredUserSignal.query.all()) == 1

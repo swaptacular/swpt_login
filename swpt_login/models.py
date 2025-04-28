@@ -27,24 +27,29 @@ class RegisteredUserSignal(db.Model):
         """Failed activation request."""
 
     user_id = db.Column(db.String(64), primary_key=True)
-    registered_user_signal_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    registered_user_signal_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True
+    )
     reservation_id = db.Column(db.String(255), nullable=False)
 
     def send_signalbus_message(self):
-        api_resource_server = current_app.config['API_RESOURCE_SERVER']
-        api_reserve_user_id_path = current_app.config['API_RESERVE_USER_ID_PATH']
-        api_base_path = api_reserve_user_id_path.split('.')[0]
+        api_resource_server = current_app.config["API_RESOURCE_SERVER"]
+        api_reserve_user_id_path = current_app.config["API_RESERVE_USER_ID_PATH"]
+        api_base_path = api_reserve_user_id_path.split(".")[0]
 
         try:
             response = requests_session.post(
-                url=urljoin(api_resource_server, f'{api_base_path}{self.user_id}/activate'),
-                json={'reservationId': self.reservation_id},
+                url=urljoin(
+                    api_resource_server, f"{api_base_path}{self.user_id}/activate"
+                ),
+                json={"reservationId": self.reservation_id},
                 verify=False,
             )
             status_code = response.status_code
             if status_code not in [200, 409, 422]:
                 raise self.SendingError(
-                    f'Unexpected status code ({status_code}) while trying to activate an user.'
+                    f"Unexpected status code ({status_code}) while trying to activate"
+                    " an user."
                 )
         except (requests.ConnectionError, requests.Timeout):
-            raise self.SendingError('connection problem')
+            raise self.SendingError("connection problem")

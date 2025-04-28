@@ -1,12 +1,10 @@
 import os
 import re
-import random
-import string
 import base64
 import struct
 import hashlib
 
-EMAIL_REGEX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
+EMAIL_REGEX = re.compile(r"^[^@]+@[^@]+\.[^@]+$")
 
 
 def is_invalid_email(email) -> bool:
@@ -16,49 +14,53 @@ def is_invalid_email(email) -> bool:
 
 
 def generate_password_salt(num_bytes: int = 16) -> str:
-    """Generate a random Base64 encoded password salt.
-    """
-    return base64.b64encode(os.urandom(num_bytes)).decode('ascii')
+    """Generate a random Base64 encoded password salt."""
+    return base64.b64encode(os.urandom(num_bytes)).decode("ascii")
 
 
 def generate_random_secret(num_bytes: int = 15) -> str:
-    return base64.urlsafe_b64encode(os.urandom(num_bytes)).decode('ascii')
+    return base64.urlsafe_b64encode(os.urandom(num_bytes)).decode("ascii")
 
 
 def generate_recovery_code(num_bytes: int = 10) -> str:
-    return base64.b32encode(os.urandom(num_bytes)).decode('ascii')
+    return base64.b32encode(os.urandom(num_bytes)).decode("ascii")
 
 
 def normalize_recovery_code(recovery_code: str) -> str:
-    return recovery_code.strip().replace(' ', '').replace('0', 'O').replace('1', 'I').upper()
+    return (
+        recovery_code.strip()
+        .replace(" ", "")
+        .replace("0", "O")
+        .replace("1", "I")
+        .upper()
+    )
 
 
 def split_recovery_code_in_blocks(recovery_code: str, block_size: int = 4) -> str:
     if recovery_code is None:
-        return ''
+        return ""
     N = block_size
     block_count = (len(recovery_code) + N - 1) // N
     blocks = [recovery_code[N * i:N * i + 4] for i in range(block_count)]
-    return ' '.join(blocks)
+    return " ".join(blocks)
 
 
 def generate_verification_code(num_digits: int = 6):
     assert 1 <= num_digits < 10
-    random_number = struct.unpack('<L', os.urandom(4))[0] % (10 ** num_digits)
+    random_number = struct.unpack("<L", os.urandom(4))[0] % (10**num_digits)
     return str(random_number).zfill(num_digits)
 
 
 def calc_crypt_hash(salt: str, password: str) -> str:
-    """Return a Base64 encoded cryptographic hash.
-    """
-    if salt.startswith('$'):
+    """Return a Base64 encoded cryptographic hash."""
+    if salt.startswith("$"):
         # NOTE: Currently, only the default hashing method is
         # supported.
-        method = salt[0:salt.rfind('$')]
+        method = salt[0:salt.rfind("$")]
         raise ValueError(f'unsupported hashing method "{method}"')
 
     salt_bytes = base64.b64decode(salt, validate=True)
-    password_bytes = password.encode('utf8')
+    password_bytes = password.encode("utf8")
     if len(password_bytes) > 1024:
         raise ValueError("The password is too long.")
 
@@ -81,10 +83,10 @@ def calc_crypt_hash(salt: str, password: str) -> str:
             p=1,
             dklen=32,
         )
-    ).decode('ascii')
+    ).decode("ascii")
 
 
 def calc_sha256(computer_code: str) -> str:
     m = hashlib.sha256()
     m.update(computer_code.encode())
-    return base64.urlsafe_b64encode(m.digest()).decode('ascii')
+    return base64.urlsafe_b64encode(m.digest()).decode("ascii")
