@@ -157,7 +157,7 @@ container allows you to execute the following *documented commands*:
 * `flush`
 
   Starts a process that periodically processes unprocessed rows from
-  the *registered_user_signal* table. When some Web server process is
+  the *activate_user_signal* table. When some Web server process is
   unexpectedly terminated, some rows in that table may remain
   unprocessed. This command will take care of them.
 

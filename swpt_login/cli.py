@@ -27,9 +27,10 @@ def swpt_login():
     help="Exit after some time (mainly useful during testing).",
 )
 def flush(wait: float, quit_early: bool) -> None:
-    """Periodically process unprocessed `registered_user_signal` rows."""
+    """Periodically process unprocessed `activate_user_signal` rows."""
+
     from swpt_pythonlib.flask_signalbus import SignalBus
-    from swpt_login.models import RegisteredUserSignal
+    from swpt_login.models import ActivateUserSignal
 
     logger = logging.getLogger(__name__)
     logger.info("Started processing unprocessed rows.")
@@ -38,7 +39,7 @@ def flush(wait: float, quit_early: bool) -> None:
     while True:
         started_at = time.time()
         try:
-            count = signalbus.flushmany([RegisteredUserSignal])
+            count = signalbus.flushmany([ActivateUserSignal])
         except Exception:
             logger.exception("Caught error while processing unprocessed rows.")
             sys.exit(1)

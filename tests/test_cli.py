@@ -16,15 +16,18 @@ def test_flush_messages_success(mocker, app, db_session):
 
     requests_session = RequestSessionMock()
     mocker.patch("swpt_login.models.requests_session", requests_session)
-    assert len(m.RegisteredUserSignal.query.all()) == 0
+    assert len(m.ActivateUserSignal.query.all()) == 0
     db.session.execute(
         sqlalchemy.text(
-            "INSERT INTO registered_user_signal (user_id, reservation_id) "
-            "VALUES ('123', '456')"
+            "INSERT INTO activate_user_signal ("
+            " user_id, reservation_id, email,"
+            " salt, password_hash, recovery_code_hash"
+            ") "
+            "VALUES ('123', '456', 'test@example.com', 'x', 'y', 'z')"
         )
     )
     db.session.commit()
-    assert len(m.RegisteredUserSignal.query.all()) == 1
+    assert len(m.ActivateUserSignal.query.all()) == 1
     db.session.commit()
 
     runner = app.test_cli_runner()
@@ -44,7 +47,14 @@ def test_flush_messages_success(mocker, app, db_session):
         url="https://resource-server.example.com/debtors/123/activate",
         verify=False,
     )
-    assert len(m.RegisteredUserSignal.query.all()) == 0
+    assert len(m.ActivateUserSignal.query.all()) == 0
+    users = m.UserRegistration.query.all()
+    assert len(users) == 1
+    assert users[0].email == "test@example.com"
+    assert users[0].user_id == "123"
+    assert users[0].salt == "x"
+    assert users[0].password_hash == "y"
+    assert users[0].recovery_code_hash == "z"
 
     runner = app.test_cli_runner()
     result = runner.invoke(
@@ -58,7 +68,8 @@ def test_flush_messages_success(mocker, app, db_session):
     )
     assert result.exit_code == 1
     requests_session.post.assert_called_once()
-    assert len(m.RegisteredUserSignal.query.all()) == 0
+    assert len(m.ActivateUserSignal.query.all()) == 0
+    assert len(m.UserRegistration.query.all()) == 1
 
 
 def test_flush_messages_failure(mocker, app, db_session):
@@ -67,15 +78,18 @@ def test_flush_messages_failure(mocker, app, db_session):
 
     requests_session = RequestSessionMock()
     mocker.patch("swpt_login.models.requests_session", requests_session)
-    assert len(m.RegisteredUserSignal.query.all()) == 0
+    assert len(m.ActivateUserSignal.query.all()) == 0
     db.session.execute(
         sqlalchemy.text(
-            "INSERT INTO registered_user_signal (user_id, reservation_id) "
-            "VALUES ('123', '456')"
+            "INSERT INTO activate_user_signal ("
+            " user_id, reservation_id, email,"
+            " salt, password_hash, recovery_code_hash"
+            ") "
+            "VALUES ('123', '456', 'test@example.com', '', '', '')"
         )
     )
     db.session.commit()
-    assert len(m.RegisteredUserSignal.query.all()) == 1
+    assert len(m.ActivateUserSignal.query.all()) == 1
     db.session.commit()
 
     runner = app.test_cli_runner()
@@ -90,4 +104,5 @@ def test_flush_messages_failure(mocker, app, db_session):
     )
     assert result.exit_code == 1
     requests_session.post.assert_called_once()
-    assert len(m.RegisteredUserSignal.query.all()) == 1
+    assert len(m.ActivateUserSignal.query.all()) == 1
+    assert len(m.UserRegistration.query.all()) == 0

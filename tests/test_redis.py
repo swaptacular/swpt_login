@@ -123,10 +123,10 @@ def test_signup_flow(mocker, app, db_session, acitivation_status_code):
 
     if acitivation_status_code == 200:
         # Successful activation.
-        assert len(m.RegisteredUserSignal.query.all()) == 0
+        assert len(m.ActivateUserSignal.query.all()) == 0
     else:
-        # Failed activations create an RegisteredUserSignal.
-        users = m.RegisteredUserSignal.query.all()
+        # Failed activations create an ActivateUserSignal.
+        users = m.ActivateUserSignal.query.all()
         assert len(users) == 1
         assert users[0].user_id == "1234"
         assert users[0].reservation_id == "456"
@@ -168,7 +168,6 @@ def test_password_recovery_flow_failure(app, db_session, user):
     #
     computer_code = utils.generate_random_secret()
     computer_code_hash = utils.calc_sha256(computer_code)
-    user = m.UserRegistration.query.filter_by(email=USER_EMAIL).one()
 
     r1 = redis.SignUpRequest.create(
         email=USER_EMAIL,
