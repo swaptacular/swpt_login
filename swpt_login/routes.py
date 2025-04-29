@@ -12,6 +12,7 @@ from flask import (
 )
 from flask_babel import gettext, get_locale
 import user_agents
+from sqlalchemy import select
 from . import utils, captcha, emails, hydra
 from .redis import (
     SignUpRequest,
@@ -21,6 +22,7 @@ from .redis import (
     UserLoginsHistory,
 )
 from .models import UserRegistration
+from .extensions import db
 
 login = Blueprint(
     "login", __name__, template_folder="templates", static_folder="static"
@@ -659,7 +661,14 @@ def login_form():
     if request.method == "POST":
         email = request.form["email"].strip()
         password = request.form["password"]
-        user = UserRegistration.query.filter_by(email=email).one_or_none()
+        user = db.session.execute(
+            select(
+                UserRegistration.user_id,
+                UserRegistration.salt,
+                UserRegistration.password_hash,
+            )
+            .where(UserRegistration.email == email)
+        ).one_or_none()
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             oauth2_subject = hydra.get_subject(user.user_id)
