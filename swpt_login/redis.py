@@ -1,11 +1,13 @@
 import re
 import time
 import hashlib
+from contextlib import suppress
+from typing import Optional
 from urllib.parse import urljoin
 from sqlalchemy.exc import IntegrityError
 from flask import current_app
 from . import utils
-from .models import UserRegistration, RegisteredUserSignal
+from .models import UserRegistration, ActivateUserSignal
 from .extensions import db, redis_store, requests_session
 
 USER_ID_REGEX_PATTERN = re.compile(r"^[0-9A-Za-z_=-]{1,64}$")
@@ -146,7 +148,7 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         return instance
 
     def is_correct_recovery_code(self, recovery_code):
-        user = UserRegistration.query.filter_by(user_id=self.user_id).one()
+        user = UserRegistration.query.filter_by(email=self.email).one()
         normalized_recovery_code = utils.normalize_recovery_code(recovery_code)
         return user.recovery_code_hash == utils.calc_crypt_hash(
             "", normalized_recovery_code
@@ -180,68 +182,61 @@ class SignUpRequest(RedisSecretHashRecord):
             self.delete()
             raise self.ExceededMaxAttempts()
 
-    def accept(self, password):
+    def accept(self, password) -> Optional[str]:
         self.delete()
-        conflicting_user = None
 
         if self.recover:
-            recovery_code = None
+            # Change the user's password.
             user = UserRegistration.query.filter_by(email=self.email).one()
             user.password_hash = utils.calc_crypt_hash(user.salt, password)
-            user_id = user.user_id
 
             # After changing the password, we "forget" past login
             # verification failures, thus guaranteeing that the user
             # will be able to log in immediately.
             _clear_user_verification_code_failures(user.user_id)
 
+            db.session.commit()
+            self.user_id = user.user_id
+            return None
+
         else:
-            recovery_code = utils.generate_recovery_code()
-            recovery_code_hash = utils.calc_crypt_hash("", recovery_code)
+            # Reserve a user ID, which we need to activate.
             user_id, reservation_id = _reserve_user_id()
-            conflicting_user = UserRegistration.query.filter_by(
-                user_id=user_id
-            ).one_or_none()
 
-            if conflicting_user is None:
-                salt = utils.generate_password_salt()
-                db.session.add(
-                    UserRegistration(
-                        user_id=user_id,
-                        email=self.email,
-                        salt=salt,
-                        password_hash=utils.calc_crypt_hash(salt, password),
-                        recovery_code_hash=recovery_code_hash,
-                    )
+            # Before we try to activate the reserved user ID, we need
+            # to make sure that a new row is added and committed to
+            # the `activate_user_signal` table. This table is
+            # periodically scanned for left-over rows, so that if the
+            # immediate activation attempt fails, activation attempts
+            # will continue automatically.
+            recovery_code = utils.generate_recovery_code()
+            salt = utils.generate_password_salt()
+            db.session.add(
+                ActivateUserSignal(
+                    user_id=user_id,
+                    reservation_id=reservation_id,
+                    email=self.email,
+                    salt=salt,
+                    password_hash=utils.calc_crypt_hash(salt, password),
+                    recovery_code_hash=utils.calc_crypt_hash("", recovery_code),
                 )
-
-            registered_user_signal = RegisteredUserSignal(
-                user_id=user_id,
-                reservation_id=reservation_id,
             )
+            db.session.commit()
 
-            # Try to immediately activate the user. If that fails, add
-            # a row in the `registered_user_signal` table. This table
-            # will be scanned periodically, and the activation attempt
-            # will be repeated until it has succeeded. The user do not
-            # need to know about this problem, because if the internal
-            # network is out, he will experience other problems down
-            # the road anyway, and if this is a short network glitch,
-            # the user will be activated pretty soon.
-            try:
-                registered_user_signal.send_signalbus_message()
-            except RegisteredUserSignal.SendingError:
-                db.session.add(registered_user_signal)
+            # Try to immediately activate the user.
+            if activate_user_signal := (
+                ActivateUserSignal.query
+                .filter_by(user_id=user_id, reservation_id=reservation_id)
+                .with_for_update(skip_locked=True)
+                .one_or_none()
+            ):
+                with suppress(activate_user_signal.SendingError):
+                    activate_user_signal.send_signalbus_message()
+                    db.session.delete(activate_user_signal)
 
-        db.session.commit()
-        if conflicting_user:
-            raise RuntimeError(
-                "An attempt has been made to register a new user, "
-                "but another user with the same ID already exists."
-            )
-        self.user_id = user_id
-
-        return recovery_code
+            db.session.commit()
+            self.user_id = user_id
+            return recovery_code
 
 
 class ChangeEmailRequest(RedisSecretHashRecord):
@@ -277,7 +272,7 @@ class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
     REDIS_PREFIX = "changerc:"
     ENTRIES = ["email"]
 
-    def accept(self):
+    def accept(self) -> str:
         self.delete()
         recovery_code = utils.generate_recovery_code()
         user = UserRegistration.query.filter_by(email=self.email).one()

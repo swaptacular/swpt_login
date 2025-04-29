@@ -41,7 +41,7 @@ USER_PASSWORD = "qwertyuiopasdfg"
 USER_RECOVERY_CODE = utils.generate_recovery_code()
 
 
-@pytest.fixture(params=[200, 500])
+@pytest.fixture(params=[200, 409, 422, 500])
 def acitivation_status_code(request):
     return request.param
 
@@ -73,7 +73,7 @@ def test_set_language(client):
     assert get_cookie(r, "user_lang") == "en"
 
 
-def test_signup(mocker, client, db_session):
+def test_signup(mocker, client, db_session, acitivation_status_code):
     class ReservationMock:
         post = Mock(
             return_value=Response(
@@ -139,11 +139,19 @@ def test_signup(mocker, client, db_session):
     assert r.status_code == 200
     assert "Your account recovery code is" in r.get_data(as_text=True)
 
-    user = m.UserRegistration.query.one_or_none()
-    assert user
-    assert user.user_id == "1234"
-    assert user.email == USER_EMAIL
-    assert user.password_hash == utils.calc_crypt_hash(user.salt, USER_PASSWORD)
+    if acitivation_status_code == 200:
+        user = m.UserRegistration.query.one_or_none()
+        assert user
+        assert user.user_id == "1234"
+        assert user.email == USER_EMAIL
+        assert user.password_hash == utils.calc_crypt_hash(user.salt, USER_PASSWORD)
+        assert len(m.ActivateUserSignal.query.all()) == 0
+    elif acitivation_status_code in [409, 422]:
+        assert len(m.UserRegistration.query.all()) == 0
+        assert len(m.ActivateUserSignal.query.all()) == 0
+    else:
+        assert len(m.UserRegistration.query.all()) == 0
+        assert len(m.ActivateUserSignal.query.all()) == 1
 
 
 def test_change_password(mocker, client, db_session, user):

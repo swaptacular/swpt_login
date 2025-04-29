@@ -1,3 +1,4 @@
+import logging
 import requests
 from urllib.parse import urljoin
 from flask import current_app
@@ -5,34 +6,49 @@ from .extensions import db, requests_session
 
 
 class UserRegistration(db.Model):
-    user_id = db.Column(db.String(64), primary_key=True)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-
-    # NOTE: The columns "salt", "password_hash", and
-    # "recovery_code_hash" are Base64 encoded. The "salt" column
-    # contains the salt used for the password hash. Salt's value may
-    # optionally have a "$hashing_method$" prefix, which determines
-    # the hashing method. The salt IS NOT used when calculating the
-    # "recovery_code_hash". The "recovery_code_hash" is always
-    # calculated using the default hashing method (Scrypt N=128, r=8,
-    # p=1, dklen=32), and an empty string as salt.
-    #
+    email = db.Column(db.String(255), primary_key=True)
+    user_id = db.Column(db.String(64), nullable=False)
     salt = db.Column(db.String(32), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     recovery_code_hash = db.Column(db.String(128), nullable=False)
 
+    __table_args__ = (
+        # NOTE: This index is not used in queries, and serves only as
+        # as a database constraint. Therefore, if for example, one
+        # wants to split the `user_registration` table to several
+        # shards (based on the email's hash), this index can be safely
+        # removed.
+        db.Index("idx_user_registration_user_id", user_id, unique=True),
+        {
+            "comment": (
+                'Represents a registered user. The columns "salt", '
+                '"password_hash", and "recovery_code_hash" are Base64 '
+                'encoded. The "salt" column contains the salt used for the '
+                'password hash. Salt\'s value may *optionally* have a '
+                '"$hashing_method$" prefix, which determines the '
+                'hashing method. The salt IS NOT used when calculating the '
+                '"recovery_code_hash". The "recovery_code_hash" is always '
+                'calculated using the default hashing method (Scrypt N=128, '
+                'r=8, p=1, dklen=32), and an empty string as salt.'
+            ),
+        },
+    )
 
-class RegisteredUserSignal(db.Model):
+
+class ActivateUserSignal(db.Model):
     class SendingError(Exception):
         """Failed activation request."""
 
     user_id = db.Column(db.String(64), primary_key=True)
-    registered_user_signal_id = db.Column(
-        db.BigInteger, primary_key=True, autoincrement=True
-    )
-    reservation_id = db.Column(db.String(255), nullable=False)
+    reservation_id = db.Column(db.String(100), primary_key=True)
+    email = db.Column(db.String(255), nullable=False)
+    salt = db.Column(db.String(32), nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    recovery_code_hash = db.Column(db.String(128), nullable=False)
 
     def send_signalbus_message(self):
+        """Activate the user reservation, then add a `UserRegistration` row."""
+
         api_resource_server = current_app.config["API_RESOURCE_SERVER"]
         api_reserve_user_id_path = current_app.config["API_RESERVE_USER_ID_PATH"]
         api_base_path = api_reserve_user_id_path.split(".")[0]
@@ -46,10 +62,53 @@ class RegisteredUserSignal(db.Model):
                 verify=False,
             )
             status_code = response.status_code
-            if status_code not in [200, 409, 422]:
-                raise self.SendingError(
-                    f"Unexpected status code ({status_code}) while trying to activate"
-                    " an user."
+
+            if status_code == 200:
+                user_query = UserRegistration.query.filter_by(email=self.email)
+                if not db.session.query(user_query.exists()).scalar():
+                    # NOTE: Imagine the case when the user's API
+                    # object (a debtor or a creditor) has been removed
+                    # from the system by an admin, but the admin
+                    # forgot to remove the user's `UserRegistration`
+                    # row from the login database. Then, when a new
+                    # user comes and tries to register, and the user
+                    # ID of the removed user (for which there is still
+                    # a `UserRegistration` row!) is randomly chosen to
+                    # be the new user's user ID -- BAM!!!. The result
+                    # is that two different user credentials (email
+                    # plus password) would be referencing the same
+                    # user API object (a debtor or a creditor). The
+                    # simplest way to avoid this problem is for the
+                    # admin to not remove user's API objects
+                    # (debtors/creditors) without removing their
+                    # corresponding `UserRegistration` rows from the
+                    # login database.
+                    db.session.add(
+                        UserRegistration(
+                            email=self.email,
+                            user_id=self.user_id,
+                            salt=self.salt,
+                            password_hash=self.password_hash,
+                            recovery_code_hash=self.recovery_code_hash,
+                        )
+                    )
+
+            elif status_code == 409 or status_code == 422:
+                # This should be very rare, and not a big problem. In
+                # this case there is nothing we can do, except logging
+                # the event.
+                logger = logging.getLogger(__name__)
+                logger.error(
+                    "Reservation %s has expired. As a result, the"
+                    " registration of the new user failed",
+                    self.reservation_id,
                 )
+
+            else:
+                raise self.SendingError(
+                    f"Unexpected status code ({status_code}) while trying to"
+                    " activate an user."
+                )
+
         except (requests.ConnectionError, requests.Timeout):
             raise self.SendingError("connection problem")

@@ -407,7 +407,7 @@ def choose_new_email(secret):
     if not verification_request:
         return render_template("report_expired_link.html")
 
-    user = UserRegistration.query.filter_by(user_id=verification_request.user_id).one()
+    user = UserRegistration.query.filter_by(email=verification_request.email).one()
 
     if request.method == "POST":
         captcha_passed, captcha_error_message = verify_captcha()
