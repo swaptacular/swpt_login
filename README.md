@@ -70,8 +70,9 @@ LOGIN_PATH=
 # will be either "/creditors-consent" or "/debtors-consent".
 CONSENT_PATH=
 
-# The URL for the PostgreSQL database that the login and consent apps should use.
-SQLALCHEMY_DATABASE_URI=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
+# The URL for the primary and replica PostgreSQL database.
+PRIMARY_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
+REPLICA_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
 
 # Set this to the URL for the Redis server instance that the login and
 # consent apps should use. It is highly recommended that your Redis instance

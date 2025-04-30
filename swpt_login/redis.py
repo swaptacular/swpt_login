@@ -1,6 +1,7 @@
 import re
 import time
 import hashlib
+from sqlalchemy import select
 from contextlib import suppress
 from typing import Optional
 from urllib.parse import urljoin
@@ -11,6 +12,14 @@ from .models import UserRegistration, ActivateUserSignal
 from .extensions import db, redis_store, requests_session
 
 USER_ID_REGEX_PATTERN = re.compile(r"^[0-9A-Za-z_=-]{1,64}$")
+
+
+def _query_recovery_code_hash(email):
+    return db.session.execute(
+        select(UserRegistration.recovery_code_hash)
+        .where(UserRegistration.email == email),
+        bind_arguments={"bind": db.engines["replica"]},
+    ).scalar()
 
 
 def _get_user_verification_code_failures_redis_key(user_id):
@@ -148,9 +157,8 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         return instance
 
     def is_correct_recovery_code(self, recovery_code):
-        user = UserRegistration.query.filter_by(email=self.email).one()
         normalized_recovery_code = utils.normalize_recovery_code(recovery_code)
-        return user.recovery_code_hash == utils.calc_crypt_hash(
+        return _query_recovery_code_hash(self.email) == utils.calc_crypt_hash(
             "", normalized_recovery_code
         )
 
@@ -170,9 +178,8 @@ class SignUpRequest(RedisSecretHashRecord):
     ENTRIES = ["email", "cc", "recover"]
 
     def is_correct_recovery_code(self, recovery_code):
-        user = UserRegistration.query.filter_by(email=self.email).one()
         normalized_recovery_code = utils.normalize_recovery_code(recovery_code)
-        return user.recovery_code_hash == utils.calc_crypt_hash(
+        return _query_recovery_code_hash(self.email) == utils.calc_crypt_hash(
             "", normalized_recovery_code
         )
 
