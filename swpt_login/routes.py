@@ -68,6 +68,18 @@ def verify_captcha():
     return captcha_passed, captcha_error_message
 
 
+def query_user_credentials(email):
+    return db.session.execute(
+        select(
+            UserRegistration.user_id,
+            UserRegistration.salt,
+            UserRegistration.password_hash,
+        )
+        .where(UserRegistration.email == email),
+        bind_arguments={"bind": db.engines["replica"]},
+    ).one_or_none()
+
+
 def get_user_agent():
     return str(user_agents.parse(request.headers.get("User-Agent", "")))
 
@@ -162,7 +174,7 @@ def signup():
             computer_code = get_computer_code()
             computer_code_hash = utils.calc_sha256(computer_code)
 
-            user = UserRegistration.query.filter_by(email=email).one_or_none()
+            user = query_user_credentials(email)
             if user:
                 if is_new_user:
                     # An user with the same email address already
@@ -359,7 +371,7 @@ def change_email_login():
     if request.method == "POST":
         old_email = request.form["email"].strip()
         password = request.form["password"]
-        user = UserRegistration.query.filter_by(email=old_email).one_or_none()
+        user = query_user_credentials(old_email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             # NOTE: We create a special kind of login verification
@@ -409,8 +421,6 @@ def choose_new_email(secret):
     if not verification_request:
         return render_template("report_expired_link.html")
 
-    user = UserRegistration.query.filter_by(email=verification_request.email).one()
-
     if request.method == "POST":
         captcha_passed, captcha_error_message = verify_captcha()
         new_email = request.form["email"].strip()
@@ -430,7 +440,7 @@ def choose_new_email(secret):
             # by the user. The `ChangeEmailRequest` generates a secret
             # which is sent to the chosen new email address.
             r = ChangeEmailRequest.create(
-                user_id=user.user_id,
+                user_id=verification_request.user_id,
                 email=new_email,
                 old_email=verification_request.email,
             )
@@ -482,7 +492,7 @@ def change_email_address(secret):
     if request.method == "POST":
         old_email = change_email_request.old_email
         password = request.form["password"]
-        user = UserRegistration.query.filter_by(email=old_email).one_or_none()
+        user = query_user_credentials(old_email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             try:
@@ -612,7 +622,7 @@ def generate_recovery_code(secret):
     if request.method == "POST":
         email = crc_request.email
         password = request.form["password"]
-        user = UserRegistration.query.filter_by(email=email).one_or_none()
+        user = query_user_credentials(email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             new_recovery_code = crc_request.accept()
@@ -661,14 +671,7 @@ def login_form():
     if request.method == "POST":
         email = request.form["email"].strip()
         password = request.form["password"]
-        user = db.session.execute(
-            select(
-                UserRegistration.user_id,
-                UserRegistration.salt,
-                UserRegistration.password_hash,
-            )
-            .where(UserRegistration.email == email)
-        ).one_or_none()
+        user = query_user_credentials(email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             oauth2_subject = hydra.get_subject(user.user_id)

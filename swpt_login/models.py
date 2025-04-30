@@ -1,6 +1,7 @@
 import logging
 import requests
 from urllib.parse import urljoin
+from sqlalchemy.exc import IntegrityError
 from flask import current_app
 from .extensions import db, requests_session
 
@@ -18,6 +19,21 @@ class UserRegistration(db.Model):
         # wants to split the `user_registration` table to several
         # shards (based on the email's hash), this index can be safely
         # removed.
+        #
+        # However, this index can catch nasty problems. For examle,
+        # imagine the case when the user's API object (a debtor or a
+        # creditor) has been removed from the system by an admin, but
+        # the admin forgot to remove the user's `UserRegistration` row
+        # from the login database. Then, when a new user comes and
+        # tries to register, and the user ID of the removed user (for
+        # which there is still a `UserRegistration` row) is unluckily
+        # chosen to be the new user's user ID -- BAM!!!. The result is
+        # that two different user credentials (email plus password)
+        # would be referencing the same user API object (a debtor or a
+        # creditor). The simplest way to avoid this problem is for the
+        # admin to not remove user's API objects (debtors/creditors)
+        # without removing their corresponding `UserRegistration` rows
+        # from the login database.
         db.Index("idx_user_registration_user_id", user_id, unique=True),
         {
             "comment": (
@@ -66,23 +82,6 @@ class ActivateUserSignal(db.Model):
             if status_code == 200:
                 user_query = UserRegistration.query.filter_by(email=self.email)
                 if not db.session.query(user_query.exists()).scalar():
-                    # NOTE: Imagine the case when the user's API
-                    # object (a debtor or a creditor) has been removed
-                    # from the system by an admin, but the admin
-                    # forgot to remove the user's `UserRegistration`
-                    # row from the login database. Then, when a new
-                    # user comes and tries to register, and the user
-                    # ID of the removed user (for which there is still
-                    # a `UserRegistration` row!) is randomly chosen to
-                    # be the new user's user ID -- BAM!!!. The result
-                    # is that two different user credentials (email
-                    # plus password) would be referencing the same
-                    # user API object (a debtor or a creditor). The
-                    # simplest way to avoid this problem is for the
-                    # admin to not remove user's API objects
-                    # (debtors/creditors) without removing their
-                    # corresponding `UserRegistration` rows from the
-                    # login database.
                     db.session.add(
                         UserRegistration(
                             email=self.email,
@@ -92,6 +91,22 @@ class ActivateUserSignal(db.Model):
                             recovery_code_hash=self.recovery_code_hash,
                         )
                     )
+                    try:
+                        db.session.flush()
+                    except IntegrityError:
+                        raise RuntimeError(
+                            "Duplicated email or user ID. This may happen if"
+                            " a user has attempted to sign up more than once"
+                            " simultaneously, with the same email address"
+                            " (duplicated email). In this case, this error is"
+                            " a single rare event which does not cause any"
+                            " problems. However, this error also occurs when"
+                            " an already existing user ID is assigned to a new"
+                            " user, which signals that a serious database"
+                            " inconsistency has been prevented. If this is"
+                            " the case, this error  will continue to show up,"
+                            " again and again."
+                        )
 
             elif status_code == 409 or status_code == 422:
                 # This should be very rare, and not a big problem. In
