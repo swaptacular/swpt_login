@@ -244,7 +244,7 @@ class SignUpRequest(RedisSecretHashRecord):
                     logger = logging.getLogger(__name__)
                     logger.error(
                         "SendingError occurred while trying to activate a"
-                        " user: user ID %s, reservation ID %s.",
+                        " user registration: user ID %s, reservation ID %s.",
                         user_id,
                         reservation_id,
                     )
