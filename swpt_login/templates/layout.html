@@ -20,7 +20,7 @@
               <li><a href="{{config.ABOUT_URL}}">{{config.SITE_TITLE}}</a></li>
               {% for code, language in language_choices %}
                 {% if code != locale_code %}
-                  <li><a href="{{url_for('.set_language', lang=code, to=request.url)}}">{{language}}</a></li>
+                  <li><a href="{{url_for('login.set_language', lang=code, to=request.url)}}">{{language}}</a></li>
                 {% endif %}
               {% endfor %}
             </ul>
