@@ -28,7 +28,6 @@ flask = "^3.1.0"
 flask-sqlalchemy = "3.0.5"
 flask-mail = "^0.10.0"
 flask-migrate = "^4.1.0"
-flask-redis = "^0.4.0"
 flask-babel = "^4.0.0"
 swpt_pythonlib = {git = "https://github.com/swaptacular/swpt_pythonlib.git", tag = "v0.10.6"}
 pytest = "^7.1.2"

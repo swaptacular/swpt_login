@@ -5,9 +5,9 @@ from swpt_pythonlib.flask_signalbus import (
     AtomicProceduresMixin,
 )
 from flask_mail import Mail
-from flask_redis import FlaskRedis
 from flask_babel import Babel
 from flask_migrate import Migrate
+from .flask_redis import FlaskRedis
 from .api_requests_session import get_requests_session
 
 
