@@ -79,7 +79,7 @@ SQLALCHEMY_DATABASE_URI=postgresql+psycopg://swpt_login:swpt_login@localhost:543
 # user requests that a busy system can handle. If not set, the
 # `SQLALCHEMY_DATABASE_URI` will also be used for the read-only
 # operations.
-REPLICA_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
+REPLICA_POSTGRES_URL=
 
 # Set this to the URL for the Redis server instance which the login and
 # consent apps should use. It is highly recommended that your Redis instance
