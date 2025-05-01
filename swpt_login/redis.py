@@ -1,8 +1,8 @@
+import logging
 import re
 import time
 import hashlib
 from sqlalchemy import select
-from contextlib import suppress
 from typing import Optional
 from urllib.parse import urljoin
 from sqlalchemy.exc import IntegrityError
@@ -237,9 +237,17 @@ class SignUpRequest(RedisSecretHashRecord):
                 .with_for_update(skip_locked=True)
                 .one_or_none()
             ):
-                with suppress(activate_user_signal.SendingError):
+                try:
                     activate_user_signal.send_signalbus_message()
                     db.session.delete(activate_user_signal)
+                except activate_user_signal.SendingError:
+                    logger = logging.getLogger(__name__)
+                    logger.error(
+                        "SendingError occurred while trying to activate a"
+                        " user: user ID %s, reservation ID %s.",
+                        user_id,
+                        reservation_id,
+                    )
 
             db.session.commit()
             self.user_id = user_id
