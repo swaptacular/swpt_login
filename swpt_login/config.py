@@ -51,7 +51,7 @@ class MetaEnvReader(type):
 class Configuration(metaclass=MetaEnvReader):
     VERSION = "0.9.5"
 
-    PRIMARY_POSTGRES_URL = ""
+    MASTER_POSTGRES_URL = ""
     REPLICA_POSTGRES_URL = ""
 
     SQLALCHEMY_ENGINE_OPTIONS: _parse_dict = _parse_dict('{"pool_size": 0}')

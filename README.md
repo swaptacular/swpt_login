@@ -71,7 +71,7 @@ LOGIN_PATH=
 CONSENT_PATH=
 
 # The URL for the primary and replica PostgreSQL database.
-PRIMARY_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
+MASTER_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
 REPLICA_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
 
 # Set this to the URL for the Redis server instance that the login and

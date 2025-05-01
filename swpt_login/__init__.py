@@ -90,12 +90,12 @@ def create_app(config_dict={}):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_port=1)
     app.config.from_object(Configuration)
     app.config.from_mapping(config_dict)
-    app.config["SQLALCHEMY_DATABASE_URI"] = app.config["PRIMARY_POSTGRES_URL"]
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.config["MASTER_POSTGRES_URL"]
     app.config["SQLALCHEMY_BINDS"] = {
         "replica": {
             "url": (
                 app.config["REPLICA_POSTGRES_URL"]
-                or app.config["PRIMARY_POSTGRES_URL"]
+                or app.config["MASTER_POSTGRES_URL"]
             ),
             **app.config["SQLALCHEMY_ENGINE_OPTIONS"],
         },

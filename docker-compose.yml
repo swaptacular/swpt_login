@@ -38,7 +38,7 @@ services:
     env_file: .env
     environment:
       - 'PYTHONDONTWRITEBYTECODE=1'
-      - 'PRIMARY_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
+      - 'MASTER_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
       - 'REPLICA_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
       - 'REDIS_URL=redis://tests-redis:6379/0'
       - 'MAIL_SERVER=tests-mail'
@@ -60,7 +60,7 @@ services:
     env_file: .env
     environment:
       - 'PYTHONDONTWRITEBYTECODE=1'
-      - 'PRIMARY_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
+      - 'MASTER_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
       - 'REPLICA_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
       - 'REDIS_URL=redis://tests-redis:6379/0'
     command: flush
