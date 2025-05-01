@@ -51,12 +51,12 @@ class MetaEnvReader(type):
 class Configuration(metaclass=MetaEnvReader):
     VERSION = "0.9.5"
 
-    PRIMARY_POSTGRES_URL = ""
-    REPLICA_POSTGRES_URL = ""
-
+    SQLALCHEMY_DATABASE_URI = ""
     SQLALCHEMY_ENGINE_OPTIONS: _parse_dict = _parse_dict('{"pool_size": 0}')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
+
+    REPLICA_POSTGRES_URL = ""
 
     SECRET_KEY = "dummy-secret"
     SITE_TITLE = "Login Test Site"
@@ -67,7 +67,9 @@ class Configuration(metaclass=MetaEnvReader):
     LOGIN_PATH = "/login"
     CONSENT_PATH = "/consent"
     HYDRA_ADMIN_URL = "http://hydra:4445/"
+
     REDIS_URL = "redis://localhost:6379/0"
+    REDIS_CLUSTER_URL = ""
 
     MAIL_SERVER = "localhost"
     MAIL_PORT = 25
@@ -87,6 +89,8 @@ class Configuration(metaclass=MetaEnvReader):
     APP_SIGNUP_REDIRECT_URL = ""
     HYDRA_REQUEST_TIMEOUT_SECONDS = 5
     SHOW_CAPTCHA_ON_SIGNUP = True
+    SIGNUP_IP_BLOCK_SECONDS = 2 * 60 * 60
+    SIGNUP_IP_MAX_REGISTRATIONS = 15
     CAPTCHA_RESPONSE_FIELD_NAME = "g-recaptcha-response"
     LOGIN_VERIFIED_DEVICES_MAX_COUNT = 10
     LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS = 60 * 60

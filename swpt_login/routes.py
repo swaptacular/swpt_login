@@ -20,6 +20,7 @@ from .redis import (
     ChangeEmailRequest,
     ChangeRecoveryCodeRequest,
     UserLoginsHistory,
+    increment_key_with_limit,
 )
 from .models import UserRegistration
 from .extensions import db
@@ -319,6 +320,17 @@ def choose_password(secret):
                     email=signup_request.email,
                 )
             else:
+                # Limit the number of allowed sign-ups for a given
+                # period of time, per IP address. This seems to be
+                # necessary, because CAPTCHAs are becoming less and
+                # less effective. Note that this method works well
+                # only for IPv4, but not for IPv6.
+                increment_key_with_limit(
+                    key="ip:" + request.remote_addr,
+                    limit=current_app.config["SIGNUP_IP_MAX_REGISTRATIONS"],
+                    period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
+                )
+
                 # For newly registered users, a secret recovery code
                 # will be generated, which they must write down and
                 # hide somewhere. The recovery code is required when
@@ -382,7 +394,7 @@ def change_email_login():
                 login_verification_request = LoginVerificationRequest.create(
                     user_id=user.user_id,
                     email=old_email,
-                    challenge_id=request.args.get("login_challenge"),
+                    challenge_id=request.args.get("login_challenge", ""),
                 )
             except LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
@@ -659,7 +671,7 @@ def login_form():
     the decision.
     """
 
-    login_request = hydra.LoginRequest(request.args["login_challenge"])
+    login_request = hydra.LoginRequest(request.args.get("login_challenge", ""))
 
     # Sometimes, after the user has already been authenticated, he/she
     # will reload this page again. In such cases we should immediately
