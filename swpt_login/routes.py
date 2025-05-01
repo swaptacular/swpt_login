@@ -170,7 +170,7 @@ def signup():
     is_new_user = "recover" not in request.args
     if request.method == "POST":
         captcha_passed, captcha_error_message = verify_captcha()
-        email = request.form["email"].strip()
+        email = request.form.get("email", "").strip()
 
         if utils.is_invalid_email(email):
             flash(gettext("The email address is invalid."))
@@ -275,7 +275,7 @@ def choose_password(secret):
 
     if request.method == "POST":
         recovery_code = request.form.get("recovery_code", "")
-        password = request.form["password"]
+        password = request.form.get("password", "")
         min_length = current_app.config["PASSWORD_MIN_LENGTH"]
         max_length = current_app.config["PASSWORD_MAX_LENGTH"]
 
@@ -293,7 +293,7 @@ def choose_password(secret):
                     num=max_length,
                 )
             )
-        elif password != request.form["confirm"]:
+        elif password != request.form.get("confirm", ""):
             flash(gettext("Passwords do not match."))
         elif is_recovery and not signup_request.is_correct_recovery_code(recovery_code):
             try:
@@ -391,8 +391,8 @@ def change_email_login():
     """
 
     if request.method == "POST":
-        old_email = request.form["email"].strip()
-        password = request.form["password"]
+        old_email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
         user = query_user_credentials(old_email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
@@ -445,7 +445,7 @@ def choose_new_email(secret):
 
     if request.method == "POST":
         captcha_passed, captcha_error_message = verify_captcha()
-        new_email = request.form["email"].strip()
+        new_email = request.form.get("email", "").strip()
         recovery_code = request.form.get("recovery_code", "")
 
         if utils.is_invalid_email(new_email):
@@ -513,7 +513,7 @@ def change_email_address(secret):
 
     if request.method == "POST":
         old_email = change_email_request.old_email
-        password = request.form["password"]
+        password = request.form.get("password", "")
         user = query_user_credentials(old_email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
@@ -598,7 +598,7 @@ def change_recovery_code():
 
     if request.method == "POST":
         captcha_passed, captcha_error_message = verify_captcha()
-        email = request.form["email"].strip()
+        email = request.form.get("email", "").strip()
 
         if utils.is_invalid_email(email):
             flash(gettext("The email address is invalid."))
@@ -643,7 +643,7 @@ def generate_recovery_code(secret):
 
     if request.method == "POST":
         email = crc_request.email
-        password = request.form["password"]
+        password = request.form.get("password", "")
         user = query_user_credentials(email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
@@ -691,8 +691,8 @@ def login_form():
         return redirect(login_request.accept(oauth2_subject))
 
     if request.method == "POST":
-        email = request.form["email"].strip()
-        password = request.form["password"]
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
         user = query_user_credentials(email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
@@ -797,7 +797,7 @@ def enter_verification_code():
         return render_template("report_expired_link.html")
 
     if request.method == "POST":
-        if request.form["verification_code"].strip() == lvr.code:
+        if request.form.get("verification_code", "").strip() == lvr.code:
             lvr.accept()
 
             # Here we use `UserLoginsHistory` to save the
