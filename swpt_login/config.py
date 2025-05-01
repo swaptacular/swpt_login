@@ -51,12 +51,12 @@ class MetaEnvReader(type):
 class Configuration(metaclass=MetaEnvReader):
     VERSION = "0.9.5"
 
-    MASTER_POSTGRES_URL = ""
-    REPLICA_POSTGRES_URL = ""
-
+    SQLALCHEMY_DATABASE_URI = ""
     SQLALCHEMY_ENGINE_OPTIONS: _parse_dict = _parse_dict('{"pool_size": 0}')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
+
+    REPLICA_POSTGRES_URL = ""
 
     SECRET_KEY = "dummy-secret"
     SITE_TITLE = "Login Test Site"
@@ -67,7 +67,9 @@ class Configuration(metaclass=MetaEnvReader):
     LOGIN_PATH = "/login"
     CONSENT_PATH = "/consent"
     HYDRA_ADMIN_URL = "http://hydra:4445/"
+
     REDIS_URL = "redis://localhost:6379/0"
+    REDIS_CLUSTER_URL = ""
 
     MAIL_SERVER = "localhost"
     MAIL_PORT = 25

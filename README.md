@@ -70,15 +70,31 @@ LOGIN_PATH=
 # will be either "/creditors-consent" or "/debtors-consent".
 CONSENT_PATH=
 
-# The URL for the primary and replica PostgreSQL database.
-MASTER_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
+# The URL for the PostgreSQL database that the login and consent apps should use.
+SQLALCHEMY_DATABASE_URI=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
+
+# Optional URL for a read-only replica of the master PostgreSQL
+# database (specified by `SQLALCHEMY_DATABASE_URI`). Using multiple
+# read-only replicas behind a load-balancer may increase the number of
+# user requests that a busy system can handle. If not set, the
+# `SQLALCHEMY_DATABASE_URI` will also be used for the read-only
+# operations.
 REPLICA_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
 
-# Set this to the URL for the Redis server instance that the login and
+# Set this to the URL for the Redis server instance which the login and
 # consent apps should use. It is highly recommended that your Redis instance
 # is backed by disk storage. If not so, your users might be inconvenienced
 # when your Redis instace is restarted.
 REDIS_URL=redis://redis:6379/0
+
+# Optional URL for one of the nodes of the Redis Cluster which the
+# login and consent apps should use, instead of using a single Redis
+# server instance. If set, `REDIS_URL` will be ingored. When
+# connecting to a Redis Cluster, usually it is a good idea to specify
+# more than one cluster node. In practice, however, a Kubernetes
+# service will always be used. "redis://my-cluster-service:30001/0"
+# for example.
+REDIS_CLUSTER_URL=
 
 # Set this to the name of your site, as it is known to your users.
 SITE_TITLE=Demo Debtors Agent
@@ -149,6 +165,11 @@ container allows you to execute the following *documented commands*:
 
   **IMPORTANT NOTE: This command has to be run only once (at the
   beginning), but running it multiple times should not do any harm.**
+
+* `await_migrations`
+
+  Blocks until the latest migration applied to the PostgreSQL server
+  instance matches the latest known migration.
 
 * `webserver`
 
