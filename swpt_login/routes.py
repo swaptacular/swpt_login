@@ -132,7 +132,7 @@ def set_computer_code_cookie(response, computer_code):
 
 @login.route("/language/<lang>")
 def set_language(lang):
-    response = redirect(request.args["to"])
+    response = redirect(request.args.get("to", "/"))
     response.set_cookie(
         current_app.config["LANGUAGE_COOKIE_NAME"],
         lang,
@@ -253,7 +253,7 @@ def signup():
 @login.route("/email")
 def report_sent_email():
     """Inform the user that a secret link has been sent to his/her email."""
-    email = request.args["email"]
+    email = request.args.get("email", "")
     return render_template("report_sent_email.html", email=email)
 
 
@@ -560,7 +560,7 @@ def report_email_change_failure():
 
     return render_template(
         "report_email_change_failure.html",
-        new_email=request.args["new_email"],
+        new_email=request.args.get("new_email", ""),
     )
 
 
@@ -574,8 +574,8 @@ def report_email_change_success():
 
     return render_template(
         "report_email_change_success.html",
-        old_email=request.args["old_email"],
-        new_email=request.args["new_email"],
+        old_email=request.args.get("old_email", ""),
+        new_email=request.args.get("new_email", ""),
     )
 
 
@@ -834,7 +834,7 @@ def grant_consent():
     After a successful login, the user will be asked to authorize the
     application to perform different classes of operations ("scopes").
     """
-    consent_request = hydra.ConsentRequest(request.args["consent_challenge"])
+    consent_request = hydra.ConsentRequest(request.args.get("consent_challenge", ""))
 
     if request.method == "POST":
         granted_scopes = request.form.getlist("granted_scope")
@@ -858,7 +858,7 @@ def grant_consent():
 @consent.route("/revoke-access", methods=["GET", "POST"])
 def revoke_granted_access():
     if request.method == "POST":
-        consent_request = hydra.ConsentRequest(request.args["consent_challenge"])
+        consent_request = hydra.ConsentRequest(request.args.get("consent_challenge", ""))
         consent_data = consent_request.fetch()
         if consent_data:
             hydra.revoke_consent_sessions(consent_data["subject"])
