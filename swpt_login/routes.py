@@ -34,6 +34,7 @@ consent = Blueprint(
 
 
 @login.after_app_request
+@consent.after_app_request
 def set_cache_control_header(response):
     if "Cache-Control" not in response.headers:
         response.headers["Cache-Control"] = "no-cache"
@@ -41,12 +42,14 @@ def set_cache_control_header(response):
 
 
 @login.after_app_request
+@consent.after_app_request
 def set_frame_options_header(response):
     response.headers["X-Frame-Options"] = "DENY"
     return response
 
 
 @login.app_context_processor
+@consent.app_context_processor
 def inject_get_locale():
     return dict(get_locale=get_locale)
 
@@ -134,6 +137,13 @@ def set_language(lang):
         current_app.config["LANGUAGE_COOKIE_NAME"],
         lang,
         max_age=1000000000,
+        path=current_app.config["LOGIN_PATH"],
+    )
+    response.set_cookie(
+        current_app.config["LANGUAGE_COOKIE_NAME"],
+        lang,
+        max_age=1000000000,
+        path=current_app.config["CONSENT_PATH"],
     )
     return response
 
