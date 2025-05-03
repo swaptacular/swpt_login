@@ -44,6 +44,7 @@ def db_session(app):
     for cmd in [
         "TRUNCATE TABLE user_registration",
         "TRUNCATE TABLE activate_user_signal",
+        "TRUNCATE TABLE deleted_registration_signal",
     ]:
         db.session.execute(sqlalchemy.text(cmd))
     db.session.commit()

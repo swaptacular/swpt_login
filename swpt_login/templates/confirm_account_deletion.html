@@ -1,0 +1,45 @@
+{% extends "form.html" %}
+
+{% block form_header %}
+  {% trans %}Delete Account{% endtrans %}
+{% endblock form_header %}
+
+{% block form_body %}
+  <form action="" method="POST" id="confirm-account-deletion-form">
+    <p class="form-comment">
+      {% trans %}
+        <strong>Warning:</strong> Be careful! If you decide to proceed
+        whit this action, your account, along with all the currency
+        holdings associated with it will be irreversibly lost.
+      {% endtrans %}
+    </p>
+    <p class="confirm-account-deletion-checkbox">
+      <label for="confirmed-deletion">{% trans %}Confirmation{% endtrans %}</label>
+      <input id="confirmed-deletion"
+             name="confirmed_deletion"
+             value="yes"
+             type="checkbox"
+             required
+             {% if confirmed_deletion == "yes" %}checked{% endif %}
+             >
+      <span>
+        {% trans %}
+          Yes, I understand the consequences. I do want my account to
+          be deleted.
+        {% endtrans %}
+      </span>
+    </p>
+    <p>
+      <label for="password">{% trans %}Password{% endtrans %}</label>
+      <input id="password"
+             name="password"
+             type="password"
+             placeholder="{% trans %}Enter your password{% endtrans %}"
+             required
+             >
+    </p>
+    <p>
+      <input type="submit" value="{% trans %}Delete Account{% endtrans %}">
+    </p>
+  </form>
+{% endblock form_body %}

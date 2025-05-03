@@ -171,10 +171,8 @@ input[type=checkbox]:active, input[type=checkbox]:checked:active {
     box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px 1px 3px rgba(0,0,0,0.1);
 }
 input[type=checkbox]:checked {
-    background-color: #e9ecee;
     border: 1px solid #adb8c0;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05), inset 15px 10px -12px rgba(255,255,255,0.1);
-    color: #99a1a7;
 }
 input[type=checkbox]:checked:after {
     content: '\2714';
@@ -182,11 +180,21 @@ input[type=checkbox]:checked:after {
     position: absolute;
     top: 0px;
     left: 3px;
-    color: #99a1a7;
 }
 input[type=checkbox] + span {
     display: inline-block;
     width: 90%;
+    font-size: 16px;
+    margin-left: 8px;
+}
+.grant-scope-checkbox input[type=checkbox]:checked {
+    background-color: #e9ecee;
+    color: #99a1a7;
+}
+.grant-scope-checkbox input[type=checkbox]:checked:after {
+    color: #99a1a7;
+}
+.grant-scope-checkbox input[type=checkbox] + span {
     font-size: 13px;
     margin-left: 5px;
     margin-top: 1px;
@@ -220,4 +228,9 @@ input[type=submit]:hover, form input[type=button]:hover, .login-link:hover{
     box-shadow:none;
     -moz-box-shadow:none;
     -webkit-box-shadow:none;
+}
+
+#confirm-account-deletion-form .form-comment {
+    color: red;
+    font-size: 17px;
 }

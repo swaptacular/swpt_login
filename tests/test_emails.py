@@ -23,8 +23,9 @@ def test_email_templates(mocker, app):
         emails.send_change_email_address_request_email(email, link)
         emails.send_change_email_address_email(email, link)
         emails.send_change_recovery_code_email(email, link)
+        emails.send_delete_account_email(email, link, link)
 
-    assert mail.send.call_count == 8
+    assert mail.send.call_count == 9
 
 
 def test_email_sending(app):
@@ -40,3 +41,4 @@ def test_email_sending(app):
         emails.send_change_email_address_request_email(email, link)
         emails.send_change_email_address_email(email, link)
         emails.send_change_recovery_code_email(email, link)
+        emails.send_delete_account_email(email, link, link)

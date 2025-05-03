@@ -27,27 +27,26 @@ def swpt_login():
     help="Exit after some time (mainly useful during testing).",
 )
 def flush(wait: float, quit_early: bool) -> None:
-    """Periodically process unprocessed `activate_user_signal` rows."""
+    """Periodically process pending tasks."""
 
     from swpt_pythonlib.flask_signalbus import SignalBus
-    from swpt_login.models import ActivateUserSignal
 
     logger = logging.getLogger(__name__)
-    logger.info("Started processing unprocessed rows.")
+    logger.info("Started processing pending tasks.")
     signalbus: SignalBus = current_app.extensions["signalbus"]
 
     while True:
         started_at = time.time()
         try:
-            count = signalbus.flushmany([ActivateUserSignal])
+            count = signalbus.flushmany()
         except Exception:
-            logger.exception("Caught error while processing unprocessed rows.")
+            logger.exception("Caught error while processing pending tasks.")
             sys.exit(1)
 
         if count > 0:
-            logger.info("%i unprocessed rows have been successfully processed.", count)
+            logger.info("%i pending tasks have been successfully processed.", count)
         else:
-            logger.debug("0 unprocessed rows have been processed.")
+            logger.debug("0 pending tasks have been processed.")
 
         seconds_to_sleep = max(0.0, wait + started_at - time.time())
         if quit_early:

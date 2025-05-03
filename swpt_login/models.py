@@ -127,3 +127,12 @@ class ActivateUserSignal(db.Model):
 
         except (requests.ConnectionError, requests.Timeout):
             raise self.SendingError("connection problem")
+
+
+class DeletedRegistrationSignal(db.Model):
+    class SendingError(Exception):
+        """Failed deactivation request."""
+
+    user_id = db.Column(db.String(64), primary_key=True)
+
+    # TODO: Implement the `send_signalbus_message` method.

@@ -8,23 +8,23 @@ directory):
 ## Extract all messages to `messages.pot`:
 
 ```
-$ pipenv run pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
+$ pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
 ```
 
 ## Update all `.po` files from `messages.pot`
 
 ```
-$ pipenv run pybabel update -i messages.pot -d translations
+$ pybabel update -i messages.pot -d translations
 ```
 
 ## Compile all `.po` files to `.mo` files
 
 ```
-$ pipenv run pybabel compile -d translations
+$ pybabel compile -d translations
 ```
 
 ## Create translation for a new language:
 
 ```
-$ pipenv run pybabel init -i messages.pot -d translations -l de
+$ pybabel init -i messages.pot -d translations -l de
 ```

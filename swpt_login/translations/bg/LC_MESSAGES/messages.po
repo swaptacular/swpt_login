@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-01 21:23+0300\n"
-"PO-Revision-Date: 2025-05-01 22:13+0300\n"
+"POT-Creation-Date: 2025-05-03 22:55+0300\n"
+"PO-Revision-Date: 2025-05-03 23:17+0300\n"
 "Last-Translator: Evgeni Pandurski <epandurski@gmai.com>\n"
 "Language: bg\n"
 "Language-Team: Bulgarian <epandurski@gmai.com>\n"
@@ -25,7 +25,7 @@ msgstr "Не сте решили \"reCAPTCHA\" пъзела."
 msgid "Duplicate Registration"
 msgstr "Съществуваща регистрация"
 
-#: emails.py:21 routes.py:243
+#: emails.py:21 routes.py:249
 msgid "Change Account Password"
 msgstr "Смяна на потребителска парола"
 
@@ -33,7 +33,7 @@ msgstr "Смяна на потребителска парола"
 msgid "Changed Account Password"
 msgstr "Променена потребителска парола"
 
-#: emails.py:47 routes.py:241
+#: emails.py:47 routes.py:247
 msgid "Create a New Account"
 msgstr "Регистрация на нов потребител"
 
@@ -42,50 +42,59 @@ msgstr "Регистрация на нов потребител"
 msgid "New login from %(user_agent)s"
 msgstr "Ново влизане от %(user_agent)s"
 
-#: emails.py:76 emails.py:88 routes.py:549 templates/change_email_login.html:4
+#: emails.py:76 emails.py:88 routes.py:556 templates/change_email_login.html:4
 #: templates/choose_new_email.html:4
 msgid "Change Email Address"
 msgstr "Промяна на имейл адрес"
 
-#: emails.py:101 routes.py:626 routes.py:669
+#: emails.py:101 routes.py:633 routes.py:676
 msgid "Change Recovery Code"
 msgstr "Промяна на кода за възстановяване"
+
+#: emails.py:118 templates/confirm_account_deletion.html:4
+#: templates/confirm_account_deletion.html:42
+msgid "Delete Account"
+msgstr "Изтриване на регистрация"
 
 #: routes.py:68
 msgid "Incorrect captcha solution."
 msgstr "Неправилно решение на captcha-та"
 
-#: routes.py:176 routes.py:452 routes.py:604
+#: routes.py:182 routes.py:459 routes.py:611
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
-#: routes.py:285
+#: routes.py:291
 #, python-format
 msgid "The password should have at least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
-#: routes.py:292
+#: routes.py:298
 #, python-format
 msgid "The password should have at most %(num)s characters."
 msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
-#: routes.py:297
+#: routes.py:303
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
 
-#: routes.py:303 routes.py:456
+#: routes.py:309 routes.py:463
 msgid "Incorrect recovery code"
 msgstr "Грешен код за възстановяване"
 
-#: routes.py:427 routes.py:774
+#: routes.py:434 routes.py:724 routes.py:899
 msgid "Incorrect email or password"
 msgstr "Грешен имейл или парола"
 
-#: routes.py:545 routes.py:665
+#: routes.py:552 routes.py:672 routes.py:776
 msgid "Incorrect password"
 msgstr "Грешна парола"
 
-#: routes.py:822
+#: routes.py:753
+msgid "You have not confirmed the deletion of your account."
+msgstr "Не сте потвърдили изтриването на вашата регистрация."
+
+#: routes.py:947
 msgid "Invalid verification code"
 msgstr "Грешен код за потвърждение"
 
@@ -160,11 +169,15 @@ msgid "Enter your old email"
 msgstr "Въведете вашия стар имейл"
 
 #: templates/change_email_login.html:21 templates/choose_password.html:23
-#: templates/enter_password.html:8 templates/login.html:21
+#: templates/confirm_account_deletion.html:33
+#: templates/delete_account_login.html:21 templates/enter_password.html:8
+#: templates/login.html:21
 msgid "Password"
 msgstr "Парола"
 
-#: templates/change_email_login.html:25 templates/enter_password.html:12
+#: templates/change_email_login.html:25
+#: templates/confirm_account_deletion.html:37
+#: templates/delete_account_login.html:25 templates/enter_password.html:12
 #: templates/login.html:25
 msgid "Enter your password"
 msgstr "Въведете вашата парола"
@@ -299,6 +312,34 @@ msgstr ""
 "на вашия имейл акаунт!\n"
 "     "
 
+#: templates/confirm_account_deletion.html:10
+msgid ""
+"\n"
+"        <strong>Warning:</strong> Be careful! If you decide to proceed\n"
+"        whit this action, your account, along with all the currency\n"
+"        holdings associated with it will be irreversibly lost.\n"
+"      "
+msgstr ""
+"\n"
+"<strong>Внимание:</strong> Ако решите да продължите с това действие, вашата "
+"регистрация, заедно със всичките ваши пари асоциирани с нея, ще бъдат "
+"безвъзвратно загубени."
+
+#: templates/confirm_account_deletion.html:17
+msgid "Confirmation"
+msgstr "Потвърждение"
+
+#: templates/confirm_account_deletion.html:26
+msgid ""
+"\n"
+"          Yes, I understand the consequences. I do want my account to\n"
+"          be deleted.\n"
+"        "
+msgstr ""
+"\n"
+"Потвърждавам че разбирам последствията. Аз наистина искам моята регистрация "
+"да бъде изтрита."
+
 #: templates/confirm_registration.txt:1
 #, python-format
 msgid ""
@@ -320,6 +361,56 @@ msgstr ""
 "\n"
 "Ако сте получили този имейл погрешка, просто го изтрийте. Няма да бъдете\n"
 "регистрирани, ако не кликнете върху горната връзка.\n"
+
+#: templates/delete_account.txt:1
+#, python-format
+msgid ""
+"Proceed with deleting your account on %(site)s by clicking on the\n"
+"following link:\n"
+"\n"
+"%(delete_account_link)s\n"
+"\n"
+"This link will expire in %(num)s minutes.\n"
+"\n"
+"If you do not remember trying to delete you account on %(site)s,\n"
+"chances are that someone else knows your password and tries to hijack\n"
+"your account. If you suspect that this is the case, you should\n"
+"immediately change your account password by clicking on the following\n"
+"link:\n"
+"\n"
+"%(change_password_page)s\n"
+msgstr ""
+"Продължете процедурата по изтриване на вашата регистрация в %(site)s,\n"
+"като кликнете върху долната връзка:\n"
+"\n"
+"%(delete_account_link)s\n"
+"\n"
+"Тази връзка ще престане да бъде активна след %(num)s минути.\n"
+"\n"
+"Ако не помните да сте се опитвали наскоро да изтриете регистрацията си в\n"
+"%(site)s, вероятно някой друг знае паролата ви и се опитва да \"открадне\"\n"
+"акаунта ви. Ако подозирате че случаят е такъв, трябва незабавно да\n"
+"промените паролата си, като кликнете на връзката по-долу:\n"
+"\n"
+"%(change_password_page)s\n"
+
+#: templates/delete_account_login.html:4
+msgid "Delete Your Account"
+msgstr "Изтриване на регистрация"
+
+#: templates/delete_account_login.html:10 templates/login.html:10
+#: templates/signup.html:8
+msgid "Email"
+msgstr "Имейл адрес"
+
+#: templates/delete_account_login.html:15 templates/login.html:15
+#: templates/signup.html:13
+msgid "Enter your email"
+msgstr "Въведете своя имейл адрес"
+
+#: templates/delete_account_login.html:30 templates/signup.html:24
+msgid "Send me a secret link"
+msgstr "Изпрати ми тайна връзка"
 
 #: templates/duplicate_registration.txt:1
 #, python-format
@@ -470,14 +561,6 @@ msgstr "Искате да отмените дадено вече разреше�
 msgid "Login"
 msgstr "Вход"
 
-#: templates/login.html:10 templates/signup.html:8
-msgid "Email"
-msgstr "Имейл адрес"
-
-#: templates/login.html:15 templates/signup.html:13
-msgid "Enter your email"
-msgstr "Въведете своя имейл адрес"
-
 #: templates/login.html:39
 msgid "Create a new account"
 msgstr "Регистрация на нов потребител"
@@ -489,6 +572,23 @@ msgstr "Забравена парола?"
 #: templates/login.html:41
 msgid "Lost your recovery code?"
 msgstr "Загубен код за възстановяване?"
+
+#: templates/login.html:43
+msgid "Delete your account"
+msgstr "Изтриване на регистрация"
+
+#: templates/report_account_deletion_success.html:6
+#, python-format
+msgid ""
+"\n"
+"      The account belonging to %(email)s has been deleted. Very soon,\n"
+"      any personal data associated with this account will be deleted\n"
+"      too.\n"
+"    "
+msgstr ""
+"\n"
+"Регистрацията принадлежаща на %(email)s е изтрита. Съвсем скоро, всички\n"
+"лични данни свързани с тази регистрация също ще бъдат изтрити."
 
 #: templates/report_email_change_failure.html:6
 #, python-format
@@ -640,10 +740,6 @@ msgstr ""
 #: templates/revoke_granted_access.html:17
 msgid "Revoke granted permissions"
 msgstr "Отмени дадените разрешения"
-
-#: templates/signup.html:24
-msgid "Send me a secret link"
-msgstr "Изпрати ми тайна връзка"
 
 #: templates/verification_code.txt:1
 #, python-format

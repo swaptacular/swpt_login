@@ -1,0 +1,17 @@
+{% trans site=config.SITE_TITLE, num=config.CHANGE_RECOVERY_CODE_REQUEST_EXPIRATION_SECONDS // 60 -%}
+Proceed with deleting your account on {{site}} by clicking on the
+following link:
+
+{{delete_account_link}}
+
+This link will expire in {{num}} minutes.
+
+If you do not remember trying to delete you account on {{site}},
+chances are that someone else knows your password and tries to hijack
+your account. If you suspect that this is the case, you should
+immediately change your account password by clicking on the following
+link:
+
+{{change_password_page}}
+{% endtrans %}
+{% include '_email_signature.txt' %}
