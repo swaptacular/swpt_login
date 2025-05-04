@@ -278,7 +278,7 @@ msgstr "Въведете вашия код за възстановяване"
 
 #: templates/choose_new_email.html:24
 msgid "New email"
-msgstr "Нов имайл"
+msgstr "Нов имейл"
 
 #: templates/choose_new_email.html:29
 msgid "Enter your new email"
@@ -330,7 +330,7 @@ msgid ""
 msgstr ""
 "\n"
 "<strong>Внимание:</strong> Ако решите да продължите с това действие, "
-"вашата регистрация, заедно със всичките ваши пари асоциирани с нея, ще "
+"вашата регистрация, заедно със всичките ваши пари свързани с нея, ще "
 "бъдат безвъзвратно загубени."
 
 #: templates/confirm_account_deletion.html:17
@@ -685,7 +685,7 @@ msgstr "Към страницата за вход"
 
 #: templates/report_sent_email.html:4
 msgid "Sent Email"
-msgstr "Изпратен имайл"
+msgstr "Изпратен имейл"
 
 #: templates/report_sent_email.html:7
 #, python-format
