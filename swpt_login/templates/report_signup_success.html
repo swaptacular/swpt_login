@@ -1,20 +1,13 @@
 {% extends "message.html" %}
 
 {% block message %}
-  {% if not recovery_code %}
-    <p class="success-message-icon"></p>
-  {% endif %}
   <p>
     {% trans email='<em class="email">{}</em>'.format(email)|safe %}
       A new account has been created for {{email}}.
     {% endtrans %}
-    {% if recovery_code %}
-      {% trans %}Your account recovery code is:{% endtrans %}
-    {% endif %}
+    {% trans %}Your account recovery code is:{% endtrans %}
   </p>
-  {% if recovery_code %}
-    {% include '_recovery_code.html' %}
-  {% endif %}
+  {% include '_recovery_code.html' %}
   <p>
     {% if config.APP_SIGNUP_REDIRECT_URL %}
       <a class="login-link" href="{{config.APP_SIGNUP_REDIRECT_URL|safe}}">{% trans %}Log in{% endtrans %}</a>

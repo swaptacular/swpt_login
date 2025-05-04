@@ -1,6 +1,7 @@
 {% extends "message.html" %}
 
 {% block message %}
+  <h1>{% trans %}Sent Email{% endtrans %}</h1>
   <p class="email-message-icon"></p>
   <p>
     {% trans email='<strong class="email">{}</strong>'.format(email)|safe %}

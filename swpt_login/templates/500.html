@@ -1,11 +1,12 @@
 {% extends "message.html" %}
 
 {% block message %}
+  <h1>{% trans %}Error{% endtrans %}</h1>
   <p class="failure-message-icon"></p>
   <p>
     {% trans %}
       An error has occurred during this operation. Most probably the
-      link has expired.
+      link you followed has expired.
     {% endtrans %}
   </p>
 {% endblock message %}

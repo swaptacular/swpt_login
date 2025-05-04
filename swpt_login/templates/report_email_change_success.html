@@ -1,6 +1,7 @@
 {% extends "message.html" %}
 
 {% block message %}
+  <h1>{% trans %}Successful Operation{% endtrans %}</h1>
   <p class="success-message-icon"></p>
   <p>
     {% trans old_email='<em class="email">{}</em>'.format(old_email)|safe, new_email='<em class="email">{}</em>'.format(new_email)|safe %}
@@ -8,4 +9,5 @@
       from {{old_email}} to {{new_email}}.
     {% endtrans %}
   </p>
+  {% include '_login_link.html' %}
 {% endblock message %}
