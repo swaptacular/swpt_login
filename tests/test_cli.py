@@ -10,7 +10,7 @@ class Response:
     status_code: int
 
 
-def test_flush_messages_success(mocker, app, db_session):
+def test_flush_activations_success(mocker, app, db_session):
     class RequestSessionMock:
         post = Mock(return_value=Response(200))
 
@@ -73,7 +73,7 @@ def test_flush_messages_success(mocker, app, db_session):
     assert len(m.UserRegistration.query.all()) == 1
 
 
-def test_flush_messages_failure(mocker, app, db_session):
+def test_flush_activations_failure(mocker, app, db_session):
     class RequestSessionMock:
         post = Mock(return_value=Response(500))
 
@@ -108,3 +108,80 @@ def test_flush_messages_failure(mocker, app, db_session):
     requests_session.post.assert_called_once()
     assert len(m.ActivateUserSignal.query.all()) == 1
     assert len(m.UserRegistration.query.all()) == 0
+
+
+def test_flush_deactivations_success(mocker, app, db_session):
+    class RequestSessionMock:
+        post = Mock(return_value=Response(204))
+
+    requests_session = RequestSessionMock()
+    mocker.patch("swpt_login.models.requests_session", requests_session)
+    assert len(m.DeactivateUserSignal.query.all()) == 0
+    db.session.add(
+        m.DeactivateUserSignal(user_id="123")
+    )
+    db.session.commit()
+    assert len(m.DeactivateUserSignal.query.all()) == 1
+    db.session.commit()
+
+    runner = app.test_cli_runner()
+    result = runner.invoke(
+        args=[
+            "swpt_login",
+            "flush",
+            "--wait",
+            "0.1",
+            "--quit-early",
+        ]
+    )
+    assert result.exit_code == 1
+    requests_session.post.assert_called_once()
+    requests_session.post.assert_called_with(
+        json={"type": "DebtorDeactivationRequest"},
+        url="https://resource-server.example.com/debtors/123/deactivate",
+        verify=False,
+    )
+    assert len(m.DeactivateUserSignal.query.all()) == 0
+
+    runner = app.test_cli_runner()
+    result = runner.invoke(
+        args=[
+            "swpt_login",
+            "flush",
+            "--wait",
+            "0.1",
+            "--quit-early",
+        ]
+    )
+    assert result.exit_code == 1
+    requests_session.post.assert_called_once()
+    assert len(m.ActivateUserSignal.query.all()) == 0
+
+
+def test_flush_deactivations_failure(mocker, app, db_session):
+    class RequestSessionMock:
+        post = Mock(return_value=Response(404))
+
+    requests_session = RequestSessionMock()
+    mocker.patch("swpt_login.models.requests_session", requests_session)
+    assert len(m.DeactivateUserSignal.query.all()) == 0
+    db.session.add(
+        m.DeactivateUserSignal(user_id="123")
+    )
+    db.session.commit()
+    assert len(m.DeactivateUserSignal.query.all()) == 1
+    db.session.commit()
+
+    runner = app.test_cli_runner()
+    result = runner.invoke(
+        args=[
+            "swpt_login",
+            "flush",
+            "--wait",
+            "0.1",
+            "--quit-early",
+        ]
+    )
+    assert result.exit_code == 1
+    requests_session.post.assert_called_once()
+    assert len(m.DeactivateUserSignal.query.all()) == 1

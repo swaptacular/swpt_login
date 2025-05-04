@@ -2,7 +2,7 @@ from swpt_login import models as m
 
 
 def test_sibnalbus_burst_count(app):
-    assert isinstance(m.DeletedRegistrationSignal.signalbus_burst_count, int)
+    assert isinstance(m.DeactivateUserSignal.signalbus_burst_count, int)
     assert isinstance(m.ActivateUserSignal.signalbus_burst_count, int)
 
 

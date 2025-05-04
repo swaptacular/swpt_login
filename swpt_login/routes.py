@@ -22,7 +22,7 @@ from .redis import (
     UserLoginsHistory,
     increment_key_with_limit,
 )
-from .models import UserRegistration, DeletedRegistrationSignal
+from .models import UserRegistration, DeactivateUserSignal
 from .extensions import db
 
 login = Blueprint(
@@ -762,7 +762,7 @@ def confirm_account_deletion(secret):
                 login_verification_request.accept()
 
                 db.session.delete(user)
-                db.session.add(DeletedRegistrationSignal(user_id=user.user_id))
+                db.session.add(DeactivateUserSignal(user_id=user.user_id))
                 db.session.commit()
 
                 return redirect(

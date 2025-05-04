@@ -592,7 +592,7 @@ def test_delete_account(client, db_session, user):
     assert r.status_code == 200
     assert "Incorrect password" in r.get_data(as_text=True)
     assert len(m.UserRegistration.query.all()) == 1
-    assert len(m.DeletedRegistrationSignal.query.all()) == 0
+    assert len(m.DeactivateUserSignal.query.all()) == 0
 
     r = client.post(
         received_link,
@@ -609,6 +609,6 @@ def test_delete_account(client, db_session, user):
     assert "has been deleted" in r.get_data(as_text=True)
 
     assert not m.UserRegistration.query.filter_by(email=USER_EMAIL).one_or_none()
-    signals = m.DeletedRegistrationSignal.query.filter_by().all()
+    signals = m.DeactivateUserSignal.query.filter_by().all()
     assert len(signals) == 1
     assert signals[0].user_id == USER_ID
