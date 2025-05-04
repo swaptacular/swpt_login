@@ -9,14 +9,14 @@
       and click on the link provided there.
     {% endtrans %}
   </p>
-  {% with login_challenge=request.args.login_challenge, login_url=request.args.login_url %}
+  {% with login_challenge=request.args.login_challenge, login_url=config.APP_SIGNUP_REDIRECT_URL %}
     {% if login_challenge %}
       <p>
         <a class="login-link" href="{{url_for('.login_form', login_challenge=login_challenge)|safe}}">{% trans %}Go to the login page{% endtrans %}</a>
       </p>
     {% elif login_url %}
       <p>
-        <a class="login-link" href="{{login_url}}">{% trans %}Go to the login page{% endtrans %}</a>
+        <a class="login-link" href="{{login_url}}">{% trans %}Log in{% endtrans %}</a>
       </p>
     {% endif %}
   {% endwith %}
