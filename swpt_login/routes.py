@@ -761,10 +761,6 @@ def confirm_account_deletion(secret):
             ):
                 login_verification_request.accept()
 
-                # Before deleting the user's registration, we
-                # invalidate all issued tokens for the user's account.
-                hydra.invalidate_credentials(user.user_id)
-
                 db.session.delete(user)
                 db.session.add(DeletedRegistrationSignal(user_id=user.user_id))
                 db.session.commit()

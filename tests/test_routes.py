@@ -533,10 +533,7 @@ def test_login_flow(mocker, client, app, db_session, user):
     assert r.location == "http://example.com/after-login/"
 
 
-def test_delete_account(mocker, client, db_session, user):
-    invalidate_credentials = Mock()
-    mocker.patch("swpt_login.hydra.invalidate_credentials", invalidate_credentials)
-
+def test_delete_account(client, db_session, user):
     r = client.get("/login/delete-account?login_challenge=9876")
     assert r.status_code == 200
     assert "Delete Your Account" in r.get_data(as_text=True)
@@ -582,7 +579,6 @@ def test_delete_account(mocker, client, db_session, user):
     r = client.get(received_link)
     assert r.status_code == 200
     assert "Enter your password" in r.get_data(as_text=True)
-    invalidate_credentials.assert_not_called()
 
     # The password must be entered once again in case the last email
     # has been read by someone else, who have followed the link.
@@ -595,7 +591,6 @@ def test_delete_account(mocker, client, db_session, user):
     )
     assert r.status_code == 200
     assert "Incorrect password" in r.get_data(as_text=True)
-    invalidate_credentials.assert_not_called()
     assert len(m.UserRegistration.query.all()) == 1
     assert len(m.DeletedRegistrationSignal.query.all()) == 0
 
@@ -613,7 +608,6 @@ def test_delete_account(mocker, client, db_session, user):
     assert r.status_code == 200
     assert "has been deleted" in r.get_data(as_text=True)
 
-    invalidate_credentials.assert_called_with(USER_ID)
     assert not m.UserRegistration.query.filter_by(email=USER_EMAIL).one_or_none()
     signals = m.DeletedRegistrationSignal.query.filter_by().all()
     assert len(signals) == 1
