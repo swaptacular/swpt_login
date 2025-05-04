@@ -12,6 +12,14 @@ def get_now_utc():
     return datetime.now(tz=timezone.utc)
 
 
+class classproperty(object):
+    def __init__(self, f):
+        self.f = f
+
+    def __get__(self, obj, owner):
+        return self.f(owner)
+
+
 class UserRegistration(db.Model):
     email = db.Column(db.String(255), primary_key=True)
     user_id = db.Column(db.String(64), nullable=False)
@@ -75,6 +83,10 @@ class ActivateUserSignal(db.Model):
     inserted_at = db.Column(
         db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc
     )
+
+    @classproperty
+    def signalbus_burst_count(self):
+        return current_app.config["APP_FLUSH_ACTIVATE_USERS_BURST_COUNT"]
 
     def send_signalbus_message(self):
         """Activate the user reservation, then add a `UserRegistration` row."""
@@ -155,3 +167,7 @@ class DeletedRegistrationSignal(db.Model):
     )
 
     # TODO: Implement the `send_signalbus_message` method.
+
+    @classproperty
+    def signalbus_burst_count(self):
+        return current_app.config["APP_FLUSH_DELETED_REGISTRATIONS_BURST_COUNT"]
