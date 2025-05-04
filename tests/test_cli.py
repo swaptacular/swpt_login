@@ -17,13 +17,14 @@ def test_flush_messages_success(mocker, app, db_session):
     requests_session = RequestSessionMock()
     mocker.patch("swpt_login.models.requests_session", requests_session)
     assert len(m.ActivateUserSignal.query.all()) == 0
-    db.session.execute(
-        sqlalchemy.text(
-            "INSERT INTO activate_user_signal ("
-            " user_id, reservation_id, email,"
-            " salt, password_hash, recovery_code_hash"
-            ") "
-            "VALUES ('123', '456', 'test@example.com', 'x', 'y', 'z')"
+    db.session.add(
+        m.ActivateUserSignal(
+            user_id="123",
+            reservation_id="456",
+            email="test@example.com",
+            salt="x",
+            password_hash="y",
+            recovery_code_hash="z",
         )
     )
     db.session.commit()
@@ -79,13 +80,14 @@ def test_flush_messages_failure(mocker, app, db_session):
     requests_session = RequestSessionMock()
     mocker.patch("swpt_login.models.requests_session", requests_session)
     assert len(m.ActivateUserSignal.query.all()) == 0
-    db.session.execute(
-        sqlalchemy.text(
-            "INSERT INTO activate_user_signal ("
-            " user_id, reservation_id, email,"
-            " salt, password_hash, recovery_code_hash"
-            ") "
-            "VALUES ('123', '456', 'test@example.com', '', '', '')"
+    db.session.add(
+        m.ActivateUserSignal(
+            user_id="123",
+            reservation_id="456",
+            email="test@example.com",
+            salt="x",
+            password_hash="y",
+            recovery_code_hash="z",
         )
     )
     db.session.commit()

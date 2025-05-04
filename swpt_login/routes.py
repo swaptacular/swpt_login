@@ -352,7 +352,7 @@ def choose_password(secret):
                 # hide somewhere. The recovery code is required when
                 # users forget their passwords, or lose access to
                 # their emails.
-                recovery_code = signup_request.accept(password)
+                recovery_code = signup_request.accept(password, request.remote_addr)
                 UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
 
                 # Do not cache this page! It contains a plain-text secret.

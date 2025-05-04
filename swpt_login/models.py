@@ -1,9 +1,15 @@
 import logging
 import requests
+from datetime import datetime, timezone
 from urllib.parse import urljoin
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.dialects.postgresql import INET
 from flask import current_app
 from .extensions import db, requests_session
+
+
+def get_now_utc():
+    return datetime.now(tz=timezone.utc)
 
 
 class UserRegistration(db.Model):
@@ -12,6 +18,10 @@ class UserRegistration(db.Model):
     salt = db.Column(db.String(32), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     recovery_code_hash = db.Column(db.String(128), nullable=False)
+    registered_from_ip = db.Column(INET)
+    registered_at = db.Column(
+        db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc,
+    )
 
     __table_args__ = (
         # NOTE: This index is not used in queries, and serves only as
@@ -61,6 +71,10 @@ class ActivateUserSignal(db.Model):
     salt = db.Column(db.String(32), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     recovery_code_hash = db.Column(db.String(128), nullable=False)
+    registered_from_ip = db.Column(INET)
+    inserted_at = db.Column(
+        db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc
+    )
 
     def send_signalbus_message(self):
         """Activate the user reservation, then add a `UserRegistration` row."""
@@ -89,6 +103,8 @@ class ActivateUserSignal(db.Model):
                             salt=self.salt,
                             password_hash=self.password_hash,
                             recovery_code_hash=self.recovery_code_hash,
+                            registered_from_ip=self.registered_from_ip,
+                            registered_at=self.inserted_at,
                         )
                     )
                     try:
@@ -134,5 +150,8 @@ class DeletedRegistrationSignal(db.Model):
         """Failed deactivation request."""
 
     user_id = db.Column(db.String(64), primary_key=True)
+    inserted_at = db.Column(
+        db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc
+    )
 
     # TODO: Implement the `send_signalbus_message` method.

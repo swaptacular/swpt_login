@@ -145,6 +145,7 @@ def test_signup(mocker, client, db_session, acitivation_status_code):
         assert user.user_id == "1234"
         assert user.email == USER_EMAIL
         assert user.password_hash == utils.calc_crypt_hash(user.salt, USER_PASSWORD)
+        assert str(user.registered_from_ip) == "127.0.0.1"
         assert len(m.ActivateUserSignal.query.all()) == 0
     elif acitivation_status_code in [409, 422]:
         assert len(m.UserRegistration.query.all()) == 0
