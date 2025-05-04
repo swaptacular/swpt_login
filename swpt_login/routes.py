@@ -236,7 +236,6 @@ def signup():
                 url_for(
                     ".report_sent_email",
                     email=email,
-                    login_url=request.args.get("login_url"),
                     login_challenge=request.args.get("login_challenge"),
                 )
             )
@@ -719,7 +718,13 @@ def delete_account_login():
                 get_change_password_link(email),
             )
 
-            return redirect(url_for(".report_sent_email", email=email))
+            return redirect(
+                url_for(
+                    ".report_sent_email",
+                    email=email,
+                    login_challenge=login_verification_request.challenge_id,
+                )
+            )
 
         flash(gettext("Incorrect email or password"))
 
