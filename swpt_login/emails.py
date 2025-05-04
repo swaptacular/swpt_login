@@ -107,3 +107,21 @@ def send_change_recovery_code_email(email, change_recovery_code_link):
         ),
     )
     mail.send(msg)
+
+
+def send_delete_account_email(
+        email,
+        delete_account_link,
+        change_password_page,
+):
+    msg = Message(
+        subject=gettext("Delete Account"),
+        recipients=[email],
+        body=render_template(
+            "delete_account.txt",
+            email=email,
+            delete_account_link=delete_account_link,
+            change_password_page=change_password_page,
+        ),
+    )
+    mail.send(msg)

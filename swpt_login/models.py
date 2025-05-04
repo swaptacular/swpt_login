@@ -1,9 +1,41 @@
 import logging
 import requests
+from datetime import datetime, timezone
 from urllib.parse import urljoin
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.dialects.postgresql import INET
 from flask import current_app
 from .extensions import db, requests_session
+
+
+def get_now_utc():
+    return datetime.now(tz=timezone.utc)
+
+
+def _get_api_base_url() -> str:
+    api_resource_server = current_app.config["API_RESOURCE_SERVER"]
+    api_reserve_user_id_path = current_app.config["API_RESERVE_USER_ID_PATH"]
+    api_base_path = api_reserve_user_id_path.split(".")[0]
+    return urljoin(api_resource_server, api_base_path)
+
+
+def _get_dactivation_request_type() -> str:
+    user_id_field_name = current_app.config["API_USER_ID_FIELD_NAME"]
+
+    if user_id_field_name == "debtorId":
+        return "DebtorDeactivationRequest"
+    elif user_id_field_name == "creditorId":
+        return "CreditorDeactivationRequest"
+    else:
+        RuntimeError("invalid API_USER_ID_FIELD_NAME")
+
+
+class classproperty(object):
+    def __init__(self, f):
+        self.f = f
+
+    def __get__(self, obj, owner):
+        return self.f(owner)
 
 
 class UserRegistration(db.Model):
@@ -12,6 +44,10 @@ class UserRegistration(db.Model):
     salt = db.Column(db.String(32), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     recovery_code_hash = db.Column(db.String(128), nullable=False)
+    registered_from_ip = db.Column(INET)
+    registered_at = db.Column(
+        db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc,
+    )
 
     __table_args__ = (
         # NOTE: This index is not used in queries, and serves only as
@@ -61,19 +97,21 @@ class ActivateUserSignal(db.Model):
     salt = db.Column(db.String(32), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     recovery_code_hash = db.Column(db.String(128), nullable=False)
+    registered_from_ip = db.Column(INET)
+    inserted_at = db.Column(
+        db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc
+    )
+
+    @classproperty
+    def signalbus_burst_count(self):
+        return current_app.config["APP_FLUSH_ACTIVATE_USERS_BURST_COUNT"]
 
     def send_signalbus_message(self):
         """Activate the user reservation, then add a `UserRegistration` row."""
 
-        api_resource_server = current_app.config["API_RESOURCE_SERVER"]
-        api_reserve_user_id_path = current_app.config["API_RESERVE_USER_ID_PATH"]
-        api_base_path = api_reserve_user_id_path.split(".")[0]
-
         try:
             response = requests_session.post(
-                url=urljoin(
-                    api_resource_server, f"{api_base_path}{self.user_id}/activate"
-                ),
+                url=urljoin(_get_api_base_url(), f"{self.user_id}/activate"),
                 json={"reservationId": self.reservation_id},
                 verify=False,
             )
@@ -89,6 +127,8 @@ class ActivateUserSignal(db.Model):
                             salt=self.salt,
                             password_hash=self.password_hash,
                             recovery_code_hash=self.recovery_code_hash,
+                            registered_from_ip=self.registered_from_ip,
+                            registered_at=self.inserted_at,
                         )
                     )
                     try:
@@ -125,5 +165,37 @@ class ActivateUserSignal(db.Model):
                     " activate an user."
                 )
 
+        except (requests.ConnectionError, requests.Timeout):
+            raise self.SendingError("connection problem")
+
+
+class DeactivateUserSignal(db.Model):
+    class SendingError(Exception):
+        """Failed deactivation request."""
+
+    user_id = db.Column(db.String(64), primary_key=True)
+    inserted_at = db.Column(
+        db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc
+    )
+
+    @classproperty
+    def signalbus_burst_count(self):
+        return current_app.config["APP_FLUSH_DEACTIVATE_USERS_BURST_COUNT"]
+
+    def send_signalbus_message(self):
+        """Deactivate the user reservation."""
+
+        try:
+            response = requests_session.post(
+                url=urljoin(_get_api_base_url(), f"{self.user_id}/deactivate"),
+                json={"type": _get_dactivation_request_type()},
+                verify=False,
+            )
+            status_code = response.status_code
+            if status_code != 204:
+                raise self.SendingError(
+                    f"Unexpected status code ({status_code}) while trying to"
+                    " deactivate an user."
+                )
         except (requests.ConnectionError, requests.Timeout):
             raise self.SendingError("connection problem")

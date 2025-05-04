@@ -40,6 +40,7 @@
         <li><a href="{{url_for('.signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot password?{% endtrans %}</a></li>
         <li><a href="{{url_for('.change_recovery_code', login_challenge=login_challenge)}}">{% trans %}Lost your recovery code?{% endtrans %}</a></li>
         <li><a href="{{url_for('.change_email_login', login_challenge=login_challenge)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
+        <li><a href="{{url_for('.delete_account_login', login_challenge=login_challenge)}}">{% trans %}Delete your account{% endtrans %}</a></li>
       </ul>
     {% endautoescape %}
   {% endwith %}

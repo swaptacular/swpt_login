@@ -1,0 +1,13 @@
+{% extends "message.html" %}
+
+{% block message %}
+  <h1>{% trans %}Successful Operation{% endtrans %}</h1>
+  <p class="success-message-icon"></p>
+  <p>
+    {% trans email='<em class="email">{}</em>'.format(email)|safe %}
+      The account belonging to {{email}} has been deleted. Very soon,
+      any personal data associated with this account will be deleted
+      too.
+    {% endtrans %}
+  </p>
+{% endblock message %}

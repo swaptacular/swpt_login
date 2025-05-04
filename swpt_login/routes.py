@@ -22,7 +22,7 @@ from .redis import (
     UserLoginsHistory,
     increment_key_with_limit,
 )
-from .models import UserRegistration
+from .models import UserRegistration, DeactivateUserSignal
 from .extensions import db
 
 login = Blueprint(
@@ -78,8 +78,7 @@ def query_user_credentials(email):
             UserRegistration.user_id,
             UserRegistration.salt,
             UserRegistration.password_hash,
-        )
-        .where(UserRegistration.email == email),
+        ).where(UserRegistration.email == email),
         bind_arguments={"bind": db.engines["replica"]},
     ).one_or_none()
 
@@ -102,6 +101,13 @@ def get_change_email_address_link(change_email_request):
     return urljoin(
         request.host_url,
         url_for(".change_email_address", secret=change_email_request.secret),
+    )
+
+
+def get_confirm_account_deletion_link(login_verification_request):
+    return urljoin(
+        request.host_url,
+        url_for(".confirm_account_deletion", secret=login_verification_request.secret),
     )
 
 
@@ -346,7 +352,7 @@ def choose_password(secret):
                 # hide somewhere. The recovery code is required when
                 # users forget their passwords, or lose access to
                 # their emails.
-                recovery_code = signup_request.accept(password)
+                recovery_code = signup_request.accept(password, request.remote_addr)
                 UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
 
                 # Do not cache this page! It contains a plain-text secret.
@@ -399,7 +405,8 @@ def change_email_login():
             # NOTE: We create a special kind of login verification
             # request -- a login verification request without a
             # verification code. This request can only be used to set
-            # a new email address for the account.
+            # a new email address for the account, or to delete the
+            # account.
             try:
                 login_verification_request = LoginVerificationRequest.create(
                     user_id=user.user_id,
@@ -457,10 +464,10 @@ def choose_new_email(secret):
         else:
             verification_request.accept()
 
-            # The third and final step of "change email" flow is to
-            # verify that the chosen new email address really is owned
-            # by the user. The `ChangeEmailRequest` generates a secret
-            # which is sent to the chosen new email address.
+            # The third and final step of the "change email" flow is
+            # to verify that the chosen new email address really is
+            # owned by the user. The `ChangeEmailRequest` generates a
+            # secret which is sent to the chosen new email address.
             r = ChangeEmailRequest.create(
                 user_id=verification_request.user_id,
                 email=new_email,
@@ -491,7 +498,7 @@ def choose_new_email(secret):
 
 @login.route("/change-email/<secret>", methods=["GET", "POST"])
 def change_email_address(secret):
-    """The third and final step of "change email" flow.
+    """The third and final step of the "change email" flow.
 
     At this point the user have satisfied the following requirements:
 
@@ -667,6 +674,120 @@ def generate_recovery_code(secret):
     return render_template(
         "enter_password.html",
         title=gettext("Change Recovery Code"),
+    )
+
+
+@login.route("/delete-account", methods=["GET", "POST"])
+def delete_account_login():
+    """Initiates the "delete account" flow.
+
+    Users must be able to delete their registrations from the system.
+    To allow this we require:
+
+      1. The user's email address;
+      2. The user's password;
+      4. The ownership of the email address must be verified.
+
+    This page starts this process by asking for the user's email
+    address, and the user's password. In fact, this page is a kind of
+    login screen.
+    """
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        user = query_user_credentials(email)
+
+        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
+            # NOTE: We create a special kind of login verification
+            # request -- a login verification request without a
+            # verification code. This request can only be used to set
+            # a new email address for the account, or to delete the
+            # account.
+            try:
+                login_verification_request = LoginVerificationRequest.create(
+                    user_id=user.user_id,
+                    email=email,
+                    challenge_id=request.args.get("login_challenge", ""),
+                )
+            except LoginVerificationRequest.ExceededMaxAttempts:
+                abort(403)
+
+            emails.send_delete_account_email(
+                email,
+                get_confirm_account_deletion_link(login_verification_request),
+                get_change_password_link(email),
+            )
+
+            return redirect(url_for(".report_sent_email", email=email))
+
+        flash(gettext("Incorrect email or password"))
+
+    return render_template("delete_account_login.html")
+
+
+@login.route("/confirm-deletion/<secret>", methods=["GET", "POST"])
+def confirm_account_deletion(secret):
+    """The final step of the "delete account" flow.
+
+    At this point the user have satisfied the following requirements:
+
+      1. Knows the email address;
+      2. Knows the password;
+      5. The ownership of the email address has been confirmed.
+
+    Nevertheless, on this page we require the user to enter the
+    password again. This prevents an attacker who can read user's
+    email, to follow the secret link to this page, and finalize the
+    "delete account" flow, without the user's consent.
+    """
+
+    login_verification_request = LoginVerificationRequest.from_secret(secret)
+    if not login_verification_request:
+        return render_template("report_expired_link.html")
+
+    confirmed_deletion = request.form.get("confirmed_deletion", "")
+
+    if request.method == "POST":
+        if confirmed_deletion != "yes":
+            flash(gettext("You have not confirmed the deletion of your account."))
+        else:
+            email = login_verification_request.email
+            password = request.form.get("password", "")
+            user = UserRegistration.query.filter_by(email=email).one_or_none()
+
+            if user and user.password_hash == utils.calc_crypt_hash(
+                user.salt, password
+            ):
+                login_verification_request.accept()
+
+                db.session.delete(user)
+                db.session.add(DeactivateUserSignal(user_id=user.user_id))
+                db.session.commit()
+
+                return redirect(
+                    url_for(".report_account_deletion_success", email=email)
+                )
+
+            flash(gettext("Incorrect password"))
+
+    return render_template(
+        "confirm_account_deletion.html",
+        confirmed_deletion=confirmed_deletion,
+    )
+
+
+@login.route("/account-deletion-success")
+def report_account_deletion_success():
+    """Report "delete account" flow success.
+
+    This page tell the user that his/her account has been successfully
+    deleted.
+    """
+
+    return render_template(
+        "report_account_deletion_success.html",
+        email=request.args.get("email", ""),
     )
 
 
@@ -858,7 +979,9 @@ def grant_consent():
 @consent.route("/revoke-access", methods=["GET", "POST"])
 def revoke_granted_access():
     if request.method == "POST":
-        consent_request = hydra.ConsentRequest(request.args.get("consent_challenge", ""))
+        consent_request = hydra.ConsentRequest(
+            request.args.get("consent_challenge", "")
+        )
         consent_data = consent_request.fetch()
         if consent_data:
             hydra.revoke_consent_sessions(consent_data["subject"])

@@ -145,6 +145,7 @@ def test_signup(mocker, client, db_session, acitivation_status_code):
         assert user.user_id == "1234"
         assert user.email == USER_EMAIL
         assert user.password_hash == utils.calc_crypt_hash(user.salt, USER_PASSWORD)
+        assert str(user.registered_from_ip) == "127.0.0.1"
         assert len(m.ActivateUserSignal.query.all()) == 0
     elif acitivation_status_code in [409, 422]:
         assert len(m.UserRegistration.query.all()) == 0
@@ -530,3 +531,84 @@ def test_login_flow(mocker, client, app, db_session, user):
     )
     assert r.status_code == 302
     assert r.location == "http://example.com/after-login/"
+
+
+def test_delete_account(client, db_session, user):
+    r = client.get("/login/delete-account?login_challenge=9876")
+    assert r.status_code == 200
+    assert "Delete Your Account" in r.get_data(as_text=True)
+    assert "Enter your email" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+
+    r = client.post(
+        "/login/delete-account?login_challenge=9876",
+        data={
+            "email": USER_EMAIL,
+            "password": "wrong_password",
+        },
+    )
+    assert r.status_code == 200
+    assert "Delete Your Account" in r.get_data(as_text=True)
+    assert "Enter your email" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+    assert "Incorrect email or password" in r.get_data(as_text=True)
+
+    with mail.record_messages() as outbox:
+        r = client.post(
+            "/login/delete-account?login_challenge=9876",
+            data={
+                "email": USER_EMAIL,
+                "password": USER_PASSWORD,
+            },
+        )
+        assert r.status_code == 302
+        assert len(outbox) == 1
+        assert outbox[0].subject == "Delete Account"
+        assert USER_EMAIL in outbox[0].recipients
+
+        r = client.get(r.location)
+        assert r.status_code == 200
+        assert "An email has been sent to" in r.get_data(as_text=True)
+        msg = str(outbox[0])
+
+    match = re.search(
+        r"^http://localhost(/login/confirm-deletion/[^/\s]+)", msg, flags=re.M
+    )
+    assert match
+    received_link = match[1]
+    r = client.get(received_link)
+    assert r.status_code == 200
+    assert "Enter your password" in r.get_data(as_text=True)
+
+    # The password must be entered once again in case the last email
+    # has been read by someone else, who have followed the link.
+    r = client.post(
+        received_link,
+        data={
+            "confirmed_deletion": "yes",
+            "password": "wrong_password",
+        },
+    )
+    assert r.status_code == 200
+    assert "Incorrect password" in r.get_data(as_text=True)
+    assert len(m.UserRegistration.query.all()) == 1
+    assert len(m.DeactivateUserSignal.query.all()) == 0
+
+    r = client.post(
+        received_link,
+        data={
+            "confirmed_deletion": "yes",
+            "password": USER_PASSWORD,
+        },
+    )
+    assert r.status_code == 302
+    redirect_location = r.location
+
+    r = client.get(redirect_location)
+    assert r.status_code == 200
+    assert "has been deleted" in r.get_data(as_text=True)
+
+    assert not m.UserRegistration.query.filter_by(email=USER_EMAIL).one_or_none()
+    signals = m.DeactivateUserSignal.query.filter_by().all()
+    assert len(signals) == 1
+    assert signals[0].user_id == USER_ID

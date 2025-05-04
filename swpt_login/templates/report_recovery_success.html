@@ -1,10 +1,12 @@
 {% extends "message.html" %}
 
 {% block message %}
+  <h1>{% trans %}Successful Operation{% endtrans %}</h1>
   <p class="success-message-icon"></p>
   <p>
     {% trans %}
       Your password has been successfully reset. Now you can log in with your new password.
     {% endtrans %}
   </p>
+  {% include '_login_link.html' %}
 {% endblock message %}

@@ -189,7 +189,7 @@ class SignUpRequest(RedisSecretHashRecord):
             self.delete()
             raise self.ExceededMaxAttempts()
 
-    def accept(self, password) -> Optional[str]:
+    def accept(self, password: str, registered_from_ip: str = None) -> Optional[str]:
         self.delete()
 
         if self.recover:
@@ -226,6 +226,7 @@ class SignUpRequest(RedisSecretHashRecord):
                     salt=salt,
                     password_hash=utils.calc_crypt_hash(salt, password),
                     recovery_code_hash=utils.calc_crypt_hash("", recovery_code),
+                    registered_from_ip=registered_from_ip,
                 )
             )
             db.session.commit()

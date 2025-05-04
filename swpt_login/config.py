@@ -119,3 +119,6 @@ class Configuration(metaclass=MetaEnvReader):
     API_RESERVE_USER_ID_PATH = "/users/.user-reserve"
     API_USER_ID_FIELD_NAME = "userId"
     API_TIMEOUT_SECONDS = 5
+
+    APP_FLUSH_ACTIVATE_USERS_BURST_COUNT = 5
+    APP_FLUSH_DEACTIVATE_USERS_BURST_COUNT = 5
