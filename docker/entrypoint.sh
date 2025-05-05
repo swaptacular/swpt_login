@@ -78,8 +78,17 @@ case $1 in
         fi
         exec gunicorn --config "$APP_ROOT_DIR/gunicorn.conf.py" -b :$WEBSERVER_PORT wsgi:app
         ;;
-    flush)
-        exec flask swpt_login "$@"
+    flush_activate_users  | flush_deactivate_users | flush_all)
+        flush_activate_users=ActivateUserSignal
+        flush_deactivate_users=DeactivateUserSignal
+        flush_all=
+
+        # For example: if `$1` is "flush_activate_users",
+        # `signal_name` will be "ActivateUserSignal".
+        eval signal_name=\$$1
+
+        shift
+        exec flask swpt_login flush $signal_name "$@"
         ;;
     await_migrations)
         echo Awaiting database migrations to be applied...

@@ -34,7 +34,7 @@ def _reserve_user_id():
     response = requests_session.post(
         url=urljoin(api_resource_server, f"{api_reserve_user_id_path}"),
         json={},
-        verify=False,
+        verify=current_app.config["APP_VERIFY_SSL_CERTIFICATES"],
     )
     response.raise_for_status()
     response_json = response.json()
