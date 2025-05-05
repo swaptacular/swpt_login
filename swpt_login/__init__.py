@@ -48,6 +48,20 @@ def _server_error(error=None):
     return render_template("500.html")
 
 
+def _get_language_choices(languages):
+    supported_languages = {"en": "English", "bg": "Български"}
+    languages = [lg.strip() for lg in languages.split(",")]
+    language_choices = [
+        (lg, supported_languages[lg])
+        for lg in languages
+        if lg in supported_languages
+    ]
+    if not language_choices:
+        raise ValueError("The LANGUAGES envvar contains no supported languages.")
+
+    return language_choices
+
+
 def configure_logging(level: str, format: str, associated_loggers: List[str]) -> None:
     root_logger = _configure_root_logger(format)
 
@@ -90,6 +104,7 @@ def create_app(config_dict={}):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_port=1)
     app.config.from_object(Configuration)
     app.config.from_mapping(config_dict)
+    app.config["LANGUAGE_CHOICES"] = _get_language_choices(app.config["LANGUAGES"])
     app.config["SQLALCHEMY_BINDS"] = {
         "replica": {
             "url": (
