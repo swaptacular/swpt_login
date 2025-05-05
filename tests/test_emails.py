@@ -42,3 +42,37 @@ def test_email_sending(app):
         emails.send_change_email_address_email(email, link)
         emails.send_change_recovery_code_email(email, link)
         emails.send_delete_account_email(email, link, link)
+
+
+def test_text_to_html_document(app):
+    from swpt_login.emails import text_to_html_document
+
+    document = text_to_html_document("Hello!")
+    assert "Hello!" in document
+    assert document.startswith("<!DOCTYPE")
+
+
+def test_text_to_html(app):
+    from swpt_login.emails import text_to_html
+
+    assert text_to_html("Hello!") == "<p>Hello!</p>"
+    assert text_to_html("First\nSecond\n") == "<p>First\nSecond\n</p>"
+    assert text_to_html("First\n\nSecond\n") == "<p>First</p><p>Second\n</p>"
+    assert text_to_html("First\n\n\nSecond\n") == "<p>First</p><p>Second\n</p>"
+    assert text_to_html("\n\nFirst\n\n\nSecond\n\n\n") == "<p>First</p><p>Second</p>"
+    assert (
+        text_to_html("https://example.com/")
+        == '<p><a href="https://example.com/">https://example.com/</a></p>'
+    )
+    assert (
+        text_to_html("https://example.com/\nsomething")
+        == "<p>https://example.com/\nsomething</p>"
+    )
+    assert (
+        text_to_html("https://example.com/ something")
+        == "<p>https://example.com/ something</p>"
+    )
+    assert (
+        text_to_html("First\n\n-- \nSignature\nLine2\nLine3\n")
+        == "<p>First</p><p>-- <br />Signature<br />Line2<br />Line3<br /></p>"
+    )
