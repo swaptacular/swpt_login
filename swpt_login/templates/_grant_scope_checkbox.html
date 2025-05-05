@@ -5,7 +5,7 @@
            name="granted_scope"
            value="{{ scope }}"
            type="checkbox"
-           {% if disabled %}disabled{% endif %}
+           {% if disabled %}onclick="return false"{% endif %}
            checked
            >
     <span>{{ scope_description }}</span>
