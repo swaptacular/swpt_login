@@ -1,10 +1,13 @@
-<p class="grant-scope-checkbox">
-  <label for="checkbox-scope-{{ scope }}" onclick="return false">{{ scope_name }}</label>
-  <input id="checkbox-scope-{{ scope }}"
-         name="granted_scope"
-         value="{{ scope }}"
-         type="checkbox"
-         checked
-         >
-  <span>{{ scope_description }}</span>
-</p>
+{% with disabled=config.APP_SIGNUP_REDIRECT_URL %}
+  <p class="grant-scope-checkbox">
+    <label for="checkbox-scope-{{ scope }}" onclick="return false">{{ scope_name }}</label>
+    <input id="checkbox-scope-{{ scope }}"
+           name="granted_scope"
+           value="{{ scope }}"
+           type="checkbox"
+           {% if disabled %}onclick="return false"{% endif %}
+           checked
+           >
+    <span>{{ scope_description }}</span>
+  </p>
+{% endwith %}

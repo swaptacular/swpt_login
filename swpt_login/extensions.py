@@ -20,7 +20,7 @@ def select_locale():
     ]
     if language in language_choices:
         return language
-    return request.accept_languages.best_match(language_choices)
+    return request.accept_languages.best_match(language_choices, language_choices[0])
 
 
 def select_timezone():

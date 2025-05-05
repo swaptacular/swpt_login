@@ -1,16 +1,6 @@
 import json
 from os import environ
 
-SUPPORTED_LANGUAGES = {"en": "English", "bg": "Български"}
-
-
-def _get_language_choices(fallback):
-    languages = environ.get("LANGUAGES", fallback)
-    languages = [lg.strip() for lg in languages.split(",")]
-    return [
-        (lg, SUPPORTED_LANGUAGES[lg]) for lg in languages if lg in SUPPORTED_LANGUAGES
-    ]
-
 
 def _parse_dict(s: str) -> dict:
     try:
@@ -110,7 +100,6 @@ class Configuration(metaclass=MetaEnvReader):
     SQLALCHEMY_ECHO = False
     BABEL_DEFAULT_LOCALE = "en"
     BABEL_DEFAULT_TIMEZONE = "UTC"
-    LANGUAGE_CHOICES = _get_language_choices(LANGUAGES)
     FLUSH_PROCESSES = 1
     FLUSH_PERIOD = 2.0
 
