@@ -111,9 +111,11 @@ class Configuration(metaclass=MetaEnvReader):
     BABEL_DEFAULT_LOCALE = "en"
     BABEL_DEFAULT_TIMEZONE = "UTC"
     LANGUAGE_CHOICES = _get_language_choices(LANGUAGES)
+    FLUSH_PROCESSES = 1
+    FLUSH_PERIOD = 2.0
 
-    SUPERVISOR_CLIENT_ID = "users-supervisor"
-    SUPERVISOR_CLIENT_SECRET = "users-supervisor"
+    SUPERUSER_CLIENT_ID = "users-superuser"
+    SUPERUSER_CLIENT_SECRET = "users-superuser"
     API_AUTH2_TOKEN_URL = "https://hydra/oauth2/token"
     API_RESOURCE_SERVER = "https://resource-server"
     API_RESERVE_USER_ID_PATH = "/users/.user-reserve"
@@ -122,3 +124,4 @@ class Configuration(metaclass=MetaEnvReader):
 
     APP_FLUSH_ACTIVATE_USERS_BURST_COUNT = 5
     APP_FLUSH_DEACTIVATE_USERS_BURST_COUNT = 5
+    APP_VERIFY_SSL_CERTIFICATES = True

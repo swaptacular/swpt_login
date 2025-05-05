@@ -44,6 +44,7 @@ services:
       - 'MAIL_SERVER=tests-mail'
       - 'MAIL_PORT=1025'
       - 'MAIL_DEFAULT_SENDER=Swaptacular <no-reply@example.com>'
+      - 'APP_VERIFY_SSL_CERTIFICATES=False'
     command: configure
     depends_on:
       - tests-pg
@@ -63,6 +64,7 @@ services:
       - 'SQLALCHEMY_DATABASE_URI=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
       - 'REPLICA_POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@tests-pg:5432/${POSTGRES_DB}'
       - 'REDIS_URL=redis://tests-redis:6379/0'
+      - 'APP_VERIFY_SSL_CERTIFICATES=False'
     command: flush
     depends_on:
       - tests-pg

@@ -113,7 +113,7 @@ class ActivateUserSignal(db.Model):
             response = requests_session.post(
                 url=urljoin(_get_api_base_url(), f"{self.user_id}/activate"),
                 json={"reservationId": self.reservation_id},
-                verify=False,
+                verify=current_app.config["APP_VERIFY_SSL_CERTIFICATES"],
             )
             status_code = response.status_code
 
@@ -189,7 +189,7 @@ class DeactivateUserSignal(db.Model):
             response = requests_session.post(
                 url=urljoin(_get_api_base_url(), f"{self.user_id}/deactivate"),
                 json={"type": _get_dactivation_request_type()},
-                verify=False,
+                verify=current_app.config["APP_VERIFY_SSL_CERTIFICATES"],
             )
             status_code = response.status_code
             if status_code != 204:

@@ -3,7 +3,7 @@ import sys
 import os
 import os.path
 from typing import List
-from flask import render_template, request
+from flask import render_template
 
 
 def _excepthook(exc_type, exc_value, traceback):

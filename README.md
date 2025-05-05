@@ -1,10 +1,10 @@
 Swaptacular service that manages OAuth2 login and consent
 =========================================================
 
-**IMPORTANT NOTE: The implementation of this service is
-provisional. Organizations running Swaptacular debtors and creditors
-agents are encouraged to use their own implementations, which take
-into account their concrete security and user management policies.**
+**IMPORTANT NOTE: Organizations running Swaptacular debtors and
+creditors agents are encouraged to use their own implementations,
+which take into account their concrete security and user management
+policies.**
 
 This project implements user registration, login, and authorization
 consent for [Swaptacular]. The ultimate deliverable is a docker image,
@@ -128,17 +128,28 @@ RECAPTCHA_PUBLIC_KEY=6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37
 RECAPTCHA_PIVATE_KEY=6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q
 
 # Parameters that determine how to obtain an user ID from the resource
-# server. "$SUPERVISOR_CLIENT_ID" and "$SUPERVISOR_CLIENT_SECRET" are
+# server. "$SUPERUSER_CLIENT_ID" and "$SUPERUSER_CLIENT_SECRET" are
 # used to perform the "Client Credentials" OAuth2 flow against the
 # OAuth2 token endpoint ("$API_AUTH2_TOKEN_URL"), so as to get the
-# permissions to create new users. New users will be created by
-# sending requests to "$API_RESOURCE_SERVER". The timeout for the Web
-# API requests will be "$API_TIMEOUT_SECONDS" seconds (default 5).
-SUPERVISOR_CLIENT_ID=debtors-supervisor
-SUPERVISOR_CLIENT_SECRET=debtors-supervisor
+# permissions to create and deactivate users. New users will be
+# created and deactivated by sending requests to
+# "$API_RESOURCE_SERVER". The timeout for the Web API requests will be
+# "$API_TIMEOUT_SECONDS" seconds (default 5).
+SUPERUSER_CLIENT_ID=debtors-superuser
+SUPERUSER_CLIENT_SECRET=debtors-superuser
 API_AUTH2_TOKEN_URL=https://my-nginx-ingress/debtors-hydra/oauth2/token
 API_RESOURCE_SERVER=https://my-nginx-ingress
 API_TIMEOUT_SECONDS=5
+
+# Settings for the `flush_*` commands. The specified number of
+# processes ("$FLUSH_PROCESSES") will be spawned to process pending
+# tasks (default 1). Note that FLUSH_PROCESSES can be set to 0, in
+# which case, the container will not process any pending tasks. The
+# "$FLUSH_PERIOD" value specifies the number of seconds to wait
+# between two sequential database queries for obtaining pending tasks
+# (default 2).
+FLUSH_PROCESSES=2
+FLUSH_PERIOD=1.5
 
 # Optional URL to go to, after a successful sign-up.
 APP_SIGNUP_REDIRECT_URL=
@@ -166,25 +177,38 @@ container allows you to execute the following *documented commands*:
   **IMPORTANT NOTE: This command has to be run only once (at the
   beginning), but running it multiple times should not do any harm.**
 
-* `await_migrations`
-
-  Blocks until the latest migration applied to the PostgreSQL server
-  instance matches the latest known migration.
-
 * `webserver`
 
   Starts a login Web server. This command allows you to start as many
   web servers as necessary, to handle the incoming load.
 
-* `flush`
+  **IMPORTANT NOTE: You must start at least one container with this
+  command.**
+
+* `flush_activate_users`
 
   Starts a process that periodically processes unprocessed rows from
   the *activate_user_signal* table. When some Web server process is
   unexpectedly terminated, some rows in that table may remain
   unprocessed. This command will take care of them.
 
-  **IMPORTANT NOTE: You must start exactly one container with this
-  command.**
+  **IMPORTANT NOTE: You must start at least one container with this
+  command. Normally, one container should be enough.**
+
+* `flush_deactivate_users`
+
+  Starts a process that periodically processes unprocessed rows from
+  the *deactivate_user_signal* table. When a user decides to delete
+  his/her account, a row is added to that table. This command
+  finalizes the user deactivation process.
+
+  **IMPORTANT NOTE: You must start at least one container with this
+  command. Normally, one container should be enough.**
+
+* `await_migrations`
+
+  Blocks until the latest migration applied to the PostgreSQL server
+  instance matches the latest known migration.
 
 
 How to run the tests

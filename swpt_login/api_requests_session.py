@@ -46,8 +46,8 @@ class APIAdapter(HTTPAdapter):
 
     @classmethod
     def __obtain_new_access_token(cls):
-        client_id = current_app.config["SUPERVISOR_CLIENT_ID"]
-        client_secret = current_app.config["SUPERVISOR_CLIENT_SECRET"]
+        client_id = current_app.config["SUPERUSER_CLIENT_ID"]
+        client_secret = current_app.config["SUPERUSER_CLIENT_SECRET"]
         token_url = current_app.config["API_AUTH2_TOKEN_URL"]
         timeout_seconds = float(current_app.config["API_TIMEOUT_SECONDS"])
 
@@ -57,9 +57,9 @@ class APIAdapter(HTTPAdapter):
         token = oauth.fetch_token(
             token_url=token_url,
             auth=auth,
-            scope=["activate"],
+            scope=["activate", "deactivate"],
             timeout=timeout_seconds,
-            verify=False,
+            verify=current_app.config["APP_VERIFY_SSL_CERTIFICATES"],
         )
         return token
 
