@@ -120,6 +120,18 @@ def create_app(config_dict={}):
         app.config["SIGNUP_IP_MAX_RECOVERY_EMAILS"] = (
             3 * app.config["SIGNUP_IP_MAX_REGISTRATIONS"]
         )
+    subject_prefix = app.config["SUBJECT_PREFIX"]
+    if subject_prefix == "debtors:":
+        app.config["API_RESERVE_USER_ID_PATH"] = "/debtors/.debtor-reserve"
+        app.config["API_USER_ID_FIELD_NAME"] = "debtorId"
+        app.config["API_DACTIVATION_REQUEST_TYPE"] = "DebtorDeactivationRequest"
+    elif subject_prefix == "creditors:":
+        app.config["API_RESERVE_USER_ID_PATH"] = "/creditors/.creditor-reserve"
+        app.config["API_USER_ID_FIELD_NAME"] = "creditorId"
+        app.config["API_DACTIVATION_REQUEST_TYPE"] = "CreditorDeactivationRequest"
+    else:
+        raise RuntimeError("invalid SUBJECT_PREFIX")
+
     extensions.init_app(app)
     app.register_blueprint(login, url_prefix=app.config["LOGIN_PATH"])
     app.register_blueprint(consent, url_prefix=app.config["CONSENT_PATH"])

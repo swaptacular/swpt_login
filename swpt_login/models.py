@@ -19,17 +19,6 @@ def _get_api_base_url() -> str:
     return urljoin(api_resource_server, api_base_path)
 
 
-def _get_dactivation_request_type() -> str:
-    user_id_field_name = current_app.config["API_USER_ID_FIELD_NAME"]
-
-    if user_id_field_name == "debtorId":
-        return "DebtorDeactivationRequest"
-    elif user_id_field_name == "creditorId":
-        return "CreditorDeactivationRequest"
-    else:
-        RuntimeError("invalid API_USER_ID_FIELD_NAME")
-
-
 class classproperty(object):
     def __init__(self, f):
         self.f = f
@@ -188,7 +177,7 @@ class DeactivateUserSignal(db.Model):
         try:
             response = requests_session.post(
                 url=urljoin(_get_api_base_url(), f"{self.user_id}/deactivate"),
-                json={"type": _get_dactivation_request_type()},
+                json={"type": current_app.config["API_DACTIVATION_REQUEST_TYPE"]},
                 verify=current_app.config["APP_VERIFY_SSL_CERTIFICATES"],
             )
             status_code = response.status_code

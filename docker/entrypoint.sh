@@ -8,19 +8,14 @@ export GUNICORN_WORKERS=${WEBSERVER_PROCESSES:-1}
 export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
 
 # When SUBJECT_PREFIX is set to one of the two standard values (which
-# must always be case), even if API_RESERVE_USER_ID_PATH,
-# API_USER_ID_FIELD_NAME, LOGIN_PATH, CONSENT_PATH variables are not
-# set, we can guess their values with confidence.
+# must always be case), even if LOGIN_PATH and CONSENT_PATH variables
+# are not set, we can guess their values with confidence.
 case "$SUBJECT_PREFIX" in
     debtors:)
-        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/debtors/.debtor-reserve}
-        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-debtorId}
         export LOGIN_PATH=${LOGIN_PATH:-/debtors-login}
         export CONSENT_PATH=${CONSENT_PATH:-/debtors-consent}
         ;;
     creditors:)
-        export API_RESERVE_USER_ID_PATH=${API_RESERVE_USER_ID_PATH:-/creditors/.creditor-reserve}
-        export API_USER_ID_FIELD_NAME=${API_USER_ID_FIELD_NAME:-creditorId}
         export LOGIN_PATH=${LOGIN_PATH:-/creditors-login}
         export CONSENT_PATH=${CONSENT_PATH:-/creditors-consent}
         ;;
