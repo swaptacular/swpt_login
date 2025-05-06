@@ -116,6 +116,10 @@ def create_app(config_dict={}):
             **app.config["SQLALCHEMY_ENGINE_OPTIONS"],
         },
     }
+    if app.config["SIGNUP_IP_MAX_RECOVERY_EMAILS"] is None:
+        app.config["SIGNUP_IP_MAX_RECOVERY_EMAILS"] = (
+            3 * app.config["SIGNUP_IP_MAX_REGISTRATIONS"]
+        )
     extensions.init_app(app)
     app.register_blueprint(login, url_prefix=app.config["LOGIN_PATH"])
     app.register_blueprint(consent, url_prefix=app.config["CONSENT_PATH"])
