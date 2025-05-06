@@ -113,4 +113,9 @@ class Configuration(metaclass=MetaEnvReader):
 
     APP_FLUSH_ACTIVATE_USERS_BURST_COUNT = 5
     APP_FLUSH_DEACTIVATE_USERS_BURST_COUNT = 5
-    APP_VERIFY_SSL_CERTIFICATES = True
+
+    # NOTE: We may make SSL requests to the debtors/creditors Web API.
+    # However, those requests will be to an internal hostname, not to
+    # the canonical hostname. Therefore, normally we would not be able
+    # to verify the SSL certificate.
+    APP_VERIFY_SSL_CERTIFICATES = False
