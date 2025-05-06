@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import urljoin
 from flask import (
     request,
@@ -21,6 +22,7 @@ from .redis import (
     ChangeRecoveryCodeRequest,
     UserLoginsHistory,
     increment_key_with_limit,
+    ExceededValueLimitError,
 )
 from .models import UserRegistration, DeactivateUserSignal
 from .extensions import db
@@ -70,6 +72,26 @@ def verify_captcha():
         captcha_passed = True
         captcha_error_message = None
     return captcha_passed, captcha_error_message
+
+
+def allow_sending_email(initiator_ip: str) -> bool:
+    """Decide if an email should be sent based on initiator's IP address.
+    """
+    try:
+        increment_key_with_limit(
+            key="iip:" + initiator_ip,
+            limit=(
+                current_app.config["SIGNUP_IP_MAX_REGISTRATIONS"]
+                + current_app.config["SIGNUP_IP_MAX_RECOVERY_EMAILS"]
+            ),
+            period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
+        )
+    except ExceededValueLimitError:
+        logger = logging.getLogger(__name__)
+        logger.warning("too many email sending initiations from %s", initiator_ip)
+        return False
+
+    return True
 
 
 def query_user_credentials(email):
@@ -198,7 +220,8 @@ def signup():
                     # exists. In this case we fail silently, so as not
                     # to reveal if the email is registered or not.
                     # Though, a message is sent to the given email.
-                    emails.send_duplicate_registration_email(email)
+                    if allow_sending_email(request.remote_addr):
+                        emails.send_duplicate_registration_email(email)
                 else:
                     # Starts the "change password" flow. The
                     # `SignUpRequest` generates a secret which is
@@ -208,10 +231,11 @@ def signup():
                         cc=computer_code_hash,
                         recover="yes",
                     )
-                    emails.send_change_password_email(
-                        email,
-                        get_choose_password_link(r),
-                    )
+                    if allow_sending_email(request.remote_addr):
+                        emails.send_change_password_email(
+                            email,
+                            get_choose_password_link(r),
+                        )
             else:
                 if is_new_user:
                     # Start the "user creation" flow. The
@@ -221,10 +245,11 @@ def signup():
                         email=email,
                         cc=computer_code_hash,
                     )
-                    emails.send_confirm_registration_email(
-                        email,
-                        get_choose_password_link(r),
-                    )
+                    if allow_sending_email(request.remote_addr):
+                        emails.send_confirm_registration_email(
+                            email,
+                            get_choose_password_link(r),
+                        )
                 else:
                     # We are asked to change the password of a
                     # non-existing user. In this case we fail
@@ -472,10 +497,11 @@ def choose_new_email(secret):
                 email=new_email,
                 old_email=verification_request.email,
             )
-            emails.send_change_email_address_email(
-                new_email,
-                get_change_email_address_link(r),
-            )
+            if allow_sending_email(request.remote_addr):
+                emails.send_change_email_address_email(
+                    new_email,
+                    get_change_email_address_link(r),
+                )
             return redirect(
                 url_for(
                     ".report_sent_email",
@@ -614,10 +640,11 @@ def change_recovery_code():
             # The `ChangeRecoveryCodeRequest` generates a secret which
             # is sent to the user's email.
             r = ChangeRecoveryCodeRequest.create(email=email)
-            emails.send_change_recovery_code_email(
-                email,
-                get_generate_recovery_code_link(r),
-            )
+            if allow_sending_email(request.remote_addr):
+                emails.send_change_recovery_code_email(
+                    email,
+                    get_generate_recovery_code_link(r),
+                )
             return redirect(
                 url_for(
                     ".report_sent_email",
