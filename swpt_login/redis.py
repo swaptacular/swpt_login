@@ -2,6 +2,7 @@ import logging
 import re
 import time
 import hashlib
+import base64
 from sqlalchemy import select
 from typing import Optional
 from urllib.parse import urljoin
@@ -70,10 +71,15 @@ class UserLoginsHistory:
     def __init__(self, user_id):
         self.max_count = current_app.config["LOGIN_VERIFIED_DEVICES_MAX_COUNT"]
         self.key = self.REDIS_PREFIX + str(user_id)
+        self.expiration_seconds = (
+            86400 * current_app.config["LOGIN_HISTORY_EXPIRATION_DAYS"]
+        )
 
     @staticmethod
-    def calc_hash(s):
-        return hashlib.sha224(s.encode("ascii")).hexdigest()
+    def calc_hash(s: str) -> str:
+        return base64.a85encode(
+            hashlib.sha224(s.encode("ascii")).digest()
+        ).decode("ascii")
 
     def contains(self, element):
         emement_hash = self.calc_hash(element)
@@ -84,6 +90,7 @@ class UserLoginsHistory:
         with redis_store.pipeline() as p:
             p.zremrangebyrank(self.key, 0, -self.max_count)
             p.zadd(self.key, {emement_hash: time.time()})
+            p.expire(self.key, self.expiration_seconds)
             p.execute()
 
     def clear(self):
