@@ -2,6 +2,8 @@ import logging
 import sys
 import os
 import os.path
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from typing import List
 from flask import render_template
 
@@ -129,3 +131,4 @@ configure_logging(
     associated_loggers=os.environ.get("APP_ASSOCIATED_LOGGERS", "").split(),
 )
 sys.excepthook = _excepthook
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
