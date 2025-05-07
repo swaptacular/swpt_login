@@ -3,6 +3,7 @@ import time
 import sys
 import click
 import signal
+import ipaddress
 from typing import Optional, Any
 from flask import current_app
 from flask.cli import with_appcontext
@@ -16,6 +17,7 @@ from swpt_pythonlib.multiproc_utils import (
 from swpt_login.hydra import invalidate_credentials
 from swpt_login.models import UserRegistration
 from swpt_login.extensions import db
+from swpt_login.redis import set_for_period
 
 
 @click.group("swpt_login")
@@ -30,7 +32,7 @@ def swpt_login():
     "--processes",
     type=int,
     help=(
-        "Then umber of worker processes."
+        "The number of worker processes."
         " If not specified, the value of the FLUSH_PROCESSES environment"
         " variable will be used, defaulting to 1 if empty."
     ),
@@ -136,6 +138,7 @@ def flush(
 
 
 @swpt_login.command("suspend_user_registrations")
+@with_appcontext
 @click.argument("user_ids", nargs=-1)
 def suspend_user_registrations(user_ids: list[str]) -> None:
     """Suspend the registrations of users.
@@ -156,6 +159,7 @@ def suspend_user_registrations(user_ids: list[str]) -> None:
 
 
 @swpt_login.command("resume_user_registrations")
+@with_appcontext
 @click.argument("user_ids", nargs=-1)
 def resume_user_registrations(user_ids: list[str]) -> None:
     """Resume suspended user registrations.
@@ -171,3 +175,36 @@ def resume_user_registrations(user_ids: list[str]) -> None:
         if user:
             user.status = 0
             db.session.commit()
+
+
+@swpt_login.command("ban_ip_addresses")
+@with_appcontext
+@click.option(
+    "-h",
+    "--hours",
+    type=int,
+    default=24,
+    help="The number of hours to ban the IP addresses for (default 24h).",
+)
+@click.argument("ip_addresses", nargs=-1)
+def ban_ip_addresses(ip_addresses: list[str], hours: int) -> None:
+    """Ban a list of IP addresses from initiating email sending.
+
+    IP_ADDRESSES should be a list of IP addresses or IP networks. For
+    example: "1.2.3.4 1.2.3.128/29" will ban 1.2.3.4, 1.2.3.129, and
+    1.2.3.130.
+
+    """
+    logger = logging.getLogger(__name__)
+    period_seconds = 60 * 60 * hours
+
+    for ip_address_or_network in ip_addresses:
+        ip_network = ipaddress.ip_network(ip_address_or_network)
+        for host in ip_network.hosts():
+            ip = str(host)
+            set_for_period(
+                key=f"ip:{ip}",
+                value="1000000000",  # some very big value
+                period_seconds=period_seconds,
+            )
+            logger.debug("Banned %s for %i hours.", ip, hours)

@@ -83,7 +83,7 @@ def allow_sending_email(initiator_ip: str) -> bool:
     """
     try:
         increment_key_with_limit(
-            key="ip:" + initiator_ip,
+            key=f"ip:{initiator_ip}",
             limit=current_app.config["SIGNUP_IP_MAX_EMAILS"],
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
         )
@@ -369,6 +369,13 @@ def choose_password(secret):
                 # their emails.
                 recovery_code = signup_request.accept(password, request.remote_addr)
                 UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
+
+                logger = logging.getLogger(__name__)
+                logger.info(
+                    "Created new user registration for %s, from %s.",
+                    signup_request.email,
+                    request.remote_addr,
+                )
 
                 # Do not cache this page! It contains a plain-text secret.
                 response = make_response(

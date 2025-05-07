@@ -1,7 +1,9 @@
+import pytest
 from dataclasses import dataclass
 from unittest.mock import Mock, call
 from swpt_login import models as m
 from swpt_login.extensions import db
+from swpt_login import redis
 
 
 @dataclass
@@ -252,3 +254,34 @@ def test_suspend_user_registrations(mocker, app, db_session):
     assert users[0].status == 0
     assert users[1].user_id == "5678"
     assert users[1].status == 1
+
+
+def test_ban_ip_addresses(app):
+    redis.set_for_period("ip:1.2.3.4", "0", period_seconds=1)
+    redis.set_for_period("ip:1.2.3.129", "0", period_seconds=1)
+    redis.set_for_period("ip:1.2.3.130", "0", period_seconds=1)
+    redis.set_for_period("ip:1.1.1.1", "0", period_seconds=1)
+
+    runner = app.test_cli_runner()
+    result = runner.invoke(
+        args=[
+            "swpt_login",
+            "ban_ip_addresses",
+            "--hours",
+            "1000",
+            "1.2.3.4",
+            "1.2.3.128/29",
+        ]
+    )
+    assert result.exit_code == 0
+
+    with pytest.raises(redis.ExceededValueLimitError):
+        assert redis.increment_key_with_limit("ip:1.2.3.4", 100000)
+
+    with pytest.raises(redis.ExceededValueLimitError):
+        assert redis.increment_key_with_limit("ip:1.2.3.129", 100000)
+
+    with pytest.raises(redis.ExceededValueLimitError):
+        assert redis.increment_key_with_limit("ip:1.2.3.130", 100000)
+
+    redis.increment_key_with_limit("ip:1.1.1.1", 100000)
