@@ -74,13 +74,15 @@ def verify_captcha():
     return captcha_passed, captcha_error_message
 
 
-def allow_sending_email(initiator_ip: str) -> bool:
+def allow_sending_email(initiator_ip: str, email: str) -> bool:
     """Decide if an email should be sent based on initiator's IP address.
 
     This seems to be necessary, because CAPTCHAs are becoming less and
     less effective. Note that this method works well only for IPv4,
     but not for IPv6.
     """
+    logger = logging.getLogger(__name__)
+
     try:
         increment_key_with_limit(
             key=f"ip:{initiator_ip}",
@@ -88,10 +90,10 @@ def allow_sending_email(initiator_ip: str) -> bool:
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
         )
     except ExceededValueLimitError:
-        logger = logging.getLogger(__name__)
         logger.warning("too many email sending initiations from %s", initiator_ip)
         return False
 
+    logger.info("%s initiated sending email to %s.", initiator_ip, email)
     return True
 
 
@@ -222,7 +224,7 @@ def signup():
                     # exists. In this case we fail silently, so as not
                     # to reveal if the email is registered or not.
                     # Though, a message is sent to the given email.
-                    if allow_sending_email(request.remote_addr):
+                    if allow_sending_email(request.remote_addr, email):
                         emails.send_duplicate_registration_email(email)
                 else:
                     # Starts the "change password" flow. The
@@ -233,7 +235,7 @@ def signup():
                         cc=computer_code_hash,
                         recover="yes",
                     )
-                    if allow_sending_email(request.remote_addr):
+                    if allow_sending_email(request.remote_addr, email):
                         emails.send_change_password_email(
                             email,
                             get_choose_password_link(r),
@@ -247,7 +249,7 @@ def signup():
                         email=email,
                         cc=computer_code_hash,
                     )
-                    if allow_sending_email(request.remote_addr):
+                    if allow_sending_email(request.remote_addr, email):
                         emails.send_confirm_registration_email(
                             email,
                             get_choose_password_link(r),
@@ -495,7 +497,7 @@ def choose_new_email(secret):
                 email=new_email,
                 old_email=verification_request.email,
             )
-            if allow_sending_email(request.remote_addr):
+            if allow_sending_email(request.remote_addr, new_email):
                 emails.send_change_email_address_email(
                     new_email,
                     get_change_email_address_link(r),
@@ -638,7 +640,7 @@ def change_recovery_code():
             # The `ChangeRecoveryCodeRequest` generates a secret which
             # is sent to the user's email.
             r = ChangeRecoveryCodeRequest.create(email=email)
-            if allow_sending_email(request.remote_addr):
+            if allow_sending_email(request.remote_addr, email):
                 emails.send_change_recovery_code_email(
                     email,
                     get_generate_recovery_code_link(r),
