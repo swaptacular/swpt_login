@@ -116,10 +116,6 @@ def create_app(config_dict={}):
             **app.config["SQLALCHEMY_ENGINE_OPTIONS"],
         },
     }
-    if app.config["SIGNUP_IP_MAX_RECOVERY_EMAILS"] is None:
-        app.config["SIGNUP_IP_MAX_RECOVERY_EMAILS"] = (
-            3 * app.config["SIGNUP_IP_MAX_REGISTRATIONS"]
-        )
     subject_prefix = app.config["SUBJECT_PREFIX"]
     if subject_prefix == "debtors:":
         app.config["API_RESERVE_USER_ID_PATH"] = "/debtors/.debtor-reserve"

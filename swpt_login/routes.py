@@ -76,14 +76,15 @@ def verify_captcha():
 
 def allow_sending_email(initiator_ip: str) -> bool:
     """Decide if an email should be sent based on initiator's IP address.
+
+    This seems to be necessary, because CAPTCHAs are becoming less and
+    less effective. Note that this method works well only for IPv4,
+    but not for IPv6.
     """
     try:
         increment_key_with_limit(
-            key="iip:" + initiator_ip,
-            limit=(
-                current_app.config["SIGNUP_IP_MAX_REGISTRATIONS"]
-                + current_app.config["SIGNUP_IP_MAX_RECOVERY_EMAILS"]
-            ),
+            key="ip:" + initiator_ip,
+            limit=current_app.config["SIGNUP_IP_MAX_EMAILS"],
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
         )
     except ExceededValueLimitError:
@@ -360,17 +361,6 @@ def choose_password(secret):
                     email=signup_request.email,
                 )
             else:
-                # Limit the number of allowed sign-ups for a given
-                # period of time, per IP address. This seems to be
-                # necessary, because CAPTCHAs are becoming less and
-                # less effective. Note that this method works well
-                # only for IPv4, but not for IPv6.
-                increment_key_with_limit(
-                    key="ip:" + request.remote_addr,
-                    limit=current_app.config["SIGNUP_IP_MAX_REGISTRATIONS"],
-                    period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
-                )
-
                 # For newly registered users, a secret recovery code
                 # will be generated, which they must write down and
                 # hide somewhere. The recovery code is required when
