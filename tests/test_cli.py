@@ -1,6 +1,5 @@
-import sqlalchemy
 from dataclasses import dataclass
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from swpt_login import models as m
 from swpt_login.extensions import db
 
@@ -185,3 +184,71 @@ def test_flush_deactivations_failure(mocker, app, db_session):
     assert result.exit_code == 1
     requests_session.post.assert_called_once()
     assert len(m.DeactivateUserSignal.query.all()) == 1
+
+
+def test_suspend_user_registrations(mocker, app, db_session):
+    invalidate_credentials = Mock()
+    mocker.patch("swpt_login.cli.invalidate_credentials", invalidate_credentials)
+
+    db_session.add(
+        m.UserRegistration(
+            user_id="1234",
+            email="user1234@example.com",
+            salt="",
+            password_hash="x",
+            recovery_code_hash="y",
+            status=0,
+        )
+    )
+    db_session.add(
+        m.UserRegistration(
+            user_id="5678",
+            email="user5678@example.com",
+            salt="",
+            password_hash="x",
+            recovery_code_hash="y",
+            status=0,
+        )
+    )
+    db_session.commit()
+
+    runner = app.test_cli_runner()
+    result = runner.invoke(
+        args=[
+            "swpt_login",
+            "suspend_user_registrations",
+            "1234",  # exists
+            "5678",  # exists
+            "9999",  # do not exist
+        ]
+    )
+    assert result.exit_code == 0
+    users = m.UserRegistration.query.order_by(m.UserRegistration.user_id).all()
+    assert len(users) == 2
+    assert users[0].user_id == "1234"
+    assert users[0].status == 1
+    assert users[1].user_id == "5678"
+    assert users[1].status == 1
+    invalidate_credentials.assert_has_calls(
+        [
+            call("1234"),
+            call("5678"),
+        ]
+    )
+
+    runner = app.test_cli_runner()
+    result = runner.invoke(
+        args=[
+            "swpt_login",
+            "resume_user_registrations",
+            "1234",  # exists
+            "9999",  # do not exist
+        ]
+    )
+    assert result.exit_code == 0
+    users = m.UserRegistration.query.order_by(m.UserRegistration.user_id).all()
+    assert len(users) == 2
+    assert users[0].user_id == "1234"
+    assert users[0].status == 0
+    assert users[1].user_id == "5678"
+    assert users[1].status == 1

@@ -13,6 +13,9 @@ from swpt_pythonlib.multiproc_utils import (
     try_unblock_signals,
     HANDLED_SIGNALS,
 )
+from swpt_login.hydra import invalidate_credentials
+from swpt_login.models import UserRegistration
+from swpt_login.extensions import db
 
 
 @click.group("swpt_login")
@@ -130,3 +133,41 @@ def flush(
         )
 
     sys.exit(1)
+
+
+@swpt_login.command("suspend_user_registrations")
+@click.argument("user_ids", nargs=-1)
+def suspend_user_registrations(user_ids: list[str]) -> None:
+    """Suspend the registrations of users.
+    """
+
+    for user_id in user_ids:
+        user = (
+            UserRegistration.query
+            .filter_by(user_id=user_id, status=0)
+            .with_for_update()
+            .one_or_none()
+        )
+        if user:
+            assert user.status == 0
+            invalidate_credentials(user_id)
+            user.status = 1
+            db.session.commit()
+
+
+@swpt_login.command("resume_user_registrations")
+@click.argument("user_ids", nargs=-1)
+def resume_user_registrations(user_ids: list[str]) -> None:
+    """Resume suspended user registrations.
+    """
+
+    for user_id in user_ids:
+        user = (
+            UserRegistration.query
+            .filter_by(user_id=user_id)
+            .with_for_update()
+            .one_or_none()
+        )
+        if user:
+            user.status = 0
+            db.session.commit()
