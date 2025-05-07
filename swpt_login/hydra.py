@@ -21,9 +21,10 @@ def revoke_consent_sessions(subject):
     hydra_consents_base_url = urljoin(
         current_app.config["HYDRA_ADMIN_URL"], "oauth2/auth/sessions/consent"
     )
-    requests_session.delete(
+    r = requests_session.delete(
         f"{hydra_consents_base_url}?subject={subject}&all=true", timeout=timeout
     )
+    r.raise_for_status()
 
 
 def invalidate_login_sessions(subject):
@@ -31,9 +32,10 @@ def invalidate_login_sessions(subject):
     hydra_logins_base_url = urljoin(
         current_app.config["HYDRA_ADMIN_URL"], "oauth2/auth/sessions/login"
     )
-    requests_session.delete(
+    r = requests_session.delete(
         f"{hydra_logins_base_url}?subject={subject}", timeout=timeout
     )
+    r.raise_for_status()
 
 
 class LoginRequest:

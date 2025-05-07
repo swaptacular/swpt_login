@@ -102,6 +102,11 @@ SITE_TITLE=Demo Debtors Agent
 # Set this to an URL that tells more about your site.
 ABOUT_URL=https://example.com/about
 
+# Optional URL for users to go to, to recover their wrongfully
+# suspended accounts. This is not needed if no user accounts have
+# ever been suspended.
+SUSPENDED_ACCOUNT_HELP_URL=https://example.com/help
+
 # Optional URL for a custom CSS style-sheet.
 STYLE_URL=
 
@@ -151,7 +156,8 @@ API_TIMEOUT_SECONDS=5
 FLUSH_PROCESSES=2
 FLUSH_PERIOD=1.5
 
-# Optional URL to go to, after a successful sign-up.
+# Optional URL to go to, after a successful sign-up. Note that setting
+# this will greatly improve users' experience!
 APP_SIGNUP_REDIRECT_URL=
 
 # Set the minimum level of severity for log messages ("info",

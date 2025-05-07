@@ -101,6 +101,7 @@ def query_user_credentials(email):
             UserRegistration.user_id,
             UserRegistration.salt,
             UserRegistration.password_hash,
+            UserRegistration.status,
         ).where(UserRegistration.email == email),
         bind_arguments={"bind": db.engines["replica"]},
     ).one_or_none()
@@ -839,6 +840,12 @@ def login_form():
         user = query_user_credentials(email)
 
         if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
+            if user.status != 0:
+                return render_template(
+                    "report_inactive_account.html",
+                    status=user.status,
+                )
+
             oauth2_subject = hydra.get_subject(user.user_id)
 
             # NOTE: The `UserLoginsHistory` instance contains the

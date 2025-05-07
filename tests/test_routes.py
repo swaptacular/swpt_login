@@ -612,3 +612,42 @@ def test_delete_account(client, db_session, user):
     signals = m.DeactivateUserSignal.query.filter_by().all()
     assert len(signals) == 1
     assert signals[0].user_id == USER_ID
+
+
+def test_login_inactive_account(mocker, client, app, db_session):
+    @dataclass
+    class LoginRequestMock:
+        fetch = Mock(return_value=None)
+        accept = Mock(return_value="http://example.com/after-login/")
+        challenge_id = "9876"
+
+    mocker.patch(
+        "swpt_login.hydra.LoginRequest",
+        Mock(return_value=LoginRequestMock()),
+    )
+    db_session.add(
+        m.UserRegistration(
+            user_id=USER_ID,
+            email=USER_EMAIL,
+            salt=USER_SALT,
+            password_hash=utils.calc_crypt_hash(USER_SALT, USER_PASSWORD),
+            recovery_code_hash=utils.calc_crypt_hash("", USER_RECOVERY_CODE),
+            status=1,  # inacitve
+        )
+    )
+    db_session.commit()
+
+    r = client.get("/login/?login_challenge=9876")
+    assert r.status_code == 200
+    assert "Enter your email" in r.get_data(as_text=True)
+    assert "Enter your password" in r.get_data(as_text=True)
+
+    r = client.post(
+        "/login/?login_challenge=9876",
+        data={
+            "email": USER_EMAIL,
+            "password": USER_PASSWORD,
+        },
+    )
+    assert r.status_code == 200
+    assert "Your account has been suspended" in r.get_data(as_text=True)

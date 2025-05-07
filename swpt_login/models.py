@@ -37,6 +37,12 @@ class UserRegistration(db.Model):
     registered_at = db.Column(
         db.TIMESTAMP(timezone=True), nullable=False, default=get_now_utc,
     )
+    status = db.Column(
+        db.SmallInteger,
+        nullable=False,
+        default=0,
+        comment="Only registrations with status=0 are allowed to log in.",
+    )
 
     __table_args__ = (
         # NOTE: This index is not used in queries, and serves only as
