@@ -81,6 +81,8 @@ def allow_sending_email(initiator_ip: str) -> bool:
     less effective. Note that this method works well only for IPv4,
     but not for IPv6.
     """
+    logger = logging.getLogger(__name__)
+
     try:
         increment_key_with_limit(
             key=f"ip:{initiator_ip}",
@@ -88,10 +90,10 @@ def allow_sending_email(initiator_ip: str) -> bool:
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
         )
     except ExceededValueLimitError:
-        logger = logging.getLogger(__name__)
         logger.warning("too many email sending initiations from %s", initiator_ip)
         return False
 
+    logger.info("%s initiated email sending.", initiator_ip)
     return True
 
 
