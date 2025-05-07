@@ -83,7 +83,7 @@ def allow_sending_email(initiator_ip: str) -> bool:
     """
     try:
         increment_key_with_limit(
-            key="ip:" + initiator_ip,
+            key=f"ip:{initiator_ip}",
             limit=current_app.config["SIGNUP_IP_MAX_EMAILS"],
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
         )

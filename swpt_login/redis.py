@@ -145,6 +145,10 @@ def increment_key_with_limit(key, limit=None, period_seconds=1):
     return value
 
 
+def set_for_period(key, value, period_seconds):
+    redis_store.set(key, value, ex=period_seconds)
+
+
 class ExceededValueLimitError(Exception):
     """The maximum value of a key has been exceeded."""
 
