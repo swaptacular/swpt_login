@@ -370,6 +370,13 @@ def choose_password(secret):
                 recovery_code = signup_request.accept(password, request.remote_addr)
                 UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
 
+                logger = logging.getLogger(__name__)
+                logger.info(
+                    "Created new user registration for %s, from %s.",
+                    signup_request.email,
+                    request.remote_addr,
+                )
+
                 # Do not cache this page! It contains a plain-text secret.
                 response = make_response(
                     render_template(
