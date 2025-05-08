@@ -139,36 +139,40 @@ def flush(
 
 @swpt_login.command("suspend_user_registrations")
 @with_appcontext
-@click.argument("user_ids", nargs=-1)
-def suspend_user_registrations(user_ids: list[str]) -> None:
+@click.argument("user_emails", nargs=-1)
+def suspend_user_registrations(user_emails: list[str]) -> None:
     """Suspend the registrations of users.
+
+    USER_EMAILS should be a list of user email addresses.
     """
 
-    for user_id in user_ids:
+    for email in user_emails:
         user = (
             UserRegistration.query
-            .filter_by(user_id=user_id, status=0)
+            .filter_by(email=email, status=0)
             .with_for_update()
             .one_or_none()
         )
         if user:
             assert user.status == 0
-            invalidate_credentials(user_id)
+            invalidate_credentials(user.user_id)
             user.status = 1
             db.session.commit()
 
 
 @swpt_login.command("resume_user_registrations")
 @with_appcontext
-@click.argument("user_ids", nargs=-1)
-def resume_user_registrations(user_ids: list[str]) -> None:
+@click.argument("user_emails", nargs=-1)
+def resume_user_registrations(user_emails: list[str]) -> None:
     """Resume suspended user registrations.
+
+    USER_EMAILS should be a list of user email addresses.
     """
 
-    for user_id in user_ids:
+    for email in user_emails:
         user = (
             UserRegistration.query
-            .filter_by(user_id=user_id)
+            .filter_by(email=email)
             .with_for_update()
             .one_or_none()
         )

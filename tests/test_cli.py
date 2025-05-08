@@ -219,9 +219,9 @@ def test_suspend_user_registrations(mocker, app, db_session):
         args=[
             "swpt_login",
             "suspend_user_registrations",
-            "1234",  # exists
-            "5678",  # exists
-            "9999",  # do not exist
+            "user1234@example.com",  # exists
+            "user5678@example.com",  # exists
+            "user9999@example.com",  # do not exist
         ]
     )
     assert result.exit_code == 0
@@ -243,8 +243,8 @@ def test_suspend_user_registrations(mocker, app, db_session):
         args=[
             "swpt_login",
             "resume_user_registrations",
-            "1234",  # exists
-            "9999",  # do not exist
+            "user1234@example.com",  # exists
+            "user9999@example.com",  # do not exist
         ]
     )
     assert result.exit_code == 0
