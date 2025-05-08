@@ -23,10 +23,11 @@ the following servers:
 2. [Ory Hydra] [OAuth 2.0] authorization server, which generates and
    verifies access tokens.
 
-3. [Redis] server instance, which stores more or less transient login
-   data. For this kind of information, the tolerance for data loss is
-   high, but nevertheless, the Redis server instance must be
-   configured as persistent (on-disk) database.
+3. A [Redis]-compatible server instance, which stores more or less
+   transient login data. For this kind of information, the tolerance
+   for data loss is high, but nevertheless, the Redis-compatible
+   server instance must be configured as persistent (on-disk)
+   database.
 
 To increase security and performance, it is highly recommended that
 you configure HTTP reverse-proxy server(s) (like [nginx]) between your
@@ -81,10 +82,11 @@ SQLALCHEMY_DATABASE_URI=postgresql+psycopg://swpt_login:swpt_login@localhost:543
 # operations.
 REPLICA_POSTGRES_URL=
 
-# Set this to the URL for the Redis server instance which the login and
-# consent apps should use. It is highly recommended that your Redis instance
-# is backed by disk storage. If not so, your users might be inconvenienced
-# when your Redis instace is restarted.
+# Set this to the URL for the Redis-compatible server instance which
+# the login and consent apps should use. It is highly recommended that
+# your Redis-compatible instance is backed by disk storage. If not so,
+# your users might be inconvenienced when your Redis instace is
+# restarted.
 REDIS_URL=redis://redis:6379/0
 
 # Optional URL for one of the nodes of the Redis Cluster which the
