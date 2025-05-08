@@ -1,15 +1,15 @@
 Swaptacular service that manages OAuth2 login and consent
 =========================================================
 
-**IMPORTANT NOTE: Organizations running Swaptacular debtors and
-creditors agents are encouraged to use their own OAuth2 login and
-consent implementations, which take into account their concrete
-security and user management policies.**
-
 This project implements user registration, login, and authorization
 consent for [Swaptacular]. The ultimate deliverable is a docker image,
 which is generated from the project's
 [Dockerfile](../master/Dockerfile).
+
+**IMPORTANT NOTE: Organizations running Swaptacular debtors and
+creditors agents are encouraged to use their own OAuth2 login and
+consent implementations, which take into account their concrete
+security and user management policies.**
 
 
 Dependencies
