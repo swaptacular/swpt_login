@@ -1,5 +1,5 @@
-{% if config.APP_SIGNUP_REDIRECT_URL %}
+{% if config.SIGNED_UP_REDIRECT_URL %}
 <p>
-  <a class="login-link" href="{{config.APP_SIGNUP_REDIRECT_URL|safe}}">{% trans %}OK{% endtrans %}</a>
+  <a class="login-link" href="{{config.SIGNED_UP_REDIRECT_URL|safe}}">{% trans %}OK{% endtrans %}</a>
 </p>
 {% endif %}
