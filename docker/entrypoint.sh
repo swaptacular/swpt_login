@@ -1,11 +1,30 @@
 #!/bin/sh
 set -e
 
+# During development and testing, we should be able to connect to
+# services installed on "localhost" from the container. To allow this,
+# we find the IP address of the docker host, and then for each
+# variable name in "$SUBSTITUTE_LOCALHOST_IN_VARS", we substitute
+# "localhost" with that IP address.
+host_ip=$(ip route show | awk '/default/ {print $3}')
+for envvar_name in $SUBSTITUTE_LOCALHOST_IN_VARS; do
+    eval envvar_value=\$$envvar_name
+    if [[ -n "$envvar_value" ]]; then
+        eval export $envvar_name=$(echo "$envvar_value" | sed -E "s/(.*@|.*\/\/)localhost\b/\1$host_ip/")
+    fi
+done
+
 # The WEBSERVER_* variables should be used instead of the GUNICORN_*
 # variables, because we do not want to tie the public interface to the
 # "gunicorn" server, which we may, or may not use in the future.
 export GUNICORN_WORKERS=${WEBSERVER_PROCESSES:-1}
 export GUNICORN_THREADS=${WEBSERVER_THREADS:-3}
+
+# The POSTGRES_URL variable should be used instead of the
+# SQLALCHEMY_DATABASE_URI variable, because we do not want to tie the
+# public interface to the "sqlalchemy" library, which we may, or may
+# not use in the future.
+export SQLALCHEMY_DATABASE_URI=${POSTGRES_URL}
 
 # When SUBJECT_PREFIX is set to one of the two standard values (which
 # must always be case), even if LOGIN_PATH and CONSENT_PATH variables

@@ -70,7 +70,7 @@ class Configuration(metaclass=MetaEnvReader):
     ABOUT_URL = "https://swaptacular.github.io/overview"
     STYLE_URL = ""
     SUSPENDED_ACCOUNT_HELP_URL = ""
-    APP_SIGNUP_REDIRECT_URL = ""  # It is highly recommended to set this!
+    SIGNED_UP_REDIRECT_URL = ""  # It is highly recommended to set this!
 
     SUBJECT_PREFIX = ""  # Must be "debtors:" or "creditors:".
 

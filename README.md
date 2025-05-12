@@ -44,9 +44,9 @@ example values:
 ```shell
 # Set this to the base URL of ORY Hydra's admin API. Note that Ory
 # Hydra 2.0 adds an "/admin/" prefix to all endpoints in the admin
-# API. Therefore, for Ory Hydra >= 2.0, the value of HYDRA_ADMIN_URL
-# would be something like this: "http://hydra:4445/admin/".
-HYDRA_ADMIN_URL=http://hydra:4445/
+# API. Therefore, for Ory Hydra < 2.0, the value of HYDRA_ADMIN_URL
+# would be something like this: "http://hydra:4445/".
+HYDRA_ADMIN_URL=http://hydra:4445/admin/
 
 # The prefix added the user ID to form the Oauth2 subject field. Must be
 # either "creditors:" or "debtors:". For example, if SUBJECT_PREFIX=creditors:,
@@ -72,14 +72,13 @@ LOGIN_PATH=
 CONSENT_PATH=
 
 # The URL for the PostgreSQL database that the login and consent apps should use.
-SQLALCHEMY_DATABASE_URI=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
+POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
 
 # Optional URL for a read-only replica of the master PostgreSQL
-# database (specified by `SQLALCHEMY_DATABASE_URI`). Using multiple
+# database (specified by `POSTGRES_URL`). Using multiple
 # read-only replicas behind a load-balancer may increase the number of
 # user requests that a busy system can handle. If not set, the
-# `SQLALCHEMY_DATABASE_URI` will also be used for the read-only
-# operations.
+# `POSTGRES_URL` will also be used for the read-only operations.
 REPLICA_POSTGRES_URL=
 
 # Set this to the URL for the Redis-compatible server instance which
@@ -103,6 +102,10 @@ SITE_TITLE=Demo Debtors Agent
 
 # Set this to an URL that tells more about your site.
 ABOUT_URL=https://example.com/about
+
+# Optional URL to go to, after a successful sign-up. Note that setting
+# this will greatly improve users' experience!
+SIGNED_UP_REDIRECT_URL=
 
 # Optional URL for users to go to, to recover their wrongfully
 # suspended accounts. This is not needed if no user accounts have
@@ -157,10 +160,6 @@ API_TIMEOUT_SECONDS=5
 # (default 2).
 FLUSH_PROCESSES=2
 FLUSH_PERIOD=1.5
-
-# Optional URL to go to, after a successful sign-up. Note that setting
-# this will greatly improve users' experience!
-APP_SIGNUP_REDIRECT_URL=
 
 # Set the minimum level of severity for log messages ("info",
 # "warning", or "error"). The default is "warning".
