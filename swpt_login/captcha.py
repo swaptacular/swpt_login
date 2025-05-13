@@ -17,13 +17,21 @@ class CaptchaResponse:
 def display_html(lang="en"):
     """Gets the HTML to display for reCAPTCHA."""
 
+    script_type = current_app.config["CAPTCHA_SCRIPT_TYPE"]
+    challenge_url = current_app.config["CAPTCHA_SCRIPT_SRC"]
+    lang_qp = current_app.config["CAPTCHA_SCRIPT_SRC_LANG_QUERY_PARAM"]
+
+    if lang_qp:
+        challenge_url += f"?{lang_qp}={lang}"
+
     return """
-    <script src="{challenge_url}?hl={lang}" async defer></script>
-    <div class="g-recaptcha" data-sitekey="{public_key}"></div>
+    <div class="{div_class}" data-sitekey="{public_key}"></div>
+    <script {type_attr} src="{challenge_url}" async defer></script>
     """.format(
-        challenge_url=current_app.config["RECAPTCHA_CHALLENGE_URL"],
-        public_key=current_app.config["RECAPTCHA_PUBLIC_KEY"],
-        lang=lang,
+        div_class=current_app.config["CAPTCHA_DIV_CLASS"],
+        public_key=current_app.config["CAPTCHA_SITEKEY"],
+        type_attr=f'type="{script_type}"' if script_type else "",
+        challenge_url=challenge_url,
     )
 
 
@@ -38,23 +46,35 @@ def verify(captcha_response, remote_ip):
     if not captcha_response:
         return CaptchaResponse(is_valid=False, error_message=ERROR_MESSAGE)
 
+    headers = {
+        "Content-type": "application/x-www-form-urlencoded",
+        "User-agent": "CAPTCHA Python",
+    }
+    data = {
+        "response": captcha_response,
+    }
+    secret = current_app.config["CAPTCHA_SITEKEY_SECRET"]
+    auth_header = current_app.config["CAPTCHA_VERIFY_AUTH_HEADER"]
+
+    if auth_header:
+        headers[auth_header] = secret
+    else:
+        data["secret"] = secret
+
+    if current_app.config["CAPTCHA_VERIFY_SEND_REMOTE_IP"]:
+        data["remoteip"] = remote_ip
+
     http_request = Request(
-        url=current_app.config["RECAPTCHA_VERIFY_URL"],
-        data=urlencode(
-            {
-                "secret": current_app.config["RECAPTCHA_PIVATE_KEY"],
-                "response": captcha_response,
-                "remoteip": remote_ip,
-            }
-        ).encode("ascii"),
-        headers={
-            "Content-type": "application/x-www-form-urlencoded",
-            "User-agent": "reCAPTCHA Python",
-        },
+        url=current_app.config["CAPTCHA_VERIFY_URL"],
+        data=urlencode(data).encode("ascii"),
+        headers=headers,
     )
-    timeout_seconds = float(current_app.config["RECAPTCHA_REQUEST_TIMEOUT_SECONDS"])
-    with urlopen(http_request, timeout=timeout_seconds) as http_response:
+    with urlopen(
+            http_request,
+            timeout=current_app.config["CAPTCHA_VERIFY_TIMEOUT_SECONDS"],
+    ) as http_response:
         response_object = json.loads(http_response.read().decode())
+
     if response_object["success"]:
         return CaptchaResponse(is_valid=True)
     else:

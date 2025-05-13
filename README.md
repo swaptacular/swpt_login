@@ -137,10 +137,11 @@ MAIL_USERNAME=smtp_user
 MAIL_PASSWORD=smpt_password
 MAIL_DEFAULT_SENDER=Demo Debtors Agent <no-reply@example.com>
 
-# Parameters for Google reCAPTCHA 2. You should obtain your own public/private
-# key pair from www.google.com/recaptcha, and put it here.
-RECAPTCHA_PUBLIC_KEY=6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37
-RECAPTCHA_PIVATE_KEY=6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q
+# Parameters for hCaptcha. You should obtain your own
+# "sitekey"/"sitekey secret" pair from https://www.hcaptcha.com/, and
+# put it here. Note that the "sitekey secret" should be kept secret.
+CAPTCHA_SITEKEY=10000000-ffff-ffff-ffff-000000000001
+CAPTCHA_SITEKEY_SECRET=0x0000000000000000000000000000000000000000
 
 # When set to `False`, does not show any CAPTCHAs. Normally, this
 # should be `True`.
