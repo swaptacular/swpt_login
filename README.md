@@ -137,6 +137,10 @@ MAIL_DEFAULT_SENDER=Demo Debtors Agent <no-reply@example.com>
 RECAPTCHA_PUBLIC_KEY=6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37
 RECAPTCHA_PIVATE_KEY=6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q
 
+# When set to `False`, does not show any CAPTCHAs. Normally, this
+# should be `True`.
+SHOW_CAPTCHA_ON_SIGNUP=True
+
 # Parameters that determine how to obtain an user ID from the resource
 # server. "$SUPERUSER_CLIENT_ID" and "$SUPERUSER_CLIENT_SECRET" are
 # used to perform the "Client Credentials" OAuth2 flow against the

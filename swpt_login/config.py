@@ -65,6 +65,7 @@ class Configuration(metaclass=MetaEnvReader):
     RECAPTCHA_CHALLENGE_URL = "https://www.google.com/recaptcha/api.js"
     RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify"
 
+    SHOW_CAPTCHA_ON_SIGNUP = True
     SITE_TITLE = "Login Test Site"
     LANGUAGES = "en"  # separated by a comma, for example "en,bg", the first is default
     ABOUT_URL = "https://swaptacular.github.io/overview"
@@ -91,7 +92,6 @@ class Configuration(metaclass=MetaEnvReader):
     LOGIN_PATH = "/login"
     CONSENT_PATH = "/consent"
     SECRET_KEY = "dummy-secret"
-    SHOW_CAPTCHA_ON_SIGNUP = True
     SIGNUP_IP_BLOCK_SECONDS = 60 * 60
     SIGNUP_IP_MAX_EMAILS = 30
     CAPTCHA_RESPONSE_FIELD_NAME = "g-recaptcha-response"
