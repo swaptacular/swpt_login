@@ -107,15 +107,19 @@ def create_app(config_dict={}):
     app.config.from_object(Configuration)
     app.config.from_mapping(config_dict)
     app.config["LANGUAGE_CHOICES"] = _get_language_choices(app.config["LANGUAGES"])
+
+    engine_options = app.config["SQLALCHEMY_ENGINE_OPTIONS"]
+    engine_options["pool_size"] = app.config["POSTGRES_CONNECTION_POOL_SIZE"]
     app.config["SQLALCHEMY_BINDS"] = {
         "replica": {
             "url": (
-                app.config["REPLICA_POSTGRES_URL"]
+                app.config["POSTGRES_REPLICA_URL"]
                 or app.config["SQLALCHEMY_DATABASE_URI"]
             ),
-            **app.config["SQLALCHEMY_ENGINE_OPTIONS"],
+            **engine_options,
         },
     }
+
     subject_prefix = app.config["SUBJECT_PREFIX"]
     if subject_prefix == "debtors:":
         app.config["API_RESERVE_USER_ID_PATH"] = "/debtors/.debtor-reserve"
