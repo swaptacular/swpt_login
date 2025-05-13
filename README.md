@@ -79,7 +79,12 @@ POSTGRES_URL=postgresql+psycopg://swpt_login:swpt_login@localhost:5435/test
 # read-only replicas behind a load-balancer may increase the number of
 # user requests that a busy system can handle. If not set, the
 # `POSTGRES_URL` will also be used for the read-only operations.
-REPLICA_POSTGRES_URL=
+POSTGRES_REPLICA_URL=
+
+# Optional upper limit on the number of PostgreSQL connections in the
+# connection pool. If set to zero, which is the default value, there
+# is no limit.
+POSTGRES_CONNECTION_POOL_SIZE=100
 
 # Set this to the URL for the Redis-compatible server instance which
 # the login and consent apps should use. It is highly recommended that

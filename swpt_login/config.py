@@ -44,7 +44,8 @@ class Configuration(metaclass=MetaEnvReader):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
 
-    REPLICA_POSTGRES_URL = ""
+    POSTGRES_CONNECTION_POOL_SIZE = 0
+    POSTGRES_REPLICA_URL = ""
 
     REDIS_URL = "redis://localhost:6379/0"
     REDIS_CLUSTER_URL = ""
