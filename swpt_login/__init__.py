@@ -2,6 +2,7 @@ import logging
 import sys
 import os
 import os.path
+import socket
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from typing import List
@@ -106,6 +107,10 @@ def create_app(config_dict={}):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_port=1)
     app.config.from_object(Configuration)
     app.config.from_mapping(config_dict)
+
+    if not app.config["TESTING"]:
+        socket.setdefaulttimeout(5.0)
+
     app.config["LANGUAGE_CHOICES"] = _get_language_choices(app.config["LANGUAGES"])
 
     engine_options = app.config["SQLALCHEMY_ENGINE_OPTIONS"]
