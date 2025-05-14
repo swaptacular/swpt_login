@@ -137,6 +137,9 @@ def create_app(config_dict={}):
     else:
         raise RuntimeError("invalid SUBJECT_PREFIX")
 
+    if not app.config["MAIL_DEFAULT_SENDER"]:
+        raise RuntimeError("MAIL_DEFAULT_SENDER is not set")
+
     extensions.init_app(app)
     app.register_blueprint(login, url_prefix=app.config["LOGIN_PATH"])
     app.register_blueprint(consent, url_prefix=app.config["CONSENT_PATH"])

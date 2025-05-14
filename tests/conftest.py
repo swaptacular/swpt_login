@@ -14,6 +14,7 @@ config_dict = {
     "API_RESOURCE_SERVER": "https://resource-server.example.com",
     "SECRET_CODE_MAX_ATTEMPTS": 5,
     "MAIL_SUPPRESS_SEND": False,
+    "MAIL_DEFAULT_SENDER": "Swaptacular <no-reply@example.com>",
     "LOGIN_VERIFIED_DEVICES_MAX_COUNT": 3,
     "SHOW_CAPTCHA_ON_SIGNUP": False,
     "SIGNUP_IP_BLOCK_SECONDS": 1,
