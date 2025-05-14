@@ -1,4 +1,5 @@
 import json
+from typing import Union
 from os import environ
 
 
@@ -7,6 +8,10 @@ def _parse_dict(s: str) -> dict:
         return json.loads(s)
     except ValueError:
         raise ValueError(f"Invalid JSON configuration value: {s}")
+
+
+def _str_or_nothing(s: str) -> Union[str, None]:
+    return s or None
 
 
 class MetaEnvReader(type):
@@ -54,8 +59,8 @@ class Configuration(metaclass=MetaEnvReader):
     MAIL_PORT = 25
     MAIL_USE_TLS = False
     MAIL_USE_SSL = False
-    MAIL_USERNAME: str = None
-    MAIL_PASSWORD: str = None
+    MAIL_USERNAME: _str_or_nothing = None
+    MAIL_PASSWORD: _str_or_nothing = None
     MAIL_DEFAULT_SENDER: str = None
     MAIL_MAX_EMAILS: int = None
     MAIL_ASCII_ATTACHMENTS = False

@@ -125,18 +125,18 @@ STYLE_URL=
 # name of your mail server, and MAIL_PORT to the SMTP port on that
 # server. MAIL_DEFAULT_SENDER should be set to the email address from
 # which outgoing emails will be sent to users. Do not set
-# MAIL_USERNAME and MAIL_PASSWORD if the SMPT server does not
-# require username and password. MAIL_USE_SSL detemines whether SSL
-# is required from the beginning, and MAIL_USE_TLS determines
-# whether the STARTTLS extension should be used after the connection
-# to the mail server has bee established.
+# MAIL_USERNAME and MAIL_PASSWORD if the SMPT server does not require
+# username and password (you can also set them to empty strings).
+# MAIL_USE_SSL detemines whether SSL is required from the beginning,
+# and MAIL_USE_TLS determines whether the STARTTLS extension should be
+# used after the connection to the mail server has bee established.
 MAIL_SERVER=my-mail-server
 MAIL_PORT=25
-MAIL_USE_TLS=False
-MAIL_USE_SSL=False
+MAIL_DEFAULT_SENDER=Demo Debtors Agent <no-reply@example.com>
 MAIL_USERNAME=smtp_user
 MAIL_PASSWORD=smpt_password
-MAIL_DEFAULT_SENDER=Demo Debtors Agent <no-reply@example.com>
+MAIL_USE_SSL=False
+MAIL_USE_TLS=False
 
 # Parameters for hCaptcha. You should obtain your own
 # "sitekey"/"sitekey secret" pair from https://www.hcaptcha.com/, and
