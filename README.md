@@ -127,9 +127,10 @@ STYLE_URL=
 # which outgoing emails will be sent to users. Do not set
 # MAIL_USERNAME and MAIL_PASSWORD if the SMPT server does not require
 # username and password (you can also set them to empty strings).
-# MAIL_USE_SSL detemines whether SSL is required from the beginning,
-# and MAIL_USE_TLS determines whether the STARTTLS extension should be
-# used after the connection to the mail server has bee established.
+# MAIL_USE_SSL detemines whether SSL is required from the beginning
+# (default "False"), and MAIL_USE_TLS determines whether the STARTTLS
+# extension should be used after the connection to the mail server has
+# bee established (default "False").
 MAIL_SERVER=my-mail-server
 MAIL_PORT=25
 MAIL_DEFAULT_SENDER=Demo Debtors Agent <no-reply@example.com>
@@ -138,15 +139,16 @@ MAIL_PASSWORD=smpt_password
 MAIL_USE_SSL=False
 MAIL_USE_TLS=False
 
-# Parameters for hCaptcha. You should obtain your own
-# "sitekey"/"sitekey secret" pair from https://www.hcaptcha.com/, and
-# put it here. Note that the "sitekey secret" should be kept secret.
+# When set to "False" (the default is "True"), does not show any
+# CAPTCHAs. Normally, this should be "True".
+SHOW_CAPTCHA_ON_SIGNUP=True
+
+# Parameters for hCaptcha. Required if SHOW_CAPTCHA_ON_SIGNUP is
+# "True". You should obtain your own "sitekey"/"sitekey secret" pair
+# from https://www.hcaptcha.com/, and put it here. Note that the
+# "sitekey secret" should be kept secret.
 CAPTCHA_SITEKEY=10000000-ffff-ffff-ffff-000000000001
 CAPTCHA_SITEKEY_SECRET=0x0000000000000000000000000000000000000000
-
-# When set to `False`, does not show any CAPTCHAs. Normally, this
-# should be `True`.
-SHOW_CAPTCHA_ON_SIGNUP=True
 
 # Parameters that determine how to obtain an user ID from the resource
 # server. "$SUPERUSER_CLIENT_ID" and "$SUPERUSER_CLIENT_SECRET" are
