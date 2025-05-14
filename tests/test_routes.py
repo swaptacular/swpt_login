@@ -651,3 +651,8 @@ def test_login_inactive_account(mocker, client, app, db_session):
     )
     assert r.status_code == 200
     assert "Your account has been suspended" in r.get_data(as_text=True)
+
+
+def test_healthz(client, app):
+    r = client.get("/login/healthz")
+    assert r.status_code == 200

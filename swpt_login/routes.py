@@ -180,6 +180,18 @@ def set_language(lang):
     return response
 
 
+@login.route("/healthz")
+def healthz():
+    """Return HTTP status code 200 if the server is healthy.
+    """
+
+    message = "I am healthy."
+    headers = {
+        "Content-Type": "text/plain",
+    }
+    return make_response(message, headers)
+
+
 @login.route("/signup", methods=["GET", "POST"])
 def signup():
     """Handle the initial sign up.

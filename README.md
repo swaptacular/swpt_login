@@ -63,7 +63,8 @@ WEBSERVER_THREADS=3
 
 # Optional path (only the path) to the login page. If not set,
 # depending on the value of the SUBJECT_PREFIX variable, the default
-# will be either "/creditors-login" or "/debtors-login".
+# will be either "/creditors-login" or "/debtors-login". The path
+# "${LOGIN_PATH}/healthz" can be used as readiness and liveness probe.
 LOGIN_PATH=
 
 # Optional path (only the path) to the consent page. If not set,
