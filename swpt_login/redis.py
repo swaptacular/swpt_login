@@ -134,12 +134,12 @@ class RedisSecretHashRecord:
         return self._data[name]
 
 
-def increment_key_with_limit(key, limit=None, period_seconds=1):
+def increment_key_with_limit(key, limit=None, period_seconds=1, increment_by=1):
     if redis_store.ttl(key) < 0:
-        redis_store.set(key, "1", ex=period_seconds)
-        value = 1
+        redis_store.set(key, str(increment_by), ex=period_seconds)
+        value = increment_by
     else:
-        value = redis_store.incrby(key)
+        value = redis_store.incrby(key, increment_by)
     if limit is not None and int(value) > limit:
         raise ExceededValueLimitError()
     return value

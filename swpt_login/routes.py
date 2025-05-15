@@ -56,22 +56,66 @@ def inject_get_locale():
     return dict(get_locale=get_locale)
 
 
+# NOTE: We use the Redis key "ip:XXX.XXX.XXX.XXX" to rate-limit the
+# number of sensitive operations per client IP address. However, there
+# are two types of sensitive operations: 1) sending emails; 2) sending
+# CAPTCHA verifications. We use the same Redis key for both of those
+# operations, but the limit for senging CAPTCHA verifications must be
+# multiple times higher than the limit for sending emails. To achieve
+# this, we define a multiplier.
+EMAIL_STATS_MULTIPLIER = 10
+
+
 def verify_captcha():
     """Verify captcha if required."""
 
+    captcha_passed = True
+    captcha_error_message = None
+
     if current_app.config["SHOW_CAPTCHA_ON_SIGNUP"]:
-        captcha_response = request.form.get(
-            current_app.config["CAPTCHA_RESPONSE_FIELD_NAME"], ""
-        )
-        captcha_solution = captcha.verify(captcha_response, request.remote_addr)
-        captcha_passed = captcha_solution.is_valid
-        captcha_error_message = captcha_solution.error_message
-        if not captcha_passed and captcha_error_message is None:
-            captcha_error_message = gettext("Incorrect captcha solution.")
-    else:
-        captcha_passed = True
-        captcha_error_message = None
+        remote_ip = request.remote_addr
+
+        if allow_verifying_captcha(remote_ip):
+            captcha_response = request.form.get(
+                current_app.config["CAPTCHA_RESPONSE_FIELD_NAME"], ""
+            )
+            captcha_solution = captcha.verify(captcha_response, remote_ip)
+            captcha_passed = captcha_solution.is_valid
+            captcha_error_message = captcha_solution.error_message
+        else:
+            captcha_passed = False
+            captcha_error_message = gettext(
+                "Too many requests from %(remote_ip)s.", remote_ip=remote_ip
+            )
+
+    if not captcha_passed and captcha_error_message is None:
+        captcha_error_message = gettext("Incorrect captcha solution.")
+
     return captcha_passed, captcha_error_message
+
+
+def allow_verifying_captcha(initiator_ip: str) -> bool:
+    """Decide if captcha verification request should be sent based on
+    initiator's IP address.
+
+    This protects against DoS attacks by blocking IPs from initiating
+    too many CAPTCHA verification requests. Note that this method
+    works well only for IPv4, but not for IPv6.
+    """
+
+    try:
+        increment_key_with_limit(
+            key=f"ip:{initiator_ip}",
+            limit=EMAIL_STATS_MULTIPLIER * current_app.config["SIGNUP_IP_MAX_EMAILS"],
+            period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
+            increment_by=1,
+        )
+    except ExceededValueLimitError:
+        logger = logging.getLogger(__name__)
+        logger.warning("too many CAPTCHA verification requests from %s", initiator_ip)
+        return False
+
+    return True
 
 
 def allow_sending_email(initiator_ip: str, email: str) -> bool:
@@ -86,8 +130,9 @@ def allow_sending_email(initiator_ip: str, email: str) -> bool:
     try:
         increment_key_with_limit(
             key=f"ip:{initiator_ip}",
-            limit=current_app.config["SIGNUP_IP_MAX_EMAILS"],
+            limit=EMAIL_STATS_MULTIPLIER * current_app.config["SIGNUP_IP_MAX_EMAILS"],
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
+            increment_by=EMAIL_STATS_MULTIPLIER,
         )
     except ExceededValueLimitError:
         logger.warning("too many email sending initiations from %s", initiator_ip)
