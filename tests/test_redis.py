@@ -372,6 +372,10 @@ def test_increment_key_with_limit(app):
     with pytest.raises(redis.ExceededValueLimitError):
         redis.increment_key_with_limit(key, limit=3, period_seconds=1000000)
 
+    assert redis.increment_key_with_limit(
+        key, limit=14, period_seconds=1000000, increment_by=10
+    ) == 14
+
 
 def test_user_logins_history(app):
     ulh = redis.UserLoginsHistory(USER_ID)
