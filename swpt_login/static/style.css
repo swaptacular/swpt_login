@@ -183,7 +183,7 @@ input[type=checkbox]:checked:after {
 }
 input[type=checkbox] + span {
     display: inline-block;
-    width: 90%;
+    width: 85%;
     font-size: 16px;
     margin-left: 8px;
 }
