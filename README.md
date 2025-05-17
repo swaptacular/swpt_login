@@ -154,7 +154,7 @@ CAPTCHA_SITEKEY_SECRET=0x0000000000000000000000000000000000000000
 # ALTCHAs (see https://altcha.org/). Normally, this should be "True".
 SHOW_ALTCHA_ON_LOGIN=True
 
-# Parameters for ALTCHA . Required if SHOW_ALTCHA_ON_LOGIN is "True".
+# Parameters for ALTCHA. Required if SHOW_ALTCHA_ON_LOGIN is "True".
 # ALTCHA_SECRET_HMAC_KEY should be set to a cryptogaphically strong
 # secret string. ALTCHA_MAX_NUMBER is proportional to the
 # computational effort needed to solve the ALTCHA challenge (default
