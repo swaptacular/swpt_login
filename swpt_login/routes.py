@@ -1,4 +1,7 @@
 import logging
+import json
+import base64
+from datetime import datetime, timedelta
 from urllib.parse import urljoin
 from flask import (
     request,
@@ -13,6 +16,7 @@ from flask import (
 )
 from flask_babel import gettext, get_locale
 import user_agents
+import altcha
 from sqlalchemy import select
 from . import utils, captcha, emails, hydra
 from .redis import (
@@ -66,7 +70,70 @@ def inject_get_locale():
 EMAIL_STATS_MULTIPLIER = 10
 
 
-def verify_captcha():
+def create_altcha_challenge() -> str:
+    if not current_app.config["SHOW_CAPTCHA_ON_SIGNUP"]:
+        return ""
+
+    options = altcha.ChallengeOptions(
+        expires=datetime.now() + timedelta(
+            seconds=current_app.config["ALTCHA_EXPIRATION_SECONDS"]
+        ),
+        max_number=current_app.config["ALTCHA_MAX_NUMBER"],
+        hmac_key=current_app.config["ALTCHA_SECRET_HMAC_KEY"],
+    )
+    c = altcha.create_challenge(options)
+    return json.dumps(
+        {
+            "algorithm": c.algorithm,
+            "challenge": c.challenge,
+            "maxnumber": c.maxnumber,
+            "salt": c.salt,
+            "signature": c.signature,
+        }
+    )
+
+
+def verify_altcha() -> bool:
+    """Verify ALTCHA if required."""
+
+    altcha_passed = True
+
+    if current_app.config["SHOW_ALTCHA_ON_LOGIN"]:
+        payload = request.form.get("altcha", "")
+        try:
+            payload = json.loads(base64.b64decode(payload).decode())
+        except (ValueError, TypeError):
+            return False
+
+        altcha_passed, _ = altcha.verify_solution(
+            payload,
+            current_app.config["ALTCHA_SECRET_HMAC_KEY"],
+            check_expires=True,
+        )
+
+        if altcha_passed:
+            challenge_fingerprint = base64.a85encode(
+                base64.b16decode(payload["challenge"], casefold=True)[:12]
+            ).decode("ascii")
+
+            try:
+                increment_key_with_limit(
+                    key=f"cf:{challenge_fingerprint}",
+                    limit=1,
+                    period_seconds=(
+                        current_app.config["ALTCHA_EXPIRATION_SECONDS"]
+                        + 300  # give it some leeway
+                    ),
+                )
+            except ExceededValueLimitError:
+                logger = logging.getLogger(__name__)
+                logger.debug("ALTCHA solution replay attempt")
+                return False
+
+    return altcha_passed
+
+
+def verify_captcha() -> tuple[bool, str | None]:
     """Verify captcha if required."""
 
     captcha_passed = True
@@ -482,7 +549,11 @@ def change_email_login():
         password = request.form.get("password", "")
         user = query_user_credentials(old_email)
 
-        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
+        if (
+                verify_altcha()
+                and user
+                and user.password_hash == utils.calc_crypt_hash(user.salt, password)
+        ):
             # NOTE: We create a special kind of login verification
             # request -- a login verification request without a
             # verification code. This request can only be used to set
@@ -514,7 +585,10 @@ def change_email_login():
 
         flash(gettext("Incorrect email or password"))
 
-    return render_template("change_email_login.html")
+    return render_template(
+        "change_email_login.html",
+        challengejson=create_altcha_challenge(),
+    )
 
 
 @login.route("/choose-email/<secret>", methods=["GET", "POST"])
@@ -541,6 +615,10 @@ def choose_new_email(secret):
         elif not captcha_passed:
             flash(captcha_error_message)
         elif not verification_request.is_correct_recovery_code(recovery_code):
+            try:
+                verification_request.register_code_failure()
+            except verification_request.ExceededMaxAttempts:
+                abort(403)
             flash(gettext("Incorrect recovery code"))
         else:
             verification_request.accept()
@@ -605,7 +683,11 @@ def change_email_address(secret):
         password = request.form.get("password", "")
         user = query_user_credentials(old_email)
 
-        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
+        if (
+                verify_altcha()
+                and user
+                and user.password_hash == utils.calc_crypt_hash(user.salt, password)
+        ):
             try:
                 change_email_request.accept()
             except change_email_request.EmailAlredyRegistered:
@@ -636,6 +718,7 @@ def change_email_address(secret):
     return render_template(
         "enter_password.html",
         title=gettext("Change Email Address"),
+        challengejson=create_altcha_challenge(),
     )
 
 
@@ -736,7 +819,11 @@ def generate_recovery_code(secret):
         password = request.form.get("password", "")
         user = query_user_credentials(email)
 
-        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
+        if (
+                verify_altcha()
+                and user
+                and user.password_hash == utils.calc_crypt_hash(user.salt, password)
+        ):
             new_recovery_code = crc_request.accept()
 
             # Do not cache this page! It contains a plain-text secret.
@@ -757,6 +844,7 @@ def generate_recovery_code(secret):
     return render_template(
         "enter_password.html",
         title=gettext("Change Recovery Code"),
+        challengejson=create_altcha_challenge(),
     )
 
 
@@ -781,7 +869,11 @@ def delete_account_login():
         password = request.form.get("password", "")
         user = query_user_credentials(email)
 
-        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
+        if (
+                verify_altcha()
+                and user
+                and user.password_hash == utils.calc_crypt_hash(user.salt, password)
+        ):
             # NOTE: We create a special kind of login verification
             # request -- a login verification request without a
             # verification code. This request can only be used to set
@@ -812,7 +904,10 @@ def delete_account_login():
 
         flash(gettext("Incorrect email or password"))
 
-    return render_template("delete_account_login.html")
+    return render_template(
+        "delete_account_login.html",
+        challengejson=create_altcha_challenge(),
+    )
 
 
 @login.route("/confirm-deletion/<secret>", methods=["GET", "POST"])
@@ -845,8 +940,10 @@ def confirm_account_deletion(secret):
             password = request.form.get("password", "")
             user = UserRegistration.query.filter_by(email=email).one_or_none()
 
-            if user and user.password_hash == utils.calc_crypt_hash(
-                user.salt, password
+            if (
+                verify_altcha()
+                and user
+                and user.password_hash == utils.calc_crypt_hash(user.salt, password)
             ):
                 login_verification_request.accept()
 
@@ -863,6 +960,7 @@ def confirm_account_deletion(secret):
     return render_template(
         "confirm_account_deletion.html",
         confirmed_deletion=confirmed_deletion,
+        challengejson=create_altcha_challenge(),
     )
 
 
@@ -905,7 +1003,11 @@ def login_form():
         password = request.form.get("password", "")
         user = query_user_credentials(email)
 
-        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
+        if (
+                verify_altcha()
+                and user
+                and user.password_hash == utils.calc_crypt_hash(user.salt, password)
+        ):
             if user.status != 0:
                 return render_template(
                     "report_inactive_account.html",
@@ -989,7 +1091,7 @@ def login_form():
 
         flash(gettext("Incorrect email or password"))
 
-    return render_template("login.html")
+    return render_template("login.html", challengejson=create_altcha_challenge())
 
 
 @login.route("/verify", methods=["GET", "POST"])

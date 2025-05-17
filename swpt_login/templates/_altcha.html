@@ -1,0 +1,27 @@
+{% if config.SHOW_ALTCHA_ON_LOGIN %}
+<p>
+  <altcha-widget
+    id="altcha"
+    auto="{{config.ALTCHA_AUTO_SOLVE}}"
+    expire="{{1000 * config.ALTCHA_EXPIRATION_SECONDS}}"
+    challengejson="{{challengejson|escape}}"
+    {% if config.ALTCHA_HIDELOGO %}hidelogo{% endif %}
+    {% if config.ALTCHA_HIDEFOOTER %}hidefooter{% endif %}
+    ></altcha-widget>
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelector('#altcha').configure({
+        strings: {
+          error: '{% trans %}Verification failed. Try again later.{% endtrans %}',
+          expired: '{% trans %}Verification expired. Try again.{% endtrans %}',
+          footer: '{% trans website=config.ALTCHA_INFO_URL %}Protected by <a href="{{website}}" target="_blank">ALTCHA</a>{% endtrans %}',
+          label: "{% trans %}I'm not a robot{% endtrans %}",
+          verified: '{% trans %}Verified{% endtrans %}',
+          verifying: '{% trans %}Verifying...{% endtrans %}',
+          waitAlert: '{% trans %}Verifying... please wait.{% endtrans %}'
+        }
+      })
+    })
+  </script>
+</p>
+{% endif %}

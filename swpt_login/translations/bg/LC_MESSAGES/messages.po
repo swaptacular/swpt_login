@@ -1,21 +1,19 @@
 #
 # Evgeni Pandurski <epandurski@gmai.com>, 2025.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-15 15:01+0300\n"
-"PO-Revision-Date: 2025-05-15 15:02+0300\n"
+"POT-Creation-Date: 2025-05-17 20:08+0300\n"
+"PO-Revision-Date: 2025-05-17 15:30+0300\n"
 "Last-Translator: Evgeni Pandurski <epandurski@gmai.com>\n"
 "Language: bg\n"
 "Language-Team: Bulgarian <epandurski@gmai.com>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
-"X-Generator: Gtranslator 42.0\n"
 
 #: captcha.py:8
 msgid "You did not solve the \"reCAPTCHA\" challenge."
@@ -25,7 +23,7 @@ msgstr "Не сте решили \"reCAPTCHA\" пъзела."
 msgid "Duplicate Registration"
 msgstr "Съществуваща регистрация"
 
-#: emails.py:51 routes.py:334
+#: emails.py:51 routes.py:401
 msgid "Change Account Password"
 msgstr "Смяна на потребителска парола"
 
@@ -33,7 +31,7 @@ msgstr "Смяна на потребителска парола"
 msgid "Changed Account Password"
 msgstr "Променена потребителска парола"
 
-#: emails.py:81 routes.py:332
+#: emails.py:81 routes.py:399
 msgid "Create a New Account"
 msgstr "Регистрация на нов потребител"
 
@@ -42,64 +40,64 @@ msgstr "Регистрация на нов потребител"
 msgid "New login from %(user_agent)s"
 msgstr "Ново влизане от %(user_agent)s"
 
-#: emails.py:113 emails.py:128 routes.py:638
+#: emails.py:113 emails.py:128 routes.py:720
 #: templates/change_email_login.html:4 templates/choose_new_email.html:4
 msgid "Change Email Address"
 msgstr "Промяна на имейл адрес"
 
-#: emails.py:143 routes.py:716 routes.py:759
+#: emails.py:143 routes.py:799 routes.py:846
 msgid "Change Recovery Code"
 msgstr "Промяна на кода за възстановяване"
 
 #: emails.py:163 templates/confirm_account_deletion.html:4
-#: templates/confirm_account_deletion.html:42
+#: templates/confirm_account_deletion.html:43
 msgid "Delete Account"
 msgstr "Изтриване на регистрация"
 
-#: routes.py:88
+#: routes.py:155
 #, python-format
 msgid "Too many requests from %(remote_ip)s."
 msgstr "Твърде много заявки от %(remote_ip)s."
 
-#: routes.py:92
+#: routes.py:159
 msgid "Incorrect captcha solution."
 msgstr "Неправилно решение на captcha-та"
 
-#: routes.py:265 routes.py:540 routes.py:693
+#: routes.py:332 routes.py:614 routes.py:776
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
-#: routes.py:376
+#: routes.py:443
 #, python-format
 msgid "The password should have at least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
-#: routes.py:383
+#: routes.py:450
 #, python-format
 msgid "The password should have at most %(num)s characters."
 msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
-#: routes.py:388
+#: routes.py:455
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
 
-#: routes.py:394 routes.py:544
+#: routes.py:461 routes.py:622
 msgid "Incorrect recovery code"
 msgstr "Грешен код за възстановяване"
 
-#: routes.py:515 routes.py:813 routes.py:990
+#: routes.py:586 routes.py:905 routes.py:1092
 msgid "Incorrect email or password"
 msgstr "Грешен имейл или парола"
 
-#: routes.py:634 routes.py:755 routes.py:861
+#: routes.py:716 routes.py:842 routes.py:958
 msgid "Incorrect password"
 msgstr "Грешна парола"
 
-#: routes.py:842
+#: routes.py:937
 msgid "You have not confirmed the deletion of your account."
 msgstr "Не сте потвърдили изтриването на вашата регистрация."
 
-#: routes.py:1038
+#: routes.py:1140
 msgid "Invalid verification code"
 msgstr "Грешен код за потвърждение"
 
@@ -117,6 +115,35 @@ msgstr ""
 "\n"
 "Възникна грешка. Най-вероятната причина е, че срокът на валидност на "
 "връзката е изтекъл."
+
+#: templates/_altcha.html:15
+msgid "Verification failed. Try again later."
+msgstr "Неуспешна проверка. Опитайте по-късно."
+
+#: templates/_altcha.html:16
+msgid "Verification expired. Try again."
+msgstr "Невалидна проверка. Опитайте отново."
+
+#: templates/_altcha.html:17
+#, python-format
+msgid "Protected by <a href=\"%(website)s\" target=\"_blank\">ALTCHA</a>"
+msgstr "Защитено от <a href=\"%(website)s\" target=\"_blank\">ALTCHA</a>"
+
+#: templates/_altcha.html:18
+msgid "I'm not a robot"
+msgstr "Не съм робот"
+
+#: templates/_altcha.html:19
+msgid "Verified"
+msgstr "Проверено"
+
+#: templates/_altcha.html:20
+msgid "Verifying..."
+msgstr "Проверка..."
+
+#: templates/_altcha.html:21
+msgid "Verifying... please wait."
+msgstr "Проверка... моля изчакайте."
 
 #: templates/_email_signature.txt:2
 #, python-format
@@ -154,7 +181,8 @@ msgstr ""
 #: templates/change_email_address.txt:1
 #, python-format
 msgid ""
-"Proceed with changing your email address by clicking on the following link:\n"
+"Proceed with changing your email address by clicking on the following "
+"link:\n"
 "\n"
 "%(change_email_address_link)s\n"
 "\n"
@@ -163,7 +191,8 @@ msgid ""
 "If you received this email by mistake, simply delete it. Your email\n"
 "address won't be changed if you don't click the link above.\n"
 msgstr ""
-"Продължете процедурата по промяна на имейл адреса си, като кликнете върху\n"
+"Продължете процедурата по промяна на имейл адреса си, като кликнете върху"
+"\n"
 "връзката по-долу:\n"
 "\n"
 "%(change_email_address_link)s\n"
@@ -196,8 +225,8 @@ msgstr "Парола"
 msgid "Enter your password"
 msgstr "Въведете вашата парола"
 
-#: templates/change_email_login.html:30
-#: templates/enter_verification_code.html:27 templates/login.html:30
+#: templates/change_email_login.html:31
+#: templates/enter_verification_code.html:27 templates/login.html:31
 msgid "Log in"
 msgstr "Вход"
 
@@ -213,7 +242,8 @@ msgid ""
 "If you received this email by mistake, simply delete it. Your password\n"
 "won't be changed if you don't click the link above.\n"
 msgstr ""
-"Продължете процедурата по промяна на паролата, като кликнете върху връзката\n"
+"Продължете процедурата по промяна на паролата, като кликнете върху "
+"връзката\n"
 "по-долу:\n"
 "\n"
 "%(choose_password_link)s\n"
@@ -244,7 +274,8 @@ msgstr ""
 "Ако не помните да сте се променяли наскоро паролата си в %(site)s,\n"
 "вероятно някой е \"откраднал\" акаунта ви. Ако подозирате че случаят е "
 "такъв,\n"
-"трябва незабавно да се опитате да възстановите паролата на акаунта си, като\n"
+"трябва незабавно да се опитате да възстановите паролата на акаунта си, "
+"като\n"
 "кликнете върху връзката по-долу:\n"
 "\n"
 "%(change_password_page)s\n"
@@ -255,16 +286,19 @@ msgstr ""
 #: templates/change_recovery_code.txt:1
 #, python-format
 msgid ""
-"Proceed with changing your recovery code by clicking on the following link:\n"
+"Proceed with changing your recovery code by clicking on the following "
+"link:\n"
 "\n"
 "%(change_recovery_code_link)s\n"
 "\n"
 "This link will expire in %(num)s minutes.\n"
 "\n"
-"If you received this email by mistake, simply delete it. Your recovery code\n"
+"If you received this email by mistake, simply delete it. Your recovery "
+"code\n"
 "won't be changed if you don't click the link above.\n"
 msgstr ""
-"Продължете процедурата по промяна на кода за възстановяване, като кликнете\n"
+"Продължете процедурата по промяна на кода за възстановяване, като "
+"кликнете\n"
 "върху връзката по-долу:\n"
 "\n"
 "%(change_recovery_code_link)s\n"
@@ -272,7 +306,8 @@ msgstr ""
 "Тази връзка ще престане да бъде активна след %(num)s минути.\n"
 "\n"
 "Ако сте получили този имейл погрешка, просто го изтрийте. Вашият код за\n"
-"възстановяване няма да бъде променен, ако не кликнете върху горната връзка.\n"
+"възстановяване няма да бъде променен, ако не кликнете върху горната "
+"връзка.\n"
 
 #: templates/choose_new_email.html:11 templates/choose_password.html:11
 msgid "Recovery code"
@@ -291,7 +326,7 @@ msgid "Enter your new email"
 msgstr "Въведете вашия нов имейл"
 
 #: templates/choose_new_email.html:40 templates/choose_password.html:51
-#: templates/enter_password.html:17
+#: templates/enter_password.html:18
 msgid "Submit"
 msgstr "Изпрати"
 
@@ -321,7 +356,8 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"За препоръчване е паролата, която избирате тук, да е различна от паролата\n"
+"За препоръчване е паролата, която избирате тук, да е различна от паролата"
+"\n"
 "на вашия имейл акаунт!\n"
 "     "
 
@@ -334,9 +370,9 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"<strong>Внимание:</strong> Ако решите да продължите с това действие, вашата "
-"регистрация, заедно със всичките ваши пари свързани с нея, ще бъдат "
-"безвъзвратно загубени."
+"<strong>Внимание:</strong> Ако решите да продължите с това действие, "
+"вашата регистрация, заедно със всичките ваши пари свързани с нея, ще "
+"бъдат безвъзвратно загубени."
 
 #: templates/confirm_account_deletion.html:17
 msgid "Confirmation"
@@ -350,8 +386,8 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"Потвърждавам че разбирам последствията. Аз наистина искам моята регистрация "
-"да бъде изтрита."
+"Потвърждавам че разбирам последствията. Аз наистина искам моята "
+"регистрация да бъде изтрита."
 
 #: templates/confirm_registration.txt:1
 #, python-format
@@ -365,7 +401,8 @@ msgid ""
 "If you received this email by mistake, simply delete it. You won't be\n"
 "registered if you don't click the link above.\n"
 msgstr ""
-"Продължете процедурата по вашата регистрация, като кликнете върху връзката\n"
+"Продължете процедурата по вашата регистрация, като кликнете върху "
+"връзката\n"
 "по-долу:\n"
 "\n"
 "%(register_link)s\n"
@@ -401,7 +438,8 @@ msgstr ""
 "Тази връзка ще престане да бъде активна след %(num)s минути.\n"
 "\n"
 "Ако не помните да сте се опитвали наскоро да изтриете регистрацията си в\n"
-"%(site)s, вероятно някой друг знае паролата ви и се опитва да \"открадне\"\n"
+"%(site)s, вероятно някой друг знае паролата ви и се опитва да "
+"\"открадне\"\n"
 "акаунта ви. Ако подозирате че случаят е такъв, трябва незабавно да\n"
 "промените паролата си, като кликнете върху връзката по-долу:\n"
 "\n"
@@ -421,7 +459,7 @@ msgstr "Имейл адрес"
 msgid "Enter your email"
 msgstr "Въведете своя имейл адрес"
 
-#: templates/delete_account_login.html:30 templates/signup.html:24
+#: templates/delete_account_login.html:31 templates/signup.html:24
 msgid "Send me a secret link"
 msgstr "Изпрати ми тайна връзка"
 
@@ -462,7 +500,7 @@ msgstr "Код за потвърждение"
 msgid "Enter the verification code"
 msgstr "Въведете кода за потвърждение"
 
-#: templates/enter_verification_code.html:34 templates/login.html:42
+#: templates/enter_verification_code.html:34 templates/login.html:43
 msgid "Lost access to your email?"
 msgstr "Изгубен достъп до имeйл?"
 
@@ -546,8 +584,8 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"Може да извършва потенциално опасни операции без да иска въвеждане на ПИН "
-"код."
+"Може да извършва потенциално опасни операции без да иска въвеждане на ПИН"
+" код."
 
 #: templates/grant_scopes.html:63
 #, python-format
@@ -576,19 +614,19 @@ msgstr "Искате да отмените дадено вече разреше�
 msgid "Login"
 msgstr "Вход"
 
-#: templates/login.html:39
+#: templates/login.html:40
 msgid "Create a new account"
 msgstr "Регистрация на нов потребител"
 
-#: templates/login.html:40
+#: templates/login.html:41
 msgid "Forgot password?"
 msgstr "Забравена парола?"
 
-#: templates/login.html:41
+#: templates/login.html:42
 msgid "Lost your recovery code?"
 msgstr "Изгубен код за възстановяване?"
 
-#: templates/login.html:43
+#: templates/login.html:44
 msgid "Delete your account"
 msgstr "Изтриване на регистрация"
 
@@ -672,8 +710,8 @@ msgstr ""
 #: templates/report_recovery_code_change.html:5
 msgid ""
 "\n"
-"      Your account recovery code has been changed. Your new recovery code "
-"is:\n"
+"      Your account recovery code has been changed. Your new recovery code"
+" is:\n"
 "    "
 msgstr ""
 "\n"
@@ -687,7 +725,8 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Паролата ви е променена. Сега можете да влезете в акаунта си с новата парола."
+"Паролата ви е променена. Сега можете да влезете в акаунта си с новата "
+"парола."
 
 #: templates/report_revoke_granted_access_success.html:7
 msgid ""
@@ -699,8 +738,8 @@ msgid ""
 msgstr ""
 "\n"
 "Всички вече дадени разрешения ще бъдат отменени до няколко минути. За\n"
-"да продължат да имат достъп, устройствата ще трябва да получат разрешения "
-"наново."
+"да продължат да имат достъп, устройствата ще трябва да получат разрешения"
+" наново."
 
 #: templates/report_revoke_granted_access_success.html:16
 msgid "Go to the authorization page"
@@ -760,7 +799,8 @@ msgstr ""
 "Направена е заявка за промяна на имейл адреса на вашия акаунт.\n"
 "\n"
 "Ако не помните да сте се опитвали наскоро да смените имейла адреса си в\n"
-"%(site)s, вероятно някой друг знае паролата ви и се опитва да \"открадне\"\n"
+"%(site)s, вероятно някой друг знае паролата ви и се опитва да "
+"\"открадне\"\n"
 "акаунта ви. Ако подозирате че случаят е такъв, трябва незабавно да\n"
 "промените паролата си, като кликнете върху връзката по-долу:\n"
 "\n"
@@ -779,10 +819,10 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"<strong>Внимание:</strong> Всички разрешения дадени на устройства ще бъдат "
-"отменени. За\n"
-"да продължат да имат достъп, устройствата ще трябва да получат разрешения "
-"наново."
+"<strong>Внимание:</strong> Всички разрешения дадени на устройства ще "
+"бъдат отменени. За\n"
+"да продължат да имат достъп, устройствата ще трябва да получат разрешения"
+" наново."
 
 #: templates/revoke_granted_access.html:17
 msgid "Revoke granted permissions"
@@ -795,11 +835,13 @@ msgid ""
 "\n"
 "This verification code will expire in %(num)s minutes.\n"
 "\n"
-"If you do not remember being asked recently to enter a login verification\n"
+"If you do not remember being asked recently to enter a login verification"
+"\n"
 "code on %(site)s, chances are that someone else knows your password\n"
 "and tries to log in as you. If you suspect that this is the case, you "
 "should\n"
-"immediately change your account password by clicking on the following link:\n"
+"immediately change your account password by clicking on the following "
+"link:\n"
 "\n"
 "%(change_password_page)s\n"
 msgstr ""
@@ -827,7 +869,9 @@ msgstr ""
 #~ "      not have a recovery code.\n"
 #~ "    "
 #~ msgstr ""
-#~ "Не можете да промените имейл адреса на вашия акаунт, защото нямате код\n"
+#~ "Не можете да промените имейл адреса "
+#~ "на вашия акаунт, защото нямате код\n"
+#~ ""
 #~ "за възстановяване."
 
 #~ msgid ""
@@ -837,4 +881,7 @@ msgstr ""
 #~ "    "
 #~ msgstr ""
 #~ "\n"
-#~ "Тук няма нищо. Нямате достъп до тази страница, или тя вече не е активна."
+#~ "Тук няма нищо. Нямате достъп до "
+#~ "тази страница, или тя вече не е"
+#~ " активна."
+

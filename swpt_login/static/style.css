@@ -240,3 +240,15 @@ input[type=submit]:hover, form input[type=button]:hover, .login-link:hover{
     color: red;
     font-size: 17px;
 }
+
+#altcha {
+  --altcha-border-width: 1px;
+  --altcha-border-radius: 3px;
+  --altcha-color-base: #ffffff;
+  --altcha-color-border: #bebebe;
+  --altcha-color-text: currentColor;
+  --altcha-color-border-focus: currentColor;
+  --altcha-color-error-text: #f23939;
+  --altcha-color-footer-bg: #f4f4f4;
+  --altcha-max-width: 260px;
+}

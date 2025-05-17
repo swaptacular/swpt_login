@@ -20,6 +20,7 @@ config_dict = {
     "SIGNUP_IP_BLOCK_SECONDS": 1,
     "SIGNUP_IP_MAX_EMAILS": 100000000,
     "APP_VERIFY_SSL_CERTIFICATES": False,
+    "SHOW_ALTCHA_ON_LOGIN": False,
     "LANGUAGES": "en",
 }
 

@@ -77,7 +77,16 @@ class Configuration(metaclass=MetaEnvReader):
     CAPTCHA_VERIFY_SEND_REMOTE_IP = True
     CAPTCHA_VERIFY_TIMEOUT_SECONDS: float = 5.0
 
+    ALTCHA_SECRET_HMAC_KEY = "dummy-secret"
+    ALTCHA_MAX_NUMBER = 100000  # ALTCHA's computational complexity
+    ALTCHA_INFO_URL = "https://altcha.org/"
+    ALTCHA_AUTO_SOLVE = "onsubmit"  # alternatives: "off", "onfocus", "onload", "onsubmit"
+    ALTCHA_EXPIRATION_SECONDS = 60 * 60
+    ALTCHA_HIDELOGO = True
+    ALTCHA_HIDEFOOTER = False
+
     SHOW_CAPTCHA_ON_SIGNUP = True
+    SHOW_ALTCHA_ON_LOGIN = True
     SITE_TITLE = "Login Test Site"
     LANGUAGES = "en"  # separated by a comma, for example "en,bg", the first is default
     ABOUT_URL = "https://swaptacular.github.io/overview"
@@ -100,7 +109,7 @@ class Configuration(metaclass=MetaEnvReader):
 
     # Other settings:
     #
-    VERSION = "0.14.2"
+    VERSION = "0.16.4"
     LOGIN_PATH = "/login"
     CONSENT_PATH = "/consent"
     SECRET_KEY = "dummy-secret"
@@ -119,7 +128,7 @@ class Configuration(metaclass=MetaEnvReader):
     LOGIN_VERIFICATION_COOKIE_NAME = "user_lv"
     PASSWORD_MIN_LENGTH = 12
     PASSWORD_MAX_LENGTH = 64
-    SEND_FILE_MAX_AGE_DEFAULT = 12096000
+    SEND_FILE_MAX_AGE_DEFAULT = 12096000  # max-age for static files
     MAX_CONTENT_LENGTH = 16384
     BABEL_DEFAULT_LOCALE = "en"
     BABEL_DEFAULT_TIMEZONE = "UTC"

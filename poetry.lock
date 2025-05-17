@@ -21,6 +21,18 @@ typing-extensions = ">=4.12"
 tz = ["tzdata"]
 
 [[package]]
+name = "altcha"
+version = "0.1.9"
+description = "A library for creating and verifying challenges for ALTCHA."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "altcha-0.1.9-py3-none-any.whl", hash = "sha256:b93480349859dd5207bb32da7ba43d42257e5f55577bda904b6aab1c86fe1d27"},
+    {file = "altcha-0.1.9.tar.gz", hash = "sha256:24833796af620c0f056a59435a1d3015ee3ebf5c52de7be12c74ea95d697a20d"},
+]
+
+[[package]]
 name = "astroid"
 version = "3.3.9"
 description = "An abstract syntax tree for Python with inference support."
@@ -1941,4 +1953,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "4374e343f76e23169b48a7ae31b476871b7fa01814563df3ece28161c0639000"
+content-hash = "cb21706fa173aca03d4f0425b4f6a1a291834faadc1c0fed84b4e26a64123c3c"
