@@ -160,7 +160,8 @@ SHOW_ALTCHA_ON_LOGIN=True
 # computational effort needed to solve the ALTCHA challenge (default
 # 100000). ALTCHA_INFO_URL is an URL that tells the users what ALTCHA
 # is (default "https://altcha.org/"). ALTCHA_EXPIRATION_SECONDS
-# determines the expiration interval of each challenge.
+# determines the expiration interval of each challenge (default 3600
+# seconds).
 ALTCHA_SECRET_HMAC_KEY=some-long-and-secret-string
 ALTCHA_MAX_NUMBER=50000
 ALTCHA_INFO_URL=https://altcha.org/
