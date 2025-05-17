@@ -150,6 +150,22 @@ SHOW_CAPTCHA_ON_SIGNUP=True
 CAPTCHA_SITEKEY=10000000-ffff-ffff-ffff-000000000001
 CAPTCHA_SITEKEY_SECRET=0x0000000000000000000000000000000000000000
 
+# When set to "False" (the default is "True"), does not show any
+# ALTCHAs (see https://altcha.org/). Normally, this should be "True".
+SHOW_ALTCHA_ON_LOGIN=True
+
+# Parameters for ALTCHA . Required if SHOW_ALTCHA_ON_LOGIN is "True".
+# ALTCHA_SECRET_HMAC_KEY should be set to a cryptogaphically strong
+# secret string. ALTCHA_MAX_NUMBER is proportional to the
+# computational effort needed to solve the ALTCHA challenge (default
+# 100000). ALTCHA_INFO_URL is an URL that tells the users what ALTCHA
+# is (default "https://altcha.org/"). ALTCHA_EXPIRATION_SECONDS
+# determines the expiration interval of each challenge.
+ALTCHA_SECRET_HMAC_KEY=some-long-and-secret-string
+ALTCHA_MAX_NUMBER=50000
+ALTCHA_INFO_URL=https://altcha.org/
+ALTCHA_EXPIRATION_SECONDS=1800
+
 # Parameters that determine how to obtain an user ID from the resource
 # server. "$SUPERUSER_CLIENT_ID" and "$SUPERUSER_CLIENT_SECRET" are
 # used to perform the "Client Credentials" OAuth2 flow against the
