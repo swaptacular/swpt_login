@@ -71,7 +71,7 @@ EMAIL_STATS_MULTIPLIER = 10
 
 
 def create_altcha_challenge() -> str:
-    if not current_app.config["SHOW_CAPTCHA_ON_SIGNUP"]:
+    if not current_app.config["SHOW_ALTCHA_ON_LOGIN"]:
         return ""
 
     options = altcha.ChallengeOptions(
