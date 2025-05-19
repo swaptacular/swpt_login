@@ -133,32 +133,28 @@ def verify_altcha() -> bool:
     return altcha_passed
 
 
-def verify_captcha() -> tuple[bool, str | None]:
-    """Verify captcha if required."""
+def verify_captcha() -> captcha.CaptchaResult:
+    """Verify CAPTCHA if required."""
 
-    captcha_passed = True
-    captcha_error_message = None
+    if not current_app.config["SHOW_CAPTCHA_ON_SIGNUP"]:
+        return captcha.CaptchaResult(is_valid=True)
 
-    if current_app.config["SHOW_CAPTCHA_ON_SIGNUP"]:
-        remote_ip = request.remote_addr
+    remote_ip = request.remote_addr
+    captcha_response = request.form.get(
+        current_app.config["CAPTCHA_RESPONSE_FIELD_NAME"], ""
+    )
+    if captcha_response == "" or allow_verifying_captcha(remote_ip):
+        # When the response is empty, `allow_verifying_captcha()` will
+        # not be called, because the verification is trivial and does
+        # not require sending any HTTP requests.
+        return captcha.verify(captcha_response, remote_ip)
 
-        if allow_verifying_captcha(remote_ip):
-            captcha_response = request.form.get(
-                current_app.config["CAPTCHA_RESPONSE_FIELD_NAME"], ""
-            )
-            captcha_solution = captcha.verify(captcha_response, remote_ip)
-            captcha_passed = captcha_solution.is_valid
-            captcha_error_message = captcha_solution.error_message
-        else:
-            captcha_passed = False
-            captcha_error_message = gettext(
-                "Too many requests from %(remote_ip)s.", remote_ip=remote_ip
-            )
-
-    if not captcha_passed and captcha_error_message is None:
-        captcha_error_message = gettext("Incorrect captcha solution.")
-
-    return captcha_passed, captcha_error_message
+    return captcha.CaptchaResult(
+        is_valid=False,
+        error_message=gettext(
+            "Too many requests from %(remote_ip)s.", remote_ip=remote_ip
+        ),
+    )
 
 
 def allow_verifying_captcha(initiator_ip: str) -> bool:
@@ -325,13 +321,12 @@ def signup():
 
     is_new_user = "recover" not in request.args
     if request.method == "POST":
-        captcha_passed, captcha_error_message = verify_captcha()
         email = request.form.get("email", "").strip()
 
         if utils.is_invalid_email(email):
             flash(gettext("The email address is invalid."))
-        elif not captcha_passed:
-            flash(captcha_error_message)
+        elif not (cr := verify_captcha()):
+            flash(cr.error_message)
         else:
             # Here we generate a unique, secret "computer code", which
             # will be sent as a cookie to the user's browser. This
@@ -606,20 +601,19 @@ def choose_new_email(secret):
         return render_template("report_expired_link.html")
 
     if request.method == "POST":
-        captcha_passed, captcha_error_message = verify_captcha()
         new_email = request.form.get("email", "").strip()
         recovery_code = request.form.get("recovery_code", "")
 
         if utils.is_invalid_email(new_email):
             flash(gettext("The email address is invalid."))
-        elif not captcha_passed:
-            flash(captcha_error_message)
         elif not verification_request.is_correct_recovery_code(recovery_code):
             try:
                 verification_request.register_code_failure()
             except verification_request.ExceededMaxAttempts:
                 abort(403)
             flash(gettext("Incorrect recovery code"))
+        elif not (cr := verify_captcha()):
+            flash(cr.error_message)
         else:
             verification_request.accept()
 
@@ -769,13 +763,12 @@ def change_recovery_code():
     email = request.args.get("email", "")
 
     if request.method == "POST":
-        captcha_passed, captcha_error_message = verify_captcha()
         email = request.form.get("email", "").strip()
 
         if utils.is_invalid_email(email):
             flash(gettext("The email address is invalid."))
-        elif not captcha_passed:
-            flash(captcha_error_message)
+        elif not (cr := verify_captcha()):
+            flash(cr.error_message)
         else:
             # The `ChangeRecoveryCodeRequest` generates a secret which
             # is sent to the user's email.

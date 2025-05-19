@@ -5,17 +5,20 @@ from flask_babel import lazy_gettext
 from flask import current_app
 
 
-ERROR_MESSAGE = lazy_gettext('You did not solve the "reCAPTCHA" challenge.')
+ERROR_MESSAGE = lazy_gettext('You did not solve the "CAPTCHA" challenge.')
 
 
-class CaptchaResponse:
+class CaptchaResult:
     def __init__(self, is_valid, error_message=None):
         self.is_valid = is_valid
         self.error_message = error_message
 
+    def __bool__(self):
+        return self.is_valid
+
 
 def display_html(lang="en"):
-    """Gets the HTML to display for reCAPTCHA."""
+    """Gets the HTML to display the CAPTCHA."""
 
     script_type = current_app.config["CAPTCHA_SCRIPT_TYPE"]
     challenge_url = current_app.config["CAPTCHA_SCRIPT_SRC"]
@@ -37,14 +40,14 @@ def display_html(lang="en"):
 
 def verify(captcha_response, remote_ip):
     """
-    Submits a reCAPTCHA request for verification, returns `CaptchaResponse`.
+    Submits CAPTCHA request for verification, returns `CaptchaResult`.
 
-    captcha_response -- The value of `g-recaptcha-response` field from the form
-    remoteip -- user's IP address
+    captcha_response -- The value of the CAPTCHA response field from the form
+    remoteip -- The user's IP address
     """
 
     if not captcha_response:
-        return CaptchaResponse(is_valid=False, error_message=ERROR_MESSAGE)
+        return CaptchaResult(is_valid=False, error_message=ERROR_MESSAGE)
 
     headers = {
         "Content-type": "application/x-www-form-urlencoded",
@@ -76,6 +79,6 @@ def verify(captcha_response, remote_ip):
         response_object = json.loads(http_response.read().decode())
 
     if response_object["success"]:
-        return CaptchaResponse(is_valid=True)
+        return CaptchaResult(is_valid=True)
     else:
-        return CaptchaResponse(is_valid=False, error_message=ERROR_MESSAGE)
+        return CaptchaResult(is_valid=False, error_message=ERROR_MESSAGE)
