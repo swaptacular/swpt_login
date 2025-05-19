@@ -60,16 +60,6 @@ def inject_get_locale():
     return dict(get_locale=get_locale)
 
 
-# NOTE: We use the Redis key "ip:XXX.XXX.XXX.XXX" to rate-limit the
-# number of sensitive operations per client IP address. However, there
-# are two types of sensitive operations: 1) sending emails; 2) sending
-# CAPTCHA verifications. We use the same Redis key for both of those
-# operations, but the limit for senging CAPTCHA verifications must be
-# multiple times higher than the limit for sending emails. To achieve
-# this, we define a multiplier.
-EMAIL_STATS_MULTIPLIER = 10
-
-
 def create_altcha_challenge() -> str:
     if not current_app.config["SHOW_ALTCHA_ON_LOGIN"]:
         return ""
@@ -169,9 +159,8 @@ def allow_verifying_captcha(initiator_ip: str) -> bool:
     try:
         increment_key_with_limit(
             key=f"ip:{initiator_ip}",
-            limit=EMAIL_STATS_MULTIPLIER * current_app.config["SIGNUP_IP_MAX_EMAILS"],
+            limit=2 * current_app.config["SIGNUP_IP_MAX_EMAILS"],
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
-            increment_by=1,
         )
     except ExceededValueLimitError:
         logger = logging.getLogger(__name__)
@@ -190,12 +179,17 @@ def allow_sending_email(initiator_ip: str, email: str) -> bool:
     """
     logger = logging.getLogger(__name__)
 
+    # NOTE: When we show CAPTCHAs, every attempt to send an email,
+    # will call `increment_key_with_limit(key)` with the same key
+    # twice: first to allow verifying the CAPTCHA, and then to allow
+    # sending an email.
+    EMAIL_STATS_MULTIPLIER = 2 if current_app.config["SHOW_CAPTCHA_ON_SIGNUP"] else 1
+
     try:
         increment_key_with_limit(
             key=f"ip:{initiator_ip}",
             limit=EMAIL_STATS_MULTIPLIER * current_app.config["SIGNUP_IP_MAX_EMAILS"],
             period_seconds=current_app.config["SIGNUP_IP_BLOCK_SECONDS"],
-            increment_by=EMAIL_STATS_MULTIPLIER,
         )
     except ExceededValueLimitError:
         logger.warning("too many email sending initiations from %s", initiator_ip)
