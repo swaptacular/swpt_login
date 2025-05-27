@@ -224,7 +224,9 @@ container allows you to execute the following *documented commands*:
 * `webserver`
 
   Starts a login Web server. This command allows you to start as many
-  web servers as necessary, to handle the incoming load.
+  web servers as necessary, to handle the incoming load. Also, this is
+  the command that will be executed if no arguments are passed to the
+  entrypoint.
 
   **IMPORTANT NOTE: You must start at least one container with this
   command.**
