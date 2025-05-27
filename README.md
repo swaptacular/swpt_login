@@ -34,6 +34,8 @@ the following servers:
    will be activated and deactivated by issuing HTTP requests to this
    server.
 
+5. A [SMTP server], for sending emails.
+
 To increase security and performance, it is highly recommended that
 you configure HTTP reverse-proxy server(s) (like [nginx]) between your
 clients and your login and Ory Hydra servers.
@@ -318,3 +320,4 @@ parts of the system.
 [Docker Compose]: https://docs.docker.com/compose/
 [Payments Web API]: https://swaptacular.github.io/public/docs/swpt_creditors/redoc.html
 [Simple Issuing Web API]: https://swaptacular.github.io/public/docs/swpt_debtors/redoc.html
+[SMTP server]: https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol
