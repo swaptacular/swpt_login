@@ -29,6 +29,11 @@ the following servers:
    server instance must be configured as persistent (on-disk)
    database.
 
+4. A [Payments Web API] server (for creditors agent nodes), or a
+   [Simple Issuing Web API] server (for debtors agent nodes). Users
+   will be activated and deactivated by issuing HTTP requests to this
+   server.
+
 To increase security and performance, it is highly recommended that
 you configure HTTP reverse-proxy server(s) (like [nginx]) between your
 clients and your login and Ory Hydra servers.
@@ -281,10 +286,9 @@ How to setup a development environment
 
         $ docker-compose up --build
 
-    This will start its own PostgreSQL server instance in a docker
-    container, but will rely on being able to connect to a RabbitMQ
-    server instance at "amqp://guest:guest@localhost:5672". The OAuth
-    2.0 authorization will be bypassed.
+    This will start its own PostgreSQL, Redis, and Mail server
+    instances in docker containers. However, an Ory Hydra server, and
+    a creditor/debtor resource server will NOT be stated.
 
 5.  You can use `flask run -p 5000` to run a local web server, and
     `pytest --cov=swpt_login --cov-report=html` to run the tests and
@@ -310,3 +314,7 @@ parts of the system.
 [OAuth 2.0]: https://oauth.net/2/
 [Ory Hydra]: https://www.ory.sh/hydra/
 [Redis]: https://redis.io/
+[Docker Engine]: https://docs.docker.com/engine/
+[Docker Compose]: https://docs.docker.com/compose/
+[Payments Web API]: https://swaptacular.github.io/public/docs/swpt_creditors/redoc.html
+[Simple Issuing Web API]: https://swaptacular.github.io/public/docs/swpt_debtors/redoc.html
