@@ -4,6 +4,8 @@ from swpt_pythonlib.flask_signalbus import (
     SignalBusMixin,
     AtomicProceduresMixin,
 )
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from flask_mail import Mail
 from flask_babel import Babel
 from flask_migrate import Migrate
@@ -29,6 +31,14 @@ def select_timezone():
 
 class CustomAlchemy(AtomicProceduresMixin, SignalBusMixin, SQLAlchemy):
     pass
+
+
+@event.listens_for(Engine, "connect")
+def set_postgres_parametes(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("SET SESSION enable_seqscan = off")
+    cursor.close()
+    dbapi_connection.commit()
 
 
 db = CustomAlchemy()
