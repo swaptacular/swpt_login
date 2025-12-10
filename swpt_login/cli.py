@@ -4,7 +4,8 @@ import sys
 import click
 import signal
 import ipaddress
-from typing import Optional, Any
+import random
+from typing import Any
 from flask import current_app
 from flask.cli import with_appcontext
 from flask_sqlalchemy.model import Model
@@ -89,7 +90,7 @@ def flush(
 
     def _flush(
         models_to_flush: list[type[Model]],
-        wait: Optional[float],
+        wait: float,
     ) -> None:
         from swpt_login import create_app
 
@@ -106,6 +107,8 @@ def flush(
 
         with app.app_context():
             signalbus: SignalBus = current_app.extensions["signalbus"]
+            time.sleep(wait * random.random())
+
             while not stopped:
                 started_at = time.time()
                 try:
