@@ -38,12 +38,14 @@ def upgrade():
         'activate_user_signal',
         fillfactor=100,
         autovacuum_vacuum_cost_delay=0.0,
+        autovacuum_vacuum_insert_threshold=-1,
         autovacuum_analyze_threshold=2000000000,
     )
     set_storage_params(
         'deactivate_user_signal',
         fillfactor=100,
         autovacuum_vacuum_cost_delay=0.0,
+        autovacuum_vacuum_insert_threshold=-1,
         autovacuum_analyze_threshold=2000000000,
     )
 
@@ -62,6 +64,7 @@ def downgrade():
         [
             'fillfactor',
             'autovacuum_vacuum_cost_delay',
+            'autovacuum_vacuum_insert_threshold',
             'autovacuum_analyze_threshold',
         ]
     )
@@ -70,6 +73,7 @@ def downgrade():
         [
             'fillfactor',
             'autovacuum_vacuum_cost_delay',
+            'autovacuum_vacuum_insert_threshold',
             'autovacuum_analyze_threshold',
         ]
     )
