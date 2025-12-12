@@ -1,4 +1,4 @@
-"""storage parmas
+"""storage params
 
 Revision ID: 8614e8d155d4
 Revises: e61c239caaae
