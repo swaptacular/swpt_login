@@ -107,6 +107,11 @@ class Configuration(metaclass=MetaEnvReader):
     FLUSH_PROCESSES = 1
     FLUSH_PERIOD = 2.0
 
+    # Limit Flask content lengths.
+    MAX_CONTENT_LENGTH = 16384
+    MAX_FORM_MEMORY_SIZE = 16384
+    MAX_FORM_PARTS = 10
+
     # Other settings:
     #
     VERSION = "0.16.5"
@@ -129,7 +134,6 @@ class Configuration(metaclass=MetaEnvReader):
     PASSWORD_MIN_LENGTH = 12
     PASSWORD_MAX_LENGTH = 64
     SEND_FILE_MAX_AGE_DEFAULT = 12096000  # max-age for static files
-    MAX_CONTENT_LENGTH = 16384
     BABEL_DEFAULT_LOCALE = "en"
     BABEL_DEFAULT_TIMEZONE = "UTC"
     APP_FLUSH_ACTIVATE_USERS_BURST_COUNT = 5
