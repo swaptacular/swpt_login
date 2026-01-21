@@ -85,6 +85,7 @@ class Configuration(metaclass=MetaEnvReader):
     ALTCHA_HIDELOGO = True
     ALTCHA_HIDEFOOTER = False
 
+    ALLOW_SIGNUP = True
     SHOW_CAPTCHA_ON_SIGNUP = True
     SHOW_ALTCHA_ON_LOGIN = True
     SITE_TITLE = "Login Test Site"

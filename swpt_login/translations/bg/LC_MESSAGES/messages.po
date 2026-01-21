@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-19 15:13+0300\n"
+"POT-Creation-Date: 2026-01-21 17:14+0200\n"
 "PO-Revision-Date: 2025-05-19 14:40+0300\n"
 "Last-Translator: Evgeni Pandurski <epandurski@gmai.com>\n"
 "Language: bg\n"
@@ -23,7 +23,7 @@ msgstr "Не сте решили \"CAPTCHA\" пъзела."
 msgid "Duplicate Registration"
 msgstr "Съществуваща регистрация"
 
-#: emails.py:51 routes.py:390
+#: emails.py:51 routes.py:393
 msgid "Change Account Password"
 msgstr "Смяна на потребителска парола"
 
@@ -31,7 +31,7 @@ msgstr "Смяна на потребителска парола"
 msgid "Changed Account Password"
 msgstr "Променена потребителска парола"
 
-#: emails.py:81 routes.py:388
+#: emails.py:81 routes.py:391
 msgid "Create a New Account"
 msgstr "Регистрация на нов потребител"
 
@@ -40,12 +40,12 @@ msgstr "Регистрация на нов потребител"
 msgid "New login from %(user_agent)s"
 msgstr "Ново влизане от %(user_agent)s"
 
-#: emails.py:113 emails.py:128 routes.py:708
+#: emails.py:113 emails.py:128 routes.py:711
 #: templates/change_email_login.html:4 templates/choose_new_email.html:4
 msgid "Change Email Address"
 msgstr "Промяна на имейл адрес"
 
-#: emails.py:143 routes.py:786 routes.py:833
+#: emails.py:143 routes.py:789 routes.py:836
 msgid "Change Recovery Code"
 msgstr "Промяна на кода за възстановяване"
 
@@ -59,41 +59,41 @@ msgstr "Изтриване на регистрация"
 msgid "Too many requests from %(remote_ip)s."
 msgstr "Твърде много заявки от %(remote_ip)s."
 
-#: routes.py:321 routes.py:602 routes.py:763
+#: routes.py:321 routes.py:605 routes.py:766
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
-#: routes.py:432
+#: routes.py:435
 #, python-format
 msgid "The password should have at least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
-#: routes.py:439
+#: routes.py:442
 #, python-format
 msgid "The password should have at most %(num)s characters."
 msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
-#: routes.py:444
+#: routes.py:447
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
 
-#: routes.py:450 routes.py:608
+#: routes.py:453 routes.py:611
 msgid "Incorrect recovery code"
 msgstr "Грешен код за възстановяване"
 
-#: routes.py:575 routes.py:892 routes.py:1079
+#: routes.py:578 routes.py:895 routes.py:1082
 msgid "Incorrect email or password"
 msgstr "Грешен имейл или парола"
 
-#: routes.py:704 routes.py:829 routes.py:945
+#: routes.py:707 routes.py:832 routes.py:948
 msgid "Incorrect password"
 msgstr "Грешна парола"
 
-#: routes.py:924
+#: routes.py:927
 msgid "You have not confirmed the deletion of your account."
 msgstr "Не сте потвърдили изтриването на вашата регистрация."
 
-#: routes.py:1127
+#: routes.py:1130
 msgid "Invalid verification code"
 msgstr "Грешен код за потвърждение"
 
@@ -496,7 +496,7 @@ msgstr "Код за потвърждение"
 msgid "Enter the verification code"
 msgstr "Въведете кода за потвърждение"
 
-#: templates/enter_verification_code.html:34 templates/login.html:43
+#: templates/enter_verification_code.html:34 templates/login.html:45
 msgid "Lost access to your email?"
 msgstr "Изгубен достъп до имeйл?"
 
@@ -610,19 +610,19 @@ msgstr "Искате да отмените дадено вече разреше�
 msgid "Login"
 msgstr "Вход"
 
-#: templates/login.html:40
+#: templates/login.html:41
 msgid "Create a new account"
 msgstr "Регистрация на нов потребител"
 
-#: templates/login.html:41
+#: templates/login.html:43
 msgid "Forgot password?"
 msgstr "Забравена парола?"
 
-#: templates/login.html:42
+#: templates/login.html:44
 msgid "Lost your recovery code?"
 msgstr "Изгубен код за възстановяване?"
 
-#: templates/login.html:44
+#: templates/login.html:46
 msgid "Delete your account"
 msgstr "Изтриване на регистрация"
 
