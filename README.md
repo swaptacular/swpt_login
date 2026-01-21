@@ -146,6 +146,10 @@ MAIL_PASSWORD=smpt_password
 MAIL_USE_SSL=False
 MAIL_USE_TLS=False
 
+# When set to "False" (the default is "True"), does not allow new
+# user registrations.
+ALLOW_SIGNUP=True
+
 # When set to "False" (the default is "True"), does not show any
 # CAPTCHAs. Normally, this should be "True".
 SHOW_CAPTCHA_ON_SIGNUP=True

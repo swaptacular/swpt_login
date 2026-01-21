@@ -355,18 +355,21 @@ def signup():
                         )
             else:
                 if is_new_user:
-                    # Start the "user creation" flow. The
-                    # `SignUpRequest` generates a secret which is
-                    # emailed to the user.
-                    r = SignUpRequest.create(
-                        email=email,
-                        cc=computer_code_hash,
-                    )
-                    if allow_sending_email(request.remote_addr, email):
-                        emails.send_confirm_registration_email(
-                            email,
-                            get_choose_password_link(r),
+                    if current_app.config["ALLOW_SIGNUP"]:
+                        # Start the "user creation" flow. The
+                        # `SignUpRequest` generates a secret which is
+                        # emailed to the user.
+                        r = SignUpRequest.create(
+                            email=email,
+                            cc=computer_code_hash,
                         )
+                        if allow_sending_email(request.remote_addr, email):
+                            emails.send_confirm_registration_email(
+                                email,
+                                get_choose_password_link(r),
+                            )
+                    else:
+                        abort(403)
                 else:
                     # We are asked to change the password of a
                     # non-existing user. In this case we fail
