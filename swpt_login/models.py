@@ -2,6 +2,8 @@ import logging
 import requests
 from datetime import datetime, timezone
 from urllib.parse import urljoin
+from sqlalchemy import text
+from sqlalchemy.inspection import inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import INET
 from flask import current_app
@@ -25,6 +27,19 @@ class classproperty(object):
 
     def __get__(self, obj, owner):
         return self.f(owner)
+
+
+class ChooseRowsMixin:
+    @classmethod
+    def choose_rows(cls, primary_keys: list[tuple], name: str = "chosen"):
+        pktype_name = f"{cls.__table__.name}_pktype"
+        bindparam_name = f"{name}_rows"
+        return (
+            text(f"SELECT * FROM unnest(:{bindparam_name} :: {pktype_name}[])")
+            .bindparams(**{bindparam_name: primary_keys})
+            .columns(**{c.key: c.type for c in inspect(cls).primary_key})
+            .cte(name=name)
+        )
 
 
 class UserRegistration(db.Model):
@@ -82,7 +97,7 @@ class UserRegistration(db.Model):
     )
 
 
-class ActivateUserSignal(db.Model):
+class ActivateUserSignal(db.Model, ChooseRowsMixin):
     class SendingError(Exception):
         """Failed activation request."""
 
@@ -164,7 +179,7 @@ class ActivateUserSignal(db.Model):
             raise self.SendingError("connection problem")
 
 
-class DeactivateUserSignal(db.Model):
+class DeactivateUserSignal(db.Model, ChooseRowsMixin):
     class SendingError(Exception):
         """Failed deactivation request."""
 
