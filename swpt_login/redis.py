@@ -243,16 +243,16 @@ class SignUpRequest(RedisSecretHashRecord):
             db.session.commit()
 
             # Try to immediately activate the user.
-            if activate_user_signal := (
+            if signal := (
                 ActivateUserSignal.query
                 .filter_by(user_id=user_id, reservation_id=reservation_id)
                 .with_for_update(skip_locked=True)
                 .one_or_none()
             ):
                 try:
-                    activate_user_signal.send_signalbus_message()
-                    db.session.delete(activate_user_signal)
-                except activate_user_signal.SendingError:
+                    ActivateUserSignal.send_signalbus_message(signal)
+                    db.session.delete(signal)
+                except ActivateUserSignal.SendingError:
                     logger = logging.getLogger(__name__)
                     logger.error(
                         "SendingError occurred while trying to activate a"
