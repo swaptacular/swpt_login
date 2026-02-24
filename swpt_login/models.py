@@ -116,29 +116,30 @@ class ActivateUserSignal(db.Model, ChooseRowsMixin):
     def signalbus_burst_count(self):
         return current_app.config["APP_FLUSH_ACTIVATE_USERS_BURST_COUNT"]
 
-    def send_signalbus_message(self):
+    @classmethod
+    def send_signalbus_message(cls, obj):
         """Activate the user reservation, then add a `UserRegistration` row."""
 
         try:
             response = requests_session.post(
-                url=urljoin(_get_api_base_url(), f"{self.user_id}/activate"),
-                json={"reservationId": self.reservation_id},
+                url=urljoin(_get_api_base_url(), f"{obj.user_id}/activate"),
+                json={"reservationId": obj.reservation_id},
                 verify=current_app.config["APP_VERIFY_SSL_CERTIFICATES"],
             )
             status_code = response.status_code
 
             if status_code == 200:
-                user_query = UserRegistration.query.filter_by(email=self.email)
+                user_query = UserRegistration.query.filter_by(email=obj.email)
                 if not db.session.query(user_query.exists()).scalar():
                     db.session.add(
                         UserRegistration(
-                            email=self.email,
-                            user_id=self.user_id,
-                            salt=self.salt,
-                            password_hash=self.password_hash,
-                            recovery_code_hash=self.recovery_code_hash,
-                            registered_from_ip=self.registered_from_ip,
-                            registered_at=self.inserted_at,
+                            email=obj.email,
+                            user_id=obj.user_id,
+                            salt=obj.salt,
+                            password_hash=obj.password_hash,
+                            recovery_code_hash=obj.recovery_code_hash,
+                            registered_from_ip=obj.registered_from_ip,
+                            registered_at=obj.inserted_at,
                         )
                     )
                     try:
@@ -166,17 +167,17 @@ class ActivateUserSignal(db.Model, ChooseRowsMixin):
                 logger.error(
                     "Reservation %s has expired. As a result, the"
                     " registration of the new user failed",
-                    self.reservation_id,
+                    obj.reservation_id,
                 )
 
             else:
-                raise self.SendingError(
+                raise cls.SendingError(
                     f"Unexpected status code ({status_code}) while trying to"
                     " activate an user."
                 )
 
         except (requests.ConnectionError, requests.Timeout):
-            raise self.SendingError("connection problem")
+            raise cls.SendingError("connection problem")
 
 
 class DeactivateUserSignal(db.Model, ChooseRowsMixin):
@@ -192,20 +193,21 @@ class DeactivateUserSignal(db.Model, ChooseRowsMixin):
     def signalbus_burst_count(self):
         return current_app.config["APP_FLUSH_DEACTIVATE_USERS_BURST_COUNT"]
 
-    def send_signalbus_message(self):
+    @classmethod
+    def send_signalbus_message(cls, obj):
         """Deactivate the user reservation."""
 
         try:
             response = requests_session.post(
-                url=urljoin(_get_api_base_url(), f"{self.user_id}/deactivate"),
+                url=urljoin(_get_api_base_url(), f"{obj.user_id}/deactivate"),
                 json={"type": current_app.config["API_DACTIVATION_REQUEST_TYPE"]},
                 verify=current_app.config["APP_VERIFY_SSL_CERTIFICATES"],
             )
             status_code = response.status_code
             if status_code != 204:
-                raise self.SendingError(
+                raise cls.SendingError(
                     f"Unexpected status code ({status_code}) while trying to"
                     " deactivate an user."
                 )
         except (requests.ConnectionError, requests.Timeout):
-            raise self.SendingError("connection problem")
+            raise cls.SendingError("connection problem")
