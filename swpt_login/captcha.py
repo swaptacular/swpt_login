@@ -5,7 +5,7 @@ from flask_babel import lazy_gettext
 from flask import current_app
 
 
-ERROR_MESSAGE = lazy_gettext('You did not solve the "CAPTCHA" challenge.')
+ERROR_MESSAGE = lazy_gettext('You did not solve the "I am human" challenge.')
 
 
 class CaptchaResult:
