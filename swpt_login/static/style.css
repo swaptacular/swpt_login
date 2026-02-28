@@ -229,6 +229,9 @@ input[type=submit]:hover, form input[type=button]:hover, .login-link:hover{
     -moz-box-shadow:none;
     -webkit-box-shadow:none;
 }
+input[type=submit]:active {
+    background:#ffdfb9;
+}
 .primary-message h1 {
     padding-top: 0;
     margin-top: 0;
