@@ -8,11 +8,40 @@
     {% trans %}Your account recovery code is:{% endtrans %}
   </p>
   {% include '_recovery_code.html' %}
-  <p>
-    {% if config.SIGNED_UP_REDIRECT_URL %}
-      <a class="login-link" href="{{config.SIGNED_UP_REDIRECT_URL|safe}}">{% trans %}OK{% endtrans %}</a>
-    {% else %}
-      {% trans %}Now you can log in.{% endtrans %}
-    {% endif %}
-  </p>
+  {% if config.SIGNED_UP_REDIRECT_URL %}
+    <script>
+      function saved() {
+        let checkbox = document.getElementById("confirmed-recovery-code");
+        let confirmed = checkbox && checkbox.checked;
+        if (!confirmed) {
+          alert("{% trans %}Please confirm that you have saved your recovery code before continuing.{% endtrans %}");
+          checkbox.focus()
+        }
+        return confirmed;
+      }
+    </script>
+    <form action="" method="GET" id="confirm-recovery-code-form">
+      <p class="confirm-recovery-code-checkbox">
+        <label for="confirmed-recovery-code">
+          <input id="confirmed-recovery-code"
+                 name="confirmed_recovery_code"
+                 value="yes"
+                 type="checkbox"
+                 >
+          <span>{% trans %}I have written down my recovery code and stored it safely.{% endtrans %}</span>
+        </label>
+      </p>
+    </form>
+    <p>
+      <a
+        class="login-link"
+        href="{{config.SIGNED_UP_REDIRECT_URL|safe}}"
+        onclick="return saved()"
+        >
+        {% trans %}OK{% endtrans %}
+      </a>
+    </p>
+  {% else %}
+    <p>{% trans %}Now you can log in.{% endtrans %}</p>
+  {% endif %}
 {% endblock message %}
