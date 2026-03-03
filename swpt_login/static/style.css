@@ -222,14 +222,14 @@ input[type=submit], form input[type=button], .login-link {
     text-decoration: none;
     border-radius: 3px;
 }
-input[type=submit]:hover, form input[type=button]:hover, .login-link:hover{
+input[type=submit]:hover, form input[type=button]:hover, .login-link:hover {
     color: #fff;
     background:#2a55c5;
     box-shadow:none;
     -moz-box-shadow:none;
     -webkit-box-shadow:none;
 }
-input[type=submit]:active {
+input[type=submit]:active, form input[type=button]:active, .login-link:active {
     background:#ffdfb9;
 }
 .primary-message h1 {
