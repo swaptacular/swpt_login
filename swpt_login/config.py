@@ -115,7 +115,7 @@ class Configuration(metaclass=MetaEnvReader):
 
     # Other settings:
     #
-    VERSION = "0.16.5"
+    VERSION = "1.0.6"
     LOGIN_PATH = "/login"
     CONSENT_PATH = "/consent"
     SECRET_KEY = "dummy-secret"
