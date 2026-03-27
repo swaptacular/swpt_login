@@ -1,5 +1,6 @@
 import logging
 import sys
+import signal
 import os
 import os.path
 import socket
@@ -7,6 +8,12 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from typing import List
 from flask import render_template
+
+
+def _raise_keyboard_interrupt(signum, frame):  # pragma: no cover
+    logger = logging.getLogger(__name__)
+    logger.warning("Received %s signal. Exiting...", signal.strsignal(signum))
+    raise KeyboardInterrupt()
 
 
 def _excepthook(exc_type, exc_value, traceback):
@@ -152,4 +159,6 @@ configure_logging(
     associated_loggers=os.environ.get("APP_ASSOCIATED_LOGGERS", "").split(),
 )
 sys.excepthook = _excepthook
+signal.signal(signal.SIGTERM, _raise_keyboard_interrupt)
+signal.signal(signal.SIGINT, _raise_keyboard_interrupt)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
