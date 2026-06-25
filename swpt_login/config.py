@@ -94,7 +94,15 @@ class Configuration(metaclass=MetaEnvReader):
     STYLE_NAME = "default"
     STYLE_URL = ""
     SUSPENDED_ACCOUNT_HELP_URL = ""
-    SIGNED_UP_REDIRECT_URL = ""  # It is highly recommended to set this!
+    SIGNED_UP_REDIRECT_URL = ""
+
+    # Optional list of URLs, separated by a comma. Setting this allows
+    # you to redirect users to different URLs depending on the
+    # language used by the user. The number and the order of the URLs
+    # must be the same as the number and the order of languages in the
+    # LANGUAGES setting. If SIGNED_UP_REDIRECT_URL is set, this
+    # setting will be ignored.
+    SIGNED_UP_REDIRECT_URLS = ""
 
     SUBJECT_PREFIX = ""  # Must be "debtors:" or "creditors:".
 

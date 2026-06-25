@@ -58,18 +58,35 @@ def _server_error(error=None):
     return render_template("500.html")
 
 
-def _get_language_choices(languages):
+def _configure_language_choices(app):
     supported_languages = {"en": "English", "bg": "Български"}
-    languages = [lg.strip() for lg in languages.split(",")]
-    language_choices = [
-        (lg, supported_languages[lg])
-        for lg in languages
-        if lg in supported_languages
-    ]
-    if not language_choices:
-        raise ValueError("The LANGUAGES envvar contains no supported languages.")
+    languages = [lang.strip() for lang in app.config["LANGUAGES"].split(",")]
+    n = len(languages)
 
-    return language_choices
+    signed_up_redirect_url = app.config["SIGNED_UP_REDIRECT_URL"]
+    signed_up_redirect_urls = app.config["SIGNED_UP_REDIRECT_URLS"]
+    redirect_url_list = (
+        [url.strip() for url in signed_up_redirect_urls.split(",")]
+        if signed_up_redirect_urls and not signed_up_redirect_url
+        else n * [signed_up_redirect_url]
+    )
+    if len(redirect_url_list) != n:
+        raise ValueError("Invalid value for SIGNED_UP_REDIRECT_URLS.")
+
+    if not any(lang in supported_languages for lang in languages):
+        raise ValueError("LANGUAGES contains no supported languages.")
+
+    app.config["LANGUAGE_CHOICES"] = [
+        (lang, supported_languages[lang])
+        for lang in languages
+        if lang in supported_languages
+
+    ]
+    app.config["REDIRECT_URLS"] = {
+        lang: url
+        for lang, url in zip(languages, redirect_url_list)
+        if lang in supported_languages
+    }
 
 
 def configure_logging(level: str, format: str, associated_loggers: List[str]) -> None:
@@ -118,7 +135,7 @@ def create_app(config_dict={}):
     if not app.config["TESTING"]:
         socket.setdefaulttimeout(5.0)
 
-    app.config["LANGUAGE_CHOICES"] = _get_language_choices(app.config["LANGUAGES"])
+    _configure_language_choices(app)
 
     engine_options = app.config["SQLALCHEMY_ENGINE_OPTIONS"]
     engine_options["pool_size"] = app.config["POSTGRES_CONNECTION_POOL_SIZE"]
