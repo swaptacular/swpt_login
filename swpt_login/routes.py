@@ -67,6 +67,7 @@ def add_utility_functions():
                 version=cfg['VERSION'],
             )
         ),
+        get_redirect_url=lambda: cfg['REDIRECT_URLS'][str(get_locale())],
         get_locale=get_locale,
     )
 

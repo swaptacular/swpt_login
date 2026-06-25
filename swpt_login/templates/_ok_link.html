@@ -1,5 +1,7 @@
-{% if config.SIGNED_UP_REDIRECT_URL %}
-<p>
-  <a class="login-link" href="{{config.SIGNED_UP_REDIRECT_URL|safe}}">{% trans %}OK{% endtrans %}</a>
-</p>
-{% endif %}
+{% with redirect_url=get_redirect_url() %}
+  {% if redirect_url %}
+    <p>
+      <a class="login-link" href="{{redirect_url|safe}}">{% trans %}OK{% endtrans %}</a>
+    </p>
+  {% endif %}
+{% endwith %}
