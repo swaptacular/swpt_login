@@ -116,9 +116,25 @@ SITE_TITLE=Demo Debtors Agent
 # Set this to an URL that tells more about your site.
 ABOUT_URL=https://example.com/about
 
+# Optional list of language codes separated by a comma. The first code
+# in the list determines the default language. This configures what
+# languages for the UI the users will be able to choose from. Here you
+# should list only languages for which a translation already exists
+# (currently "en" and "bg"). The default value is "en".
+LANGUAGES=en,bg
+
 # Optional URL to go to, after a successful sign-up. Note that setting
-# this will greatly improve users' experience!
+# this, or SIGNED_UP_REDIRECT_URLS will greatly improve users'
+# experience!
 SIGNED_UP_REDIRECT_URL=
+
+# Optional list of URLs, separated by a comma. Setting this allows you
+# -- after a successful sign-up -- to redirect users to different URLs
+# depending on the language used by the user. The number and the order
+# of the URLs must be the same as the number and the order of
+# languages in the LANGUAGES setting. If SIGNED_UP_REDIRECT_URL is
+# set, this setting will be ignored.
+SIGNED_UP_REDIRECT_URLS=https://example.com/en/,https://example.com/bg/
 
 # Optional URL for users to go to, to recover their wrongfully
 # suspended accounts. This is not needed if no user accounts have
