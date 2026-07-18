@@ -66,7 +66,10 @@ class LoginRequest:
             raise self.TooManyLogins()
 
     def fetch(self):
-        """Return the subject if already logged, `None` otherwise."""
+        """Return the subject and the preferred language.
+
+        If not already logged the subject will be `None`.
+        """
 
         r = requests_session.get(
             url=f"{self.fetch_url}?login_challenge={self.challenge_id}",
