@@ -16,7 +16,10 @@ from .api_requests_session import get_requests_session
 def select_locale():
     from flask import current_app, request
 
-    language = request.cookies.get(current_app.config["LANGUAGE_COOKIE_NAME"])
+    language = (
+        request.cookies.get(current_app.config["LANGUAGE_COOKIE_NAME"])
+        or request.cookies.get(current_app.config["CLIENT_LANGUAGE_COOKIE_NAME"])
+    )
     language_choices = [
         choices[0] for choices in current_app.config["LANGUAGE_CHOICES"]
     ]

@@ -124,7 +124,7 @@ class Configuration(metaclass=MetaEnvReader):
 
     # Other settings:
     #
-    VERSION = "1.1.2"
+    VERSION = "1.1.3"
     LOGIN_PATH = "/login"
     CONSENT_PATH = "/consent"
     SECRET_KEY = "dummy-secret"
@@ -139,6 +139,7 @@ class Configuration(metaclass=MetaEnvReader):
     CHANGE_EMAIL_REQUEST_EXPIRATION_SECONDS = 24 * 60 * 60
     CHANGE_RECOVERY_CODE_REQUEST_EXPIRATION_SECONDS = 60 * 60
     LANGUAGE_COOKIE_NAME = "user_lang"
+    CLIENT_LANGUAGE_COOKIE_NAME = "client_lang"
     COMPUTER_CODE_COOKIE_NAME = "user_cc"
     LOGIN_VERIFICATION_COOKIE_NAME = "user_lv"
     PASSWORD_MIN_LENGTH = 12
