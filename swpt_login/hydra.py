@@ -66,7 +66,10 @@ class LoginRequest:
             raise self.TooManyLogins()
 
     def fetch(self):
-        """Return the subject if already logged, `None` otherwise."""
+        """Return the subject and the preferred language.
+
+        If not already logged the subject will be `None`.
+        """
 
         r = requests_session.get(
             url=f"{self.fetch_url}?login_challenge={self.challenge_id}",
@@ -74,7 +77,10 @@ class LoginRequest:
         )
         r.raise_for_status()
         fetched_data = r.json()
-        return fetched_data["subject"] if fetched_data["skip"] else None
+        return (
+            fetched_data["subject"] if fetched_data["skip"] else None,
+            fetched_data["client"].get("metadata", {}).get("language"),
+        )
 
     def accept(self, subject, remember=False, remember_for=1000000000):
         """Accept the request unless the limit is reached, return an URL to redirect to."""

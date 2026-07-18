@@ -465,7 +465,7 @@ def test_change_email_failure(mocker, client, db_session, user):
 def test_login_flow(mocker, client, app, db_session, user):
     @dataclass
     class LoginRequestMock:
-        fetch = Mock(return_value=None)
+        fetch = Mock(return_value=(None, None))
         accept = Mock(return_value="http://example.com/after-login/")
         challenge_id = "9876"
 
@@ -623,7 +623,7 @@ def test_delete_account(client, db_session, user):
 def test_login_inactive_account(mocker, client, app, db_session):
     @dataclass
     class LoginRequestMock:
-        fetch = Mock(return_value=None)
+        fetch = Mock(return_value=(None, None))
         accept = Mock(return_value="http://example.com/after-login/")
         challenge_id = "9876"
 

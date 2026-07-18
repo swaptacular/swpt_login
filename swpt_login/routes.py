@@ -276,22 +276,41 @@ def set_computer_code_cookie(response, computer_code):
     )
 
 
-@login.route("/language/<lang>")
-def set_language(lang):
-    response = redirect(request.args.get("to", "/"))
+def consider_client_language_redirect(lang):
+    language_choices = (
+        choices[0] for choices in current_app.config["LANGUAGE_CHOICES"]
+    )
+    return (
+        make_language_redirect(lang, request.url, "CLIENT_LANGUAGE_COOKIE_NAME")
+        if lang != str(get_locale()) and lang in language_choices
+        else None
+    )
+
+
+def make_language_redirect(lang, redirect_url, cookie_name):
+    response = redirect(redirect_url)
     response.set_cookie(
-        current_app.config["LANGUAGE_COOKIE_NAME"],
+        current_app.config[cookie_name],
         lang,
         max_age=1000000000,
         path=current_app.config["LOGIN_PATH"],
     )
     response.set_cookie(
-        current_app.config["LANGUAGE_COOKIE_NAME"],
+        current_app.config[cookie_name],
         lang,
         max_age=1000000000,
         path=current_app.config["CONSENT_PATH"],
     )
     return response
+
+
+@login.route("/language/<lang>")
+def set_language(lang):
+    return make_language_redirect(
+        lang,
+        request.args.get("to", "/"),
+        "LANGUAGE_COOKIE_NAME",
+    )
 
 
 @login.route("/healthz")
@@ -992,11 +1011,21 @@ def login_form():
     """
 
     login_request = hydra.LoginRequest(request.args.get("login_challenge", ""))
+    oauth2_subject, client_language = login_request.fetch()
+
+    # If the user did not specify a preferred language, but the client
+    # did, and we can satisfy this preference -- we do it.
+    if (
+            not request.cookies.get(current_app.config["LANGUAGE_COOKIE_NAME"])
+            and client_language
+            and request.method == "GET"
+    ):
+        if redirect_response := consider_client_language_redirect(client_language):
+            return redirect_response
 
     # Sometimes, after the user has already been authenticated, he/she
     # will reload this page again. In such cases we should immediately
     # redirect the user to wherever Hydra wants him/her to be.
-    oauth2_subject = login_request.fetch()
     if oauth2_subject:
         return redirect(login_request.accept(oauth2_subject))
 
