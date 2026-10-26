@@ -4,7 +4,7 @@
   <h1>{% trans %}Sent Email{% endtrans %}</h1>
   <p class="email-message-icon"></p>
   <p>
-    {% trans email='<strong class="email">{}</strong>'.format(email)|safe %}
+    {% trans email='<strong class="email">{}</strong>'.format(email|e)|safe %}
       An email has been sent to {{email}}. Please check your inbox,
       and click on the link provided there.
     {% endtrans %}

@@ -2,7 +2,7 @@
 
 {% block message %}
   <p>
-    {% trans email='<em class="email">{}</em>'.format(email)|safe %}
+    {% trans email='<em class="email">{}</em>'.format(email|e)|safe %}
       A new account has been created for {{email}}.
     {% endtrans %}
     {% trans %}Your account recovery code is:{% endtrans %}

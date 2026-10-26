@@ -94,6 +94,26 @@ def test_set_language_redirect_target(client, to, location):
     assert r.location == location
 
 
+@pytest.mark.parametrize(
+    "path, args",
+    [
+        ("/login/email", {"email": "EMAIL"}),
+        ("/login/change-email-failure", {"new_email": "EMAIL"}),
+        ("/login/change-email-success", {"old_email": "EMAIL"}),
+        ("/login/change-email-success", {"new_email": "EMAIL"}),
+        ("/login/account-deletion-success", {"email": "EMAIL"}),
+    ],
+)
+def test_reported_email_is_escaped(client, path, args):
+    payload = "<script>alert(1)</script>@example.com"
+    args = {k: payload for k in args}
+    r = client.get(path, query_string=args)
+    assert r.status_code == 200
+    body = r.get_data(as_text=True)
+    assert "<script>" not in body
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;@example.com" in body
+
+
 def test_stylesheet(client):
     r = client.get("/login/signup")
     assert r.status_code == 200
