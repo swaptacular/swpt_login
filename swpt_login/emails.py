@@ -1,4 +1,5 @@
 import re
+from html import escape
 from flask import render_template
 from flask_babel import gettext
 from flask_mail import Message
@@ -18,10 +19,14 @@ def text_to_html(text: str) -> str:
 
     for p in PARAGRAPHS_SEPARATOR_REGEX.split(text):
         if p != "":
+            # NOTE: The text may contain user-supplied data (email
+            # addresses, user agents), so it must be escaped.
             if SIGNATURE_START_REGEX.match(p):
-                p = "<br />".join(p.split("\n"))
+                p = "<br />".join(escape(line) for line in p.split("\n"))
             elif ANCHOR_LINE_REGEX.match(p):
-                p = f'<a href="{p}">{p}</a>'
+                p = f'<a href="{escape(p)}">{escape(p)}</a>'
+            else:
+                p = escape(p)
             html_paragraphs.append(f"<p>{p}</p>")
 
     return "".join(html_paragraphs)

@@ -76,3 +76,17 @@ def test_text_to_html(app):
         text_to_html("First\n\n-- \nSignature\nLine2\nLine3\n")
         == "<p>First</p><p>-- <br />Signature<br />Line2<br />Line3<br /></p>"
     )
+    assert (
+        text_to_html('<a href="https://evil.example/">Click</a> & go')
+        == "<p>&lt;a href=&quot;https://evil.example/&quot;&gt;Click&lt;/a&gt;"
+        " &amp; go</p>"
+    )
+    assert (
+        text_to_html("https://example.com/?a=1&b=2")
+        == '<p><a href="https://example.com/?a=1&amp;b=2">'
+        "https://example.com/?a=1&amp;b=2</a></p>"
+    )
+    assert (
+        text_to_html("First\n\n-- \n<b>Signature</b>")
+        == "<p>First</p><p>-- <br />&lt;b&gt;Signature&lt;/b&gt;</p>"
+    )
