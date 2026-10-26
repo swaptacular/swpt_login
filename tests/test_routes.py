@@ -73,6 +73,27 @@ def test_set_language(client):
     assert get_cookie(r, "user_lang") == "en"
 
 
+@pytest.mark.parametrize(
+    "to, location",
+    [
+        ("/login/signup", "/login/signup"),
+        ("http://localhost/login/signup", "http://localhost/login/signup"),
+        ("https://evil.example/phish", "/"),
+        ("http://localhost.evil.example/", "/"),
+        ("//evil.example", "/"),
+        ("/\\evil.example", "/"),
+        ("\\\\evil.example", "/"),
+        ("/\t/evil.example", "/"),
+        ("javascript:alert(1)", "/"),
+        ("evil.example", "/"),
+    ],
+)
+def test_set_language_redirect_target(client, to, location):
+    r = client.get("/login/language/en", query_string={"to": to})
+    assert r.status_code == 302
+    assert r.location == location
+
+
 def test_stylesheet(client):
     r = client.get("/login/signup")
     assert r.status_code == 200
