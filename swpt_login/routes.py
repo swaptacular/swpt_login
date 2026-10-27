@@ -2,7 +2,7 @@ import logging
 import json
 import base64
 from datetime import datetime, timedelta
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 from flask import (
     request,
     redirect,
@@ -304,11 +304,34 @@ def make_language_redirect(lang, redirect_url, cookie_name):
     return response
 
 
+def is_safe_redirect_url(url: str) -> bool:
+    """Return whether `url` points to the current host.
+
+    Only relative paths (like "/login"), and absolute HTTP(S) URLs
+    whose host is the current host are allowed.
+    """
+    if any(c.isspace() or c == "\\" or ord(c) < 32 for c in url):
+        return False
+
+    parts = urlsplit(url)
+    if parts.scheme or parts.netloc:
+        return (
+            parts.scheme in ("http", "https")
+            and parts.netloc == request.host
+        )
+
+    return url.startswith("/") and not url.startswith("//")
+
+
 @login.route("/language/<lang>")
 def set_language(lang):
+    redirect_url = request.args.get("to", "/")
+    if not is_safe_redirect_url(redirect_url):
+        redirect_url = "/"
+
     return make_language_redirect(
         lang,
-        request.args.get("to", "/"),
+        redirect_url,
         "LANGUAGE_COOKIE_NAME",
     )
 
